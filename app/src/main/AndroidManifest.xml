@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mapitall.SwiftAddress">
+    package="com.mapitall.SwiftAddress"
+    android:versionCode="1"
+    android:versionName="0.1">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -14,7 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KeypadMapper4">
-        <activity android:name="com.mapitall.SwiftAddress.ChooseBackgroundImagery"></activity>
+        <activity android:name="com.mapitall.SwiftAddress.ChooseBackgroundImagery" />
         <activity android:name="com.mapitall.SwiftAddress.Keypad" />
         <activity android:name="com.mapitall.SwiftAddress.MainActivity">
             <intent-filter>
@@ -23,6 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
- mana   </application>
+    </application>
 
 </manifest>

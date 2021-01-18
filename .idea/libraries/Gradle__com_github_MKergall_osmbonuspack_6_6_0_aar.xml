@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.MKergall:osmbonuspack:6.6.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b9dcfd019f07ade60ffd098a16c5cc90/jetified-osmbonuspack-6.6.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b9dcfd019f07ade60ffd098a16c5cc90/jetified-osmbonuspack-6.6.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b9dcfd019f07ade60ffd098a16c5cc90/jetified-osmbonuspack-6.6.0/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.MKergall/osmbonuspack/6.6.0/f1957e7ab7611054e956f9f825c93c79ad4051b3/osmbonuspack-6.6.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.MKergall/osmbonuspack/6.6.0/3f10f978fbe88bc2d435f29f1f7d60298006921/osmbonuspack-6.6.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

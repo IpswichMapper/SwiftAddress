@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">SwiftAddress</string>
+    <string name="num1">1</string>
+    <string name="num2">2</string>
+    <string name="num3">3</string>
+    <string name="num4">4</string>
+    <string name="num5">5</string>
+    <string name="num6">6</string>
+    <string name="num7">7</string>
+    <string name="num8">8</string>
+    <string name="num9">9</string>
+    <string name="num10">0</string>
+    <string name="num0">0</string>
+    <string name="osm_background_imagery">Use Openstreetmap as background imagery</string>
+    <string name="pt_background_imagery_TEMP">Use public transport as background imagery</string>
+    <string name="save_note">Save Note</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_note">Add Note</string>
+    <string name="unimplemented">This feature has not been implemented yet.</string>
+    <string name="need_storage_permission">This app needs the storage permission in order to store any data.</string>
+    <string name="ok_button">Ok</string>
+    <string name="storage_permission_denied">Storage Permission Denied</string>
+    <string name="location_permission_denied">Location Permission Denied</string>
+    <string name="choose_location_permission_info">Do you want to disable location? While it is possible to survey without your location on the map, it will be more difficult.</string>
+    <string name="request_location_permission_again_button">Request Permission Again</string>
+    <string name="deny_location_permission_button">Deny Permission</string>
+    <string name="street_name">Street Name:</string>
+    <string name="building_levels">Building Levels:</string>
+    <string name="remember_change_street_name">Remember to change the Street Name everytime you move to a new street.</string>
+    <string name="change_street_name_button">Change Street name</string>
+    <string name="give_storage_permission">Please grant storage permissions first.</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="keypad_button">
+        <attr name="top_right_corner" format="string" localization="suggested" />
+        <attr name="bottom_right_corner" format="string" localization="suggested" />
+    </declare-styleable>
+</resources>

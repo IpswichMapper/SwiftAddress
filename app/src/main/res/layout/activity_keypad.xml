@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Keypad">
+
+    <EditText
+        android:id="@+id/address_textbox"
+        android:layout_width="240dp"
+        android:layout_height="73dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:textSize="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_4"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/address_textbox" >
+
+        <Button
+            android:id="@+id/keypad_num1"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num1"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/lettera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text="a"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@id/relative_layout_2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_5"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_3"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_1"
+        app:layout_constraintTop_toBottomOf="@+id/address_textbox"
+        app:layout_constraintVertical_bias="0.146" >
+
+        <Button
+            android:id="@+id/keypad_num2"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/num2"
+            android:textColor="#000000"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/letterb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text="b"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_2"
+        app:layout_constraintTop_toBottomOf="@+id/address_textbox">
+
+        <Button
+            android:id="@+id/keypad_num3"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/num3"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/letterc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text="c"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_7"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_5"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_1" >
+
+        <Button
+            android:id="@+id/keypad_num4"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num4"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/comma"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"
+            android:text=","
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/B1R0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="B1 R0" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_8"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_6"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_4"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_2" >
+
+        <Button
+            android:id="@+id/keypad_num5"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num5"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/hypen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text="–"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/B2R0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="B2 R0" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_5"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_3" >
+
+        <Button
+            android:id="@+id/keypad_num6"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num6"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/semicolon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text=";"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/B3R0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="B3 R0" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_7"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_remove"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_8"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_4" >
+
+        <Button
+            android:id="@+id/keypad_num7"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num7"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/B1R1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="B1 R1" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_8"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_0"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_9"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_7"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_5" >
+
+        <Button
+            android:id="@+id/keypad_num8"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num8"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/B2R1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="B2 R1" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_9"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_backspace"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_8"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_6" >
+
+        <Button
+            android:id="@+id/keypad_num9"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num9"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+
+        <TextView
+            android:id="@+id/B3R1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="B3 R1" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_remove"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_substract"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_0"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_7"
+        app:srcCompat="@drawable/clear">
+
+        <ImageButton
+            android:id="@+id/remove"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:scaleType="fitCenter"
+            android:padding="30dp"
+            android:tint="#000000"
+            app:srcCompat="@drawable/clear" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_0"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_done"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_backspace"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_remove"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_8" >
+
+        <Button
+            android:id="@+id/keypad_num0"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:text="@string/num0"
+            android:textColor="@color/black"
+            android:textSize="50sp" />
+
+        <TextView
+            android:id="@+id/modify_street_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="Modify Street Name"
+            android:textSize="14dp"/>
+
+        <TextView
+            android:id="@+id/change_building_levels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:layout_centerHorizontal="true"
+            android:text="Change Building Levels"
+            android:textSize="12dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_backspace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_0"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_9"
+        app:srcCompat="@drawable/backspace" >
+
+        <ImageButton
+            android:id="@+id/backspace"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:onClick="textboxRemoveLastChar"
+            android:scaleType="fitCenter"
+            android:tint="#000000"
+            app:srcCompat="@drawable/backspace"
+            android:padding="30dp"/>
+
+        <TextView
+            android:id="@+id/modify_increment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:textSize="14dp"
+            android:text="Modify Increment" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_substract"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_done"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_remove"
+        app:srcCompat="@drawable/minus">
+
+        <ImageButton
+            android:id="@+id/substract"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:onClick="decrement_textbox"
+            android:scaleType="fitCenter"
+            android:padding="30dp"
+            android:tint="#000000"
+            app:srcCompat="@drawable/minus" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_done"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/relative_layout_add"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_substract"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_0"
+        app:srcCompat="@drawable/check" >
+
+        <ImageButton
+            android:id="@+id/done"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:scaleType="fitCenter"
+            android:padding="30dp"
+            android:tint="#000000"
+            app:srcCompat="@drawable/check" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_layout_add"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/relative_layout_done"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout_backspace"
+        app:srcCompat="@drawable/plus" >
+
+        <ImageButton
+            android:id="@+id/add"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#FFFFFF"
+            android:onClick="incrementTextbox"
+            android:scaleType="fitCenter"
+            android:padding="30dp"
+            android:tint="#000000"
+            app:srcCompat="@drawable/plus" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/street_name_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/street_name"
+        android:textSize="14dp"
+        app:layout_constraintBottom_toTopOf="@+id/street_name_value"
+        app:layout_constraintStart_toEndOf="@+id/address_textbox"
+        app:layout_constraintTop_toBottomOf="@+id/building_levels_tag"
+        app:layout_constraintVertical_bias="0.74" />
+
+    <TextView
+        android:id="@+id/building_levels_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:textSize="13dp"
+        android:text="@string/building_levels"
+        app:layout_constraintStart_toEndOf="@+id/address_textbox"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/building_levels_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textSize="13dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/building_levels_tag"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- This widget should not contain more than 17 characters (15 when including ...) -->
+    <TextView
+        android:id="@+id/street_name_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        android:text=""
+        android:textSize="13dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/relative_layout_3"
+        app:layout_constraintStart_toEndOf="@+id/address_textbox" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

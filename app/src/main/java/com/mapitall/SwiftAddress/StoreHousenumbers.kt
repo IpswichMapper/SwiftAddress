@@ -141,7 +141,7 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
             var latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
             var longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
 
-            str.append("<node id=\"${i}\" lat\"${latitude}\" lon\"${longitude}\">\n") // opening tag
+            str.append("<node id=\"${i}\" lat=\"${latitude}\" lon=\"${longitude}\">\n") // opening tag
             str.append("<tag k=\"addr:housenumber\" v=\"${housenumber}\"/>\n") // housenumber
             if (street != "") {
                 str.append("<tag k=\"addr:street\" v=\"${street}\"/>\n") // street
@@ -278,6 +278,7 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
 
+    // Gets last address that was entered
     fun lastAddressEntry(side : String) : AddressNodes?{
         val db: SQLiteDatabase = this.readableDatabase
         var lastAddress: AddressNodes? = null

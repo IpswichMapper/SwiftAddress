@@ -263,24 +263,28 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         numButton0.setOnTouchListener { _, event ->
             touchEvent = false
             onFlingDetected = "no"
-
+            Log.w("key0", "ontouchactivated")
             gestureDetector.onTouchEvent(event)
 
             if (onFlingDetected == "up") {
                 modStreetName()
                 touchEvent = true
+                Log.w("key0", "onFlingDetected is up, touchevent is true")
             } else if (onFlingDetected == "down") {
                 modBuildLevels()
                 touchEvent = true
+                Log.w("key0", "onFlingDetected is up, touchevent is true")
             } else {
                 touchEvent = false
+                Log.w("key0", "onFlingDetected is not up or down, touchevent is false")
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton0.setOnClickListener() {
+            Log.i("key0", "onclicklistener called.")
             if (!touchEvent) {
-                addNum(numButton0, "", "")
+                addNum(numButton0)
             }
         }
 

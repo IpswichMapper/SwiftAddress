@@ -20,6 +20,8 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
     private var touchEvent = false
     private var street = ""
     private var buildingLevels = ""
+
+    private val DEBUG_TAG = "Keypad"
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +46,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         if (lastAddress != null) texbox.hint = lastAddress?.housenumber
         val numButton1 = findViewById<Button>(R.id.keypad_num1)
         numButton1.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton1: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -59,8 +62,10 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton1.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton1: onTouchListener Called")
             if (!touchEvent) {
-                Log.i("keypad button ${numButton1.text}", "Clicked")
+                Log.i(DEBUG_TAG, "numButton2: clicked.")
+                Log.i(DEBUG_TAG, "numButton2: addNum(numButton4) called")
                 addNum(numButton1)
             } else {
                 touchEvent = false
@@ -69,6 +74,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val numButton2 = findViewById<Button>(R.id.keypad_num2)
         numButton2.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton2: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -84,8 +90,10 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton2.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton2: onTouchListener Called")
             if (!touchEvent) {
-                Log.i("keypad button ${numButton2.text}", "Clicked")
+                Log.i(DEBUG_TAG, "numButton2: clicked.")
+                Log.i(DEBUG_TAG, "numButton2: addNum(numButton4) called")
                 addNum(numButton2)
             } else {
                 touchEvent = false
@@ -94,6 +102,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val numButton3 = findViewById<Button>(R.id.keypad_num3)
         numButton3.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton3: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -109,14 +118,17 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton3.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton3: onTouchListener Called")
             if (!touchEvent) {
-                Log.i("keypad button ${numButton3.text}", "Clicked")
+                Log.i(DEBUG_TAG, "numButton3: clicked.")
+                Log.i(DEBUG_TAG, "numButton3: addNum(numButton4) called")
                 addNum(numButton3)
             }
         }
 
         val numButton4 = findViewById<Button>(R.id.keypad_num4)
         numButton4.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton4: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -132,8 +144,10 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton4.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton4: onTouchListener Called")
             if (!touchEvent) {
-                Log.i("keypad button ${numButton4.text}", "Clicked")
+                Log.i(DEBUG_TAG, "numButton4: clicked.")
+                Log.i(DEBUG_TAG, "numButton4: addNum(numButton4) called")
                 addNum(numButton4)
             }
         }
@@ -141,6 +155,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val numButton5 = findViewById<Button>(R.id.keypad_num5)
         numButton5.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton5: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -156,15 +171,17 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton5.setOnClickListener {
-            Log.i("Button clicked", "touch event is $touchEvent")
+            Log.i(DEBUG_TAG, "numButton5: onTouchListener Called")
             if (!touchEvent) {
-                Log.i("keypad button ${numButton5.text}", "Clicked")
+                Log.i(DEBUG_TAG, "numButton5: clicked.")
+                Log.i(DEBUG_TAG, "numButton5: addNum(numButton5) called")
                 addNum(numButton5)
             }
         }
 
         val numButton6 = findViewById<Button>(R.id.keypad_num6)
         numButton6.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton6: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -181,14 +198,17 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton6.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton6: onTouchListener Called")
             if (!touchEvent) {
-                Log.i("keypad button ${numButton6.text}", "Clicked")
+                Log.i(DEBUG_TAG, "numButton6: clicked.")
+                Log.i(DEBUG_TAG, "numButton6: addNum(numButton6) called")
                 addNum(numButton6)
             }
         }
 
         val numButton7 = findViewById<Button>(R.id.keypad_num7)
         numButton7.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton7: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -204,15 +224,18 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton7.setOnClickListener {
-          if (!touchEvent) {
-              Log.i("keypad button ${numButton7.text}", "Clicked")
-              addNum(numButton7)
+            Log.i(DEBUG_TAG, "numButton7: onTouchListener Called")
+            if (!touchEvent) {
+                Log.i(DEBUG_TAG, "numButton7: clicked.")
+                Log.i(DEBUG_TAG, "numButton7: addNum(numButton7) called")
+                addNum(numButton7)
           }
         }
 
 
         val numButton8 = findViewById<Button>(R.id.keypad_num8)
         numButton8.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton8: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -228,7 +251,10 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton8.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton8: onTouchListener Called")
             if (!touchEvent) {
+                Log.i(DEBUG_TAG, "numButton8: clicked.")
+                Log.i(DEBUG_TAG, "numButton8: addNum(numButton8) called")
                 Log.i("keypad button ${numButton8.text}", "Clicked")
                 addNum(numButton8)
             }
@@ -237,6 +263,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val numButton9 = findViewById<Button>(R.id.keypad_num9)
         numButton9.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "numButton9: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -252,8 +279,10 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton9.setOnClickListener {
+            Log.i(DEBUG_TAG, "numButton9: onClickListener Called")
           if (!touchEvent) {
-              Log.i("keypad button ${numButton9.text}", "Clicked")
+              Log.i(DEBUG_TAG, "numButton9: clicked.")
+              Log.i(DEBUG_TAG, "numButton9: addNum(numButton9) called")
               addNum(numButton9)
           }
         }
@@ -269,14 +298,14 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             if (onFlingDetected == "up") {
                 modStreetName()
                 touchEvent = true
-                Log.w("key0", "onFlingDetected is up, touchevent is true")
+                Log.i(DEBUG_TAG, "numButton0: onFlingDetected = up, touchevent = true")
             } else if (onFlingDetected == "down") {
                 modBuildLevels()
                 touchEvent = true
-                Log.w("key0", "onFlingDetected is up, touchevent is true")
+                Log.i(DEBUG_TAG, "numButton0: onFlingDetected = up, touchevent = true")
             } else {
                 touchEvent = false
-                Log.w("key0", "onFlingDetected is not up or down, touchevent is false")
+                Log.w(DEBUG_TAG, "numButton0: onFlingDetected != up || down, touchEvent = false")
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
@@ -291,6 +320,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val backspaceButton = findViewById<ImageButton>(R.id.backspace)
         backspaceButton.setOnTouchListener { _, event ->
+            Log.i(DEBUG_TAG, "backspaceButton pressed")
             touchEvent = false
             onFlingDetected = "no"
 

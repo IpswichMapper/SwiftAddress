@@ -42,8 +42,19 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val texbox = findViewById<EditText>(R.id.address_textbox)
 
+        // Set hint to be housenumber of last address
+        // Set street to be the street of last andress
+        if (lastAddress != null) {
+            texbox.hint = lastAddress.housenumber
+            street = lastAddress.street
 
-        if (lastAddress != null) texbox.hint = lastAddress?.housenumber
+            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+            if (street.length < 18) {
+                streetNameTextView.text = street
+            } else {
+                streetNameTextView.text = "${street.subSequence(0, 15)}..."
+            }
+        }
         val numButton1 = findViewById<Button>(R.id.keypad_num1)
         numButton1.setOnTouchListener { _, event ->
             Log.i(DEBUG_TAG, "numButton1: onTouchListener Called")
@@ -395,7 +406,9 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
 
             if (streetNameValue.length < 18) {
-                streetNameTextView.text =(streetNameValue)
+                streetNameTextView.text = streetNameValue
+            } else {
+                streetNameTextView.text = "${streetNameValue.subSequence(0, 15)}..."
             }
 
             street = streetNameValue

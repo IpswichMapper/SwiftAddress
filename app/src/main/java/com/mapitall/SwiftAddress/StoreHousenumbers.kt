@@ -83,7 +83,7 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
 
             Log.i("ExtStorageAvailable", "$isExternalStorageAvailable")
             val folder_path = Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator + "Keypad Mapper" + File.separator
+                    File.separator + "SwiftAddress" + File.separator
 
             if (!File(folder_path).exists()) {
                 File(folder_path).mkdir()
@@ -108,7 +108,7 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
             db.execSQL("DELETE FROM $TABLE_NAME")
 
             Toast.makeText(context,
-                    "Data saved in \"Keypad Mapper\".",
+                    context.getString(R.string.saved_to_folder),
                     Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Data failed to save.", Toast.LENGTH_SHORT).show()

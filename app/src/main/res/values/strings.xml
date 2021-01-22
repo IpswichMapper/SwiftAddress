@@ -29,4 +29,5 @@
     <string name="remember_change_street_name">Remember to change the Street Name everytime you move to a new street.</string>
     <string name="change_street_name_button">Change Street name</string>
     <string name="give_storage_permission">Please grant storage permissions first.</string>
+    <string name="saved_to_folder">Data saved in \'SwiftAddress\' folder.</string>
 </resources>

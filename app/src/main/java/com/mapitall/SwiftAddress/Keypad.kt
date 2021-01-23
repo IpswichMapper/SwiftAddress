@@ -2,6 +2,7 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -10,6 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 import layout.AddressNodes
+import org.apache.commons.lang3.StringUtils
+import java.net.URL
 
 class Keypad : AppCompatActivity(), View.OnTouchListener,
         GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
@@ -43,17 +46,33 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         // Set hint to be housenumber of last address
         // Set street to be the street of last andress
+
         if (lastAddress != null) {
             texbox.hint = lastAddress.housenumber
-            street = lastAddress.street
+        }
 
-            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
-            if (street.length < 18) {
-                streetNameTextView.text = street
-            } else {
-                streetNameTextView.text = "${street.subSequence(0, 15)}..."
+
+        val netInfo = (getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager)
+                .activeNetworkInfo
+
+        if (netInfo != null && netInfo.isConnected) {
+            reverseGeocodeStreet(intent.getDoubleExtra("lat", 0.000), intent.getDoubleExtra("lon", 0.000))
+        } else {
+            Log.i(DEBUG_TAG, "No internet connection available. Street name " +
+                    "now equals lastAddress street name.")
+            if (lastAddress != null) {
+                street = lastAddress.street
+
+                val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+                if (street.length < 18) {
+                    streetNameTextView.text = street
+                } else {
+                    streetNameTextView.text = "${street.subSequence(0, 15)}..."
+                }
             }
         }
+
+        Log.i("street outside", street)
         val numButton1 = findViewById<Button>(R.id.keypad_num1)
         numButton1.setOnTouchListener { _, event ->
             Log.i(DEBUG_TAG, "numButton1: onTouchListener Called")
@@ -370,6 +389,33 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         }
     }
 
+    @SuppressLint("SetTextI18n")
+    private fun reverseGeocodeStreet(lat: Double, lon: Double) {
+        var nominatimReverseGeocode : URL
+        Thread {
+            nominatimReverseGeocode = URL(
+                    "https://nominatim.openstreetmap.org/reverse?format=xml&lat=$lat&lon=$lon")
+            val result = nominatimReverseGeocode.readText()
+            Log.i("result:", result)
+            var streetName: String
+            streetName = StringUtils.substringBetween(result, "<road>", "</road>")
+            Log.i("street name: ", streetName)
+            street = streetName
+
+            runOnUiThread {
+                val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+                if (street.length < 18) {
+                    Log.i("stgert", "in if statement")
+                    streetNameTextView.text = street
+                } else {
+                    Log.i("in else statement", street.subSequence(0, 15) as String)
+                    streetNameTextView.text = "${street.subSequence(0, 15) as String}..."
+                }
+            }
+        }.start()
+
+    }
+
     // Change the building levels of this address
     private fun modBuildLevels() {
         // TODO : Implement
@@ -379,6 +425,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
     // Change the street name corresponding to this address.
     // This information should stay the same unless manually changed.
+    @SuppressLint("SetTextI18n")
     private fun modStreetName() {
         val changeStreetDialogue  = AlertDialog.Builder(this)
         changeStreetDialogue.setTitle(getString(R.string.street_name))

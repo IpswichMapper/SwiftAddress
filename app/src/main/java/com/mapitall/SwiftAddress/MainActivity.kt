@@ -67,9 +67,6 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(0, eventsOverlay)
 
-        // map.zoomToBoundingBox(BoundingBox(83.0, 27.8 , -53.3, -64.0), false)
-        // map.invalidate()
-
         val mapController = map.controller
         mapController.setZoom(3.0)
         var locationManager : LocationManager? = null

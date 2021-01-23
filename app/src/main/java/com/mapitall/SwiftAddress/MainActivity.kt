@@ -8,6 +8,8 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.location.Criteria
+import android.location.LocationManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -28,6 +30,7 @@ import layout.StoreHousenumbers
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -58,13 +61,29 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
 
+
+        val test = BoundingBox(0.00, 0.01, 0.02, 0.03)
+
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(0, eventsOverlay)
 
-        //TODO: Later on this should be able to change depending on which activity
-        // the user wants to use to enter housenumbers
-        val enterPad = Keypad::class.java
+        // map.zoomToBoundingBox(BoundingBox(83.0, 27.8 , -53.3, -64.0), false)
+        // map.invalidate()
 
+        val mapController = map.controller
+        mapController.setZoom(3.0)
+        var locationManager : LocationManager? = null
+        try {
+            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val criteria = Criteria()
+            val provider = locationManager.getBestProvider(criteria, false)
+            val location = locationManager.getLastKnownLocation(provider!!)
+            mapController.animateTo(GeoPoint(location!!.latitude, location.longitude))
+            mapController.zoomTo(17, null)
+            Log.i("test", "test")
+        } catch (e : Exception) {
+            e.printStackTrace()
+        }
 
         // Ask for user permissions
         // TODO: improve this code so that it asks for external storage permission again
@@ -80,7 +99,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         leftArrow.setOnClickListener {
 
             val coordinates = map.mapCenter
-            val intent = Intent(this,enterPad)
+            val intent = Intent(this, Keypad::class.java)
             intent.putExtra("lat", coordinates.latitude)
             intent.putExtra("lon", coordinates.longitude)
             intent.putExtra("side", "left")
@@ -138,7 +157,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         rightArrow.setOnClickListener {
 
             val coordinates = map.mapCenter
-            val intent = Intent(this, enterPad)
+            val intent = Intent(this, Keypad::class.java)
             intent.putExtra("lat", coordinates.latitude)
             intent.putExtra("lon", coordinates.longitude)
             intent.putExtra("side", "right")
@@ -214,6 +233,8 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         map.setMultiTouchControls(true)
         map.overlays.add(rotationGestureOverlay)
 
+        // Displays all the housenumbers that have already been
+        // created but haven't been stored to an OSM file yet.
         markerList = storeHousenumbersObject.displayMarkers(map, markerList)
 
         map.setBuiltInZoomControls(false)
@@ -221,8 +242,6 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         for(marker: Marker in markerList) {
             map.overlays.add(marker)
         }
-
-
 
     }
 

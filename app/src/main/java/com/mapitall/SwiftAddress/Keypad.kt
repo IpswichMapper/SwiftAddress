@@ -2,18 +2,14 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 import layout.AddressNodes
-import java.io.IOException
-import java.lang.Exception
-import java.lang.NullPointerException
-import java.lang.NumberFormatException
 
 class Keypad : AppCompatActivity(), View.OnTouchListener,
         GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {

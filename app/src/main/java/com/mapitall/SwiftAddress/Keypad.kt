@@ -10,7 +10,10 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GestureDetectorCompat
 import layout.AddressNodes
+import java.io.IOException
 import java.lang.Exception
+import java.lang.NullPointerException
+import java.lang.NumberFormatException
 
 class Keypad : AppCompatActivity(), View.OnTouchListener,
         GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
@@ -474,13 +477,18 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val addressTextbox = findViewById<EditText>(R.id.address_textbox)
         val addressTextboxText = addressTextbox.text.toString()
-        val addressTextboxHint = addressTextbox.hint.toString()
+        var addressTextboxHint: String
+        try {
+            addressTextboxHint = addressTextbox.hint.toString()
+        } catch (e : NullPointerException) {
+            addressTextboxHint = ""
+        }
         if (addressTextboxText != "") {
             try {
                 var numToIncrement = addressTextboxText.toInt()
                 numToIncrement += 1
                 addressTextbox.setText(numToIncrement.toString())
-            } catch (e: Exception) {
+            } catch (e: NumberFormatException) {
                 var textToSet = "";
 
                 for (c in addressTextboxText) {
@@ -495,15 +503,15 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
                 Log.i(textToSet, "final text")
             }
-        } else if (addressTextboxHint.isNotBlank()) {
+        } else if (addressTextboxHint != "") {
             try {
                 var numToIncrement = addressTextboxHint.toInt()
                 numToIncrement += 1
                 addressTextbox.setText(numToIncrement.toString())
-            } catch (e: Exception) {
+            } catch (e: NumberFormatException) {
                 var textToSet = "";
 
-                for (c in addressTextboxText) {
+                for (c in addressTextboxHint) {
                     val intOrNot = c.toString().toIntOrNull()
                     if (intOrNot != null) {
                         textToSet += intOrNot.toString()
@@ -520,28 +528,56 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
     // Increments the number in the textbox by one
     // Firstly, all characters are removed, then the remaining number is incremented
-    fun decrement_textbox(view: View) {
+    fun decrementTextbox(view: View) {
 
         val addressTextbox = findViewById<EditText>(R.id.address_textbox)
         val addressTextboxText = addressTextbox.text.toString()
+        var addressTextboxHint: String
         try {
-            var num_to_decrement = addressTextboxText.toInt()
-            num_to_decrement -= 1
-            addressTextbox.setText(num_to_decrement.toString())
-        } catch (e: Exception) {
-            var textToSet = "";
-            if (addressTextboxText.isNotBlank()) {
-                for (c in addressTextboxText) {
+            addressTextboxHint = addressTextbox.hint.toString()
+        } catch (e : NullPointerException) {
+            addressTextboxHint = ""
+        }
+        if (addressTextboxText != "") {
+            try {
+                var num_to_decrement = addressTextboxText.toInt()
+                num_to_decrement -= 1
+                addressTextbox.setText(num_to_decrement.toString())
+            } catch (e: NumberFormatException) {
+                var textToSet = "";
+                if (addressTextboxText.isNotBlank()) {
+                    for (c in addressTextboxText) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() - 1).toString()
+                    addressTextbox.setText(textToSet)
+                }
+                Log.i(textToSet, "final text")
+            }
+        } else if (addressTextboxHint != "") {
+            try {
+                var numToDecrement = addressTextboxHint.toInt()
+                numToDecrement -= 1
+                addressTextbox.setText(numToDecrement.toString())
+            } catch (e: NumberFormatException) {
+                var textToSet = "";
+
+                for (c in addressTextboxHint) {
                     val intOrNot = c.toString().toIntOrNull()
                     if (intOrNot != null) {
                         textToSet += intOrNot.toString()
                         Log.i(textToSet, "text to set")
                     }
                 }
-                textToSet = (textToSet.toInt() + 1).toString()
+                textToSet = (textToSet.toInt() - 1).toString()
                 addressTextbox.setText(textToSet)
+
+                Log.i(textToSet, "final text")
             }
-            Log.i(textToSet, "final text")
         }
     }
 

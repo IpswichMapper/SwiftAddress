@@ -87,7 +87,7 @@
             android:layout_marginEnd="-5dp"
             android:layout_marginBottom="-6dp"
             android:layout_marginStart="-5dp"
-            android:layout_marginTop="-5dp"
+            android:layout_marginTop="-6dp"
             app:srcCompat="@drawable/left_arrow"
             />
 
@@ -101,7 +101,7 @@
             android:layout_marginStart="-5dp"
             android:layout_marginBottom="-6dp"
             android:layout_marginEnd="-5dp"
-            android:layout_marginTop="-5dp"
+            android:layout_marginTop="-6dp"
             app:srcCompat="@drawable/right_arrow" />
     </LinearLayout>
 

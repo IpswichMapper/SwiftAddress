@@ -1,11 +1,16 @@
 package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
+import android.app.ActionBar
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.Gravity.*
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +27,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
     private var touchEvent = false
     private var street = ""
     private var buildingLevels = ""
+    private var increment  = 2
 
     private val DEBUG_TAG = "Keypad"
 
@@ -356,27 +362,22 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             gestureDetector.onTouchEvent(event)
 
             if (onFlingDetected == "up"){
-                // TODO : Implement
-                Toast.makeText(this, getString(R.string.unimplemented),
-                        Toast.LENGTH_SHORT).show()
-                touchEvent = true
+                modifyIncrement()
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
 
         // go back to MainActivity & send address data to MainActivity
-        findViewById<ImageButton>(R.id.done).setOnClickListener {
+        val doneButton = findViewById<ImageButton>(R.id.done)
+        doneButton.setOnClickListener {
 
             val addressTextbox = findViewById<EditText>(R.id.address_textbox)
             val lat = intent.getDoubleExtra("lat", 0.000)
             val lon = intent.getDoubleExtra("lon", 0.000)
             val side = intent.getStringExtra("side").toString()
-            Log.i("received data: Lat", lat.toString())
-            Log.i("received data: Lon", lon.toString())
-            Log.i("received data: Side", side)
-            Log.i("data : address number", addressTextbox.text.toString())
-            // TODO : make this work with streets.
+            Log.i(DEBUG_TAG, "address number: ${addressTextbox.text}")
+
             buildingLevels = findViewById<TextView>(R.id.building_levels_value).text.toString()
             val address = AddressNodes(addressTextbox.text.toString(), street, lat, lon,
                     side, buildingLevels)
@@ -384,11 +385,135 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             val intent = Intent(this, MainActivity::class.java)
 
             intent.putExtra("address", address)
+
             setResult(RESULT_OK, intent)
             finish()
         }
+
+        val cancelButton = findViewById<ImageButton>(R.id.remove)
+        cancelButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
+    private fun modifyIncrement() {
+        val incrementButtonDimensions = 200
+        val textBoxWidth = 200
+        val textBoxTextSize = 40f
+
+        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        increment = sharedPreferences.getInt("increment", 2)
+
+        Log.i(DEBUG_TAG, "Increment before function: $increment")
+        val modifyIncrementDialogue  = AlertDialog.Builder(this)
+        modifyIncrementDialogue.setTitle(getString(R.string.change_increment))
+
+        var incrementValue : String
+
+        val modifyIncrementInput = EditText(this)
+        modifyIncrementInput.inputType = EditorInfo.TYPE_CLASS_PHONE
+        modifyIncrementInput.setText(increment.toString())
+        modifyIncrementInput.textSize = textBoxTextSize
+        modifyIncrementInput.layoutParams = ViewGroup.LayoutParams(textBoxWidth, MATCH_PARENT)
+        modifyIncrementInput.gravity =CENTER
+
+        val minusButton = ImageButton(this)
+        minusButton.setImageResource(R.drawable.minus)
+
+        minusButton.layoutParams = ViewGroup.LayoutParams(incrementButtonDimensions,
+                incrementButtonDimensions)
+        minusButton.setOnClickListener {
+            val text = modifyIncrementInput.text.toString()
+            if (text != "") {
+                try {
+                    var textToInt = text.toInt()
+                    textToInt -= 1
+                    modifyIncrementInput.setText(textToInt.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = "";
+
+                    for (c in text) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() - 1).toString()
+                    modifyIncrementInput.setText(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+            Log.i(DEBUG_TAG, "modifyIncrementDialog: minusButton pressed")
+        }
+
+        val plusButton = ImageButton(this)
+        plusButton.setImageResource(R.drawable.plus)
+        plusButton.layoutParams = ViewGroup.LayoutParams(incrementButtonDimensions,
+                incrementButtonDimensions)
+        plusButton.setOnClickListener {
+            val text = modifyIncrementInput.text.toString()
+            if (text != "") {
+                try {
+                    var textToInt = text.toInt()
+                    textToInt += 1
+                    modifyIncrementInput.setText(textToInt.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = "";
+
+                    for (c in text) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() + 1).toString()
+                    modifyIncrementInput.setText(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+            Log.i(DEBUG_TAG, "modifyIncrementDialog: plusButton pressed")
+        }
+
+        val linearLayout = LinearLayout(this)
+
+        linearLayout.layoutParams = ActionBar.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        linearLayout.orientation = LinearLayout.HORIZONTAL
+        linearLayout.gravity = CENTER
+        linearLayout.addView(minusButton)
+        linearLayout.addView(modifyIncrementInput)
+        linearLayout.addView(plusButton)
+
+        modifyIncrementDialogue.setView(linearLayout)
+        modifyIncrementDialogue.setMessage(getString(R.string.increment_explanation))
+
+        modifyIncrementDialogue.setPositiveButton(getString(R.string.save_increment)) {
+            _, _ -> incrementValue = modifyIncrementInput.text.toString()
+            try {
+                Log.i(DEBUG_TAG, "incrementValue in Dialog: $incrementValue")
+                increment = incrementValue.toInt()
+
+                val sharedPreferencesEditor = getPreferences(MODE_PRIVATE).edit()
+                sharedPreferencesEditor.putInt("increment", increment)
+                sharedPreferencesEditor.apply()
+            } catch (e: TypeCastException) {
+                e.printStackTrace()
+                Log.e(DEBUG_TAG, getString(R.string.increment_not_integer))
+                Toast.makeText(this, getString(R.string.increment_not_integer),
+                        Toast.LENGTH_SHORT).show()
+            }
+        }
+        modifyIncrementDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        modifyIncrementDialogue.create().show()
+    }
+
+
+    // Finds the nearest street to the position of the housenumber that you want to add.
+    // Uses Nominatim reverse geocoder to do this.
     @SuppressLint("SetTextI18n")
     private fun reverseGeocodeStreet(lat: Double, lon: Double) {
         var nominatimReverseGeocode : URL
@@ -397,24 +522,26 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
                     "https://nominatim.openstreetmap.org/reverse?format=xml&lat=$lat&lon=$lon")
             val result = nominatimReverseGeocode.readText()
             Log.i("result:", result)
-            var streetName: String
+            val streetName: String
             try {
                 streetName = StringUtils.substringBetween(result, "<road>", "</road>")
                 street = streetName
                 Log.i("street name: ", streetName)
 
             } catch (e: NullPointerException) {
-                var lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
+                val lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
                 Log.i(DEBUG_TAG, "nullPointerException when trying to geocode street.")
 
                 if (lastAddress != null) {
-                    street = lastAddress!!.street
+                    street = lastAddress.street
 
                     val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
-                    if (street.length < 18) {
-                        streetNameTextView.text = street
-                    } else {
-                        streetNameTextView.text = "${street.subSequence(0, 15)}..."
+                    runOnUiThread {
+                        if (street.length < 18) {
+                            streetNameTextView.text = street
+                        } else {
+                            streetNameTextView.text = "${street.subSequence(0, 15)}..."
+                        }
                     }
                 } else {
                     street = ""
@@ -454,7 +581,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
         val container = FrameLayout(this)
         val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            MATCH_PARENT, WRAP_CONTENT
         )
         params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
         params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)

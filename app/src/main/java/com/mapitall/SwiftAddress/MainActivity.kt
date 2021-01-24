@@ -41,16 +41,19 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
+    private var DEBUG_TAG = "MainActivity"
 
     private lateinit var map : MapView
     private var markerList: MutableList<Marker> = mutableListOf()
-    private var storeHousenumbersObject : StoreHousenumbers = StoreHousenumbers(this)
-    private var increment = 2
+    private var storeHouseNumbersObject : StoreHousenumbers = StoreHousenumbers(this)
+    private var increment  = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // set map details
 
+        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        increment = sharedPreferences.getInt("increment", 2)
         setContentView(R.layout.activity_main)
         val ctx: Context = applicationContext
         Configuration.getInstance().load(
@@ -100,18 +103,21 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             intent.putExtra("lat", coordinates.latitude)
             intent.putExtra("lon", coordinates.longitude)
             intent.putExtra("side", "left")
-            val lastAddress = storeHousenumbersObject.lastAddressEntry("left")
+            val lastAddress = storeHouseNumbersObject.lastAddressEntry("left")
             intent.putExtra("last_address" , lastAddress)
-
+            Log.i("increment before send", increment.toString())
+            intent.putExtra("increment", increment)
             startActivityForResult(intent, 2)
 
         }
         leftArrow.setOnLongClickListener(View.OnLongClickListener {
-            val addressToChange = storeHousenumbersObject.lastAddressEntry("left")
+            val addressToChange = storeHouseNumbersObject.lastAddressEntry("left")
+            increment = sharedPreferences.getInt("increment", 2)
 
             if (addressToChange != null) {
                 Log.i("Long Click detected", "longclicklistener on arrow started")
                 val vibrator : Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+
 
                 if(Build.VERSION.SDK_INT >= 26) {
                     vibrator.vibrate(VibrationEffect.createOneShot(
@@ -143,7 +149,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                 addressToChange.longitude = map.mapCenter.longitude
                 addressToChange.buildingLevels = ""
 
-                storeHousenumbersObject.addHousenumber(addressToChange)
+                storeHouseNumbersObject.addHousenumber(addressToChange)
                 addHousenumberMarker(addressToChange)
             }
 
@@ -158,13 +164,14 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             intent.putExtra("lat", coordinates.latitude)
             intent.putExtra("lon", coordinates.longitude)
             intent.putExtra("side", "right")
-            val lastAddress = storeHousenumbersObject.lastAddressEntry("right")
+            val lastAddress = storeHouseNumbersObject.lastAddressEntry("right")
             intent.putExtra("last_address" , lastAddress)
-
+            intent.putExtra("increment", increment)
             startActivityForResult(intent, 3)
         }
         rightArrow.setOnLongClickListener(View.OnLongClickListener {
-            val addressToChange = storeHousenumbersObject.lastAddressEntry("right")
+            val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
+            increment = sharedPreferences.getInt("increment", 2)
 
             if (addressToChange != null) {
                 Log.i("Long Click detected", "longclicklistener on arrow started")
@@ -200,7 +207,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                 addressToChange.longitude = map.mapCenter.longitude
                 addressToChange.buildingLevels = ""
 
-                storeHousenumbersObject.addHousenumber(addressToChange)
+                storeHouseNumbersObject.addHousenumber(addressToChange)
                 addHousenumberMarker(addressToChange)
             }
 
@@ -232,7 +239,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
         // Displays all the housenumbers that have already been
         // created but haven't been stored to an OSM file yet.
-        markerList = storeHousenumbersObject.displayMarkers(map, markerList)
+        markerList = storeHouseNumbersObject.displayMarkers(map, markerList)
 
         map.setBuiltInZoomControls(false)
 
@@ -273,11 +280,12 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
             val bundle = data?.extras
             val addressParcel = bundle?.getParcelable<AddressNodes>("address")
-            Log.i("address latitude", addressParcel!!.latitude.toString())
+            Log.i(DEBUG_TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
-                storeHousenumbersObject.addHousenumber(addressParcel)
+                storeHouseNumbersObject.addHousenumber(addressParcel)
                 addHousenumberMarker(addressParcel)
             }
+            Log.i(DEBUG_TAG, "House number added to database.")
         }
 
         // Following if statement is for "keypad" activity if right button was pressed.
@@ -285,17 +293,12 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
             val bundle = data?.extras
             val addressParcel = bundle?.getParcelable<AddressNodes>("address")
-            Log.i("address latitude", addressParcel!!.latitude.toString())
+            Log.i(DEBUG_TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
-                storeHousenumbersObject.addHousenumber(addressParcel)
+                storeHouseNumbersObject.addHousenumber(addressParcel)
                 addHousenumberMarker(addressParcel)
             }
-
-            Log.i("Database", "Housenumber added")
-
-            Log.w("BUG LOCATION", "attempting to add marker to map")
-
-
+            Log.i(DEBUG_TAG, "House number added to database.")
         }
     }
 
@@ -345,7 +348,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
 
             // Remove item from database
-            storeHousenumbersObject.undo()
+            storeHouseNumbersObject.undo()
         }
     }
 
@@ -399,7 +402,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
             Log.i("inside positive button", "noteContents: $noteContents")
             if (noteContents != "") {
-                storeHousenumbersObject.addNote(noteContents, lat, lon)
+                storeHouseNumbersObject.addNote(noteContents, lat, lon)
 
                 markerList.add(Marker(map))
 
@@ -428,7 +431,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             Toast.makeText(this, getString(R.string.give_storage_permission),
                     Toast.LENGTH_SHORT).show()
         } else {
-            storeHousenumbersObject.writeToOsmFile()
+            storeHouseNumbersObject.writeToOsmFile()
 
             for (marker: Marker in markerList) {
                 map.overlays.remove(marker)

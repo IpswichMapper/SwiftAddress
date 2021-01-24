@@ -24,6 +24,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
     private var buildingLevels = ""
 
     private val DEBUG_TAG = "Keypad"
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +39,6 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         })
 
         var lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
-
 
         gestureDetector = GestureDetectorCompat(this, this)
 
@@ -398,9 +398,28 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             val result = nominatimReverseGeocode.readText()
             Log.i("result:", result)
             var streetName: String
-            streetName = StringUtils.substringBetween(result, "<road>", "</road>")
-            Log.i("street name: ", streetName)
-            street = streetName
+            try {
+                streetName = StringUtils.substringBetween(result, "<road>", "</road>")
+                street = streetName
+                Log.i("street name: ", streetName)
+
+            } catch (e: NullPointerException) {
+                var lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
+                Log.i(DEBUG_TAG, "nullPointerException when trying to geocode street.")
+
+                if (lastAddress != null) {
+                    street = lastAddress!!.street
+
+                    val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+                    if (street.length < 18) {
+                        streetNameTextView.text = street
+                    } else {
+                        streetNameTextView.text = "${street.subSequence(0, 15)}..."
+                    }
+                } else {
+                    street = ""
+                }
+            }
 
             runOnUiThread {
                 val streetNameTextView = findViewById<TextView>(R.id.street_name_value)

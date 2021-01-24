@@ -14,7 +14,8 @@
         android:layout_height="50dp"
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="115dp">
+        tools:layout_editor_absoluteX="115dp"
+        android:background="@android:color/darker_gray">
 
 
         <ImageButton
@@ -26,7 +27,6 @@
             android:onClick="saveFile"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/save"
-
             tools:srcCompat="@drawable/save" />
 
         <ImageButton
@@ -84,6 +84,10 @@
             android:layout_weight="1"
             android:scaleType="fitCenter"
             android:backgroundTint="@android:color/darker_gray"
+            android:layout_marginEnd="-5dp"
+            android:layout_marginBottom="-6dp"
+            android:layout_marginStart="-5dp"
+            android:layout_marginTop="-5dp"
             app:srcCompat="@drawable/left_arrow"
             />
 
@@ -94,6 +98,10 @@
             android:layout_weight="1"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
+            android:layout_marginStart="-5dp"
+            android:layout_marginBottom="-6dp"
+            android:layout_marginEnd="-5dp"
+            android:layout_marginTop="-5dp"
             app:srcCompat="@drawable/right_arrow" />
     </LinearLayout>
 

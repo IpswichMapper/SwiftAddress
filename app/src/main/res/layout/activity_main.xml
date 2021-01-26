@@ -26,6 +26,7 @@
             android:backgroundTint="@android:color/darker_gray"
             android:onClick="saveFile"
             android:scaleType="fitCenter"
+            android:tint="@color/black"
             app:srcCompat="@drawable/save"
             tools:srcCompat="@drawable/save" />
 
@@ -36,6 +37,7 @@
             android:layout_weight="1"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
+            android:tint="@color/black"
             app:srcCompat="@drawable/add_photo" />
 
         <ImageButton
@@ -45,6 +47,7 @@
             android:layout_weight="1"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
+            android:tint="@color/black"
             app:srcCompat="@drawable/microphone" />
 
         <ImageButton
@@ -61,9 +64,10 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:onClick="undo"
             android:backgroundTint="@android:color/darker_gray"
+            android:onClick="undo"
             android:scaleType="fitCenter"
+            android:tint="@color/black"
             app:srcCompat="@drawable/undo" />
     </LinearLayout>
 
@@ -81,27 +85,28 @@
             android:id="@+id/add_address_on_left"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:scaleType="fitCenter"
-            android:backgroundTint="@android:color/darker_gray"
-            android:layout_marginEnd="-5dp"
-            android:layout_marginBottom="-6dp"
             android:layout_marginStart="-5dp"
             android:layout_marginTop="-6dp"
-            app:srcCompat="@drawable/left_arrow"
-            />
+            android:layout_marginEnd="-5dp"
+            android:layout_marginBottom="-6dp"
+            android:layout_weight="1"
+            android:tint="@color/black"
+            android:backgroundTint="@android:color/darker_gray"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/left_arrow" />
 
         <ImageButton
             android:id="@+id/add_address_on_right"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginStart="-5dp"
+            android:layout_marginTop="-6dp"
+            android:layout_marginEnd="-5dp"
+            android:layout_marginBottom="-6dp"
             android:layout_weight="1"
+            android:tint="@color/black"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
-            android:layout_marginStart="-5dp"
-            android:layout_marginBottom="-6dp"
-            android:layout_marginEnd="-5dp"
-            android:layout_marginTop="-6dp"
             app:srcCompat="@drawable/right_arrow" />
     </LinearLayout>
 

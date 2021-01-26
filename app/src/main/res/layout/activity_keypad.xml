@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num1"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -69,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/num2"
-            android:textColor="#000000"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -102,7 +102,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/num3"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -134,7 +134,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num4"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -177,7 +177,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num5"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -220,7 +220,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num6"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -263,9 +263,8 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num7"
-            android:textColor="@color/black"
-            android:textSize="50sp"
-            />
+            android:textColor="@color/button_colors"
+            android:textSize="50sp" />
 
         <TextView
             android:id="@+id/B1R1"
@@ -295,7 +294,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num8"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -326,7 +325,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num9"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
 
@@ -356,10 +355,10 @@
             android:id="@+id/remove"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:backgroundTint="#FFFFFF"
-            android:scaleType="fitCenter"
+            android:backgroundTint="@android:color/transparent"
             android:padding="30dp"
-            android:tint="#000000"
+            android:scaleType="fitCenter"
+            android:tint="@color/button_colors"
             app:srcCompat="@drawable/clear" />
     </RelativeLayout>
 
@@ -381,7 +380,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#FFFFFF"
             android:text="@string/num0"
-            android:textColor="@color/black"
+            android:textColor="@color/button_colors"
             android:textSize="50sp" />
 
         <TextView
@@ -420,12 +419,12 @@
             android:id="@+id/backspace"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="@android:color/transparent"
             android:onClick="textboxRemoveLastChar"
+            android:padding="30dp"
             android:scaleType="fitCenter"
-            android:tint="#000000"
-            app:srcCompat="@drawable/backspace"
-            android:padding="30dp"/>
+            android:tint="@color/button_colors"
+            app:srcCompat="@drawable/backspace" />
 
         <TextView
             android:id="@+id/modify_increment"
@@ -453,11 +452,11 @@
             android:id="@+id/substract"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="@android:color/transparent"
             android:onClick="decrementTextbox"
-            android:scaleType="fitCenter"
             android:padding="30dp"
-            android:tint="#000000"
+            android:scaleType="fitCenter"
+            android:tint="@color/button_colors"
             app:srcCompat="@drawable/minus" />
     </RelativeLayout>
 
@@ -476,10 +475,10 @@
             android:id="@+id/done"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:backgroundTint="#FFFFFF"
-            android:scaleType="fitCenter"
+            android:backgroundTint="@android:color/transparent"
             android:padding="30dp"
-            android:tint="#000000"
+            android:scaleType="fitCenter"
+            android:tint="@color/button_colors"
             app:srcCompat="@drawable/check" />
     </RelativeLayout>
 
@@ -498,11 +497,11 @@
             android:id="@+id/add"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="@android:color/transparent"
             android:onClick="incrementTextbox"
-            android:scaleType="fitCenter"
             android:padding="30dp"
-            android:tint="#000000"
+            android:scaleType="fitCenter"
+            android:tint="@color/button_colors"
             app:srcCompat="@drawable/plus" />
     </RelativeLayout>
 

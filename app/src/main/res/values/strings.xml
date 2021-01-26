@@ -35,4 +35,5 @@
     <string name="increment_explanation">Change the default increment used when long pressing on an arrow. For example, if your increment is 2, and the last housenumber on the left side you added was \'24\', then long pressing the left arrow will add \'26\' because that is 2 higher than the previous number.</string>
     <string name="increment_value">increment_value</string>
     <string name="save_increment">Save Increment</string>
+    <string name="osm_files_empty">No data to save</string>
 </resources>

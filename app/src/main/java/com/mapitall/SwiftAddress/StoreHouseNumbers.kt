@@ -38,14 +38,16 @@ data class AddressNodes(
     var longitude = lon
     var side = side_
     var buildingLevels = buildingLevels_
+
 }
 
 // Static class ("object") that helps storing housenumbers
 // TODO : Make this work with a database
-class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context,
+class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context,
         "address_database",
         null,
         1) {
+    private val DEBUG_TAG = "StoreHouseNumbers"
 
     private val TABLE_NAME = "address_database"
     private val COL_ID = "ID"
@@ -61,7 +63,7 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
     // Write housenumbers to OSM file
     fun writeToOsmFile() {
 
-        val textToWrite = databaseToXml()
+        val (addressTextToWrite, noteTextToWrite) = databaseToXml()
 
         var isExternalStorageReadOnly: Boolean = false
         val extStorageState = Environment.getExternalStorageState()
@@ -74,30 +76,51 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
             isExternalStorageAvailable = true
         }
 
-        Log.w("file", textToWrite)
-        if (textToWrite != "" && isExternalStorageAvailable && !isExternalStorageReadOnly) {
+        Log.w("addressFile", addressTextToWrite)
+        Log.w("noteFile", noteTextToWrite)
+        if (isExternalStorageAvailable && !isExternalStorageReadOnly) {
             val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
-            val filename = "housenumbers${current}.xml"
-
-
+            val addressFileName = "housenumbers$current.osm"
+            val noteFileName = "notes$current.osc"
 
             Log.i("ExtStorageAvailable", "$isExternalStorageAvailable")
-            val folder_path = Environment.getExternalStorageDirectory().absolutePath +
+            val folderPath = Environment.getExternalStorageDirectory().absolutePath +
                     File.separator + "SwiftAddress" + File.separator
 
-            if (!File(folder_path).exists()) {
-                File(folder_path).mkdir()
+            if (!File(folderPath).exists()) {
+                File(folderPath).mkdir()
             }
 
 
-            var file: File = File(folder_path + filename)
-            var fileOutputStream: FileOutputStream
+            val addressFile = File(folderPath + addressFileName)
+            val addressFileOutputStream: FileOutputStream
+
+
+            val noteFile = File(folderPath + noteFileName)
+            val noteFileOutputStream : FileOutputStream
             try {
-                file?.createNewFile()
-                fileOutputStream = FileOutputStream(file, false)
-                fileOutputStream.write(textToWrite.toByteArray())
-                fileOutputStream.flush()
-                fileOutputStream.close()
+
+                if (addressTextToWrite != "") {
+                    addressFile.createNewFile()
+                    addressFileOutputStream = FileOutputStream(addressFile, false)
+                    addressFileOutputStream.write(addressTextToWrite.toByteArray())
+                    addressFileOutputStream.flush()
+                    addressFileOutputStream.close()
+                }
+                if (noteTextToWrite != "") {
+                    noteFile.createNewFile()
+                    noteFileOutputStream = FileOutputStream(noteFile, false)
+                    noteFileOutputStream.write(noteTextToWrite.toByteArray())
+                    noteFileOutputStream.flush()
+                    noteFileOutputStream.close()
+                }
+                if (addressTextToWrite == "" && noteTextToWrite == "") {
+                    Toast.makeText(context,
+                            context.getString(R.string.osm_files_empty),
+                            Toast.LENGTH_SHORT)
+                            .show()
+                }
+
 
                 Log.i("FileWrite", "check your files")
             } catch (e: Exception) {
@@ -116,48 +139,91 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // This converts a "AddressNodes" object to OSM-XML format.
-    private fun databaseToXml(): String {
+    private fun databaseToXml(): Pair<String, String> {
 
-        val fileStart = """<?xml version="1.0" encoding="UTF-8"?>
-        <osm version="0.6" generator="Keypad Mapper 4">
+        // NOTE: THE GENERATOR USED TO BE CALLED "KEYPAD MAPPER 4"
+        // Make sure to search for that when looking for related changesets.
+        val addressFileStart = """<?xml version="1.0" encoding="UTF-8"?>
+        <osm version="0.6" generator="SwiftAddress">
+        
+        """.trimIndent()
+        val addressFileEnd = "</osm>"
+        val addressFileToWrite = StringBuilder()
+        val noteFileToWrite = StringBuilder()
+
+        val noteFileStart = """
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <osmChange generator="SwiftAddress" version="0.6">
+             <create>
 
         """.trimIndent()
-        val fileEnd = "</osm>"
-        var fileToWrite = StringBuilder()
+        val noteFileEnd = """
+            </create>
+            </osmChange>
+        """.trimIndent()
 
-        fileToWrite.append(fileStart)
+        addressFileToWrite.append(addressFileStart)
+        noteFileToWrite.append(noteFileStart)
 
         val db: SQLiteDatabase = this.readableDatabase
-        var str = StringBuilder()
+        val addressFileMiddle = StringBuilder()
+        val noteFileMiddle = StringBuilder()
 
-        var c: Cursor = db.query(TABLE_NAME, null, null, null,
+        val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID ASC")
 
 
         var i = -1
+        var j = -1
         while (c.moveToNext()) {
-            var housenumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
-            var street = c.getString(c.getColumnIndex(COL_STREET))
-            var latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
-            var longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+            val type = c.getString(c.getColumnIndex(COL_TYPE))
+            if (type == "Address") {
+                val housenumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
+                val street = c.getString(c.getColumnIndex(COL_STREET))
+                val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
+                val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
 
-            str.append("<node id=\"${i}\" lat=\"${latitude}\" lon=\"${longitude}\">\n") // opening tag
-            str.append("<tag k=\"addr:housenumber\" v=\"${housenumber}\"/>\n") // housenumber
-            if (street != "") {
-                str.append("<tag k=\"addr:street\" v=\"${street}\"/>\n") // street
+                addressFileMiddle.append("<node id=\"$i\" lat=\"$latitude\" lon=\"$longitude\">\n") // opening tag
+                addressFileMiddle.append("<tag k=\"addr:housenumber\" v=\"$housenumber\"/>\n") // housenumber
+                if (street != "") {
+                    addressFileMiddle.append("<tag k=\"addr:street\" v=\"$street\"/>\n") // street
+                }
+                addressFileMiddle.append("</node>\n")
+                i--
+            } else if (type == "Note") {
+                val contents = c.getString(c.getColumnIndex(COL_NOTE))
+                val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
+                val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+
+                noteFileMiddle.append("<note id=\"$j\" lat=\"$latitude\" lon=\"$longitude\">\n")
+                noteFileMiddle.append("<comment text=\"$contents\" />\n")
+                noteFileMiddle.append("</note>\n")
+                j--
+            } else {
+
+                Log.e(DEBUG_TAG, "data type wasn't note or address.")
             }
-            str.append("</node>\n")
-            i--
         }
 
-        fileToWrite.append(str)
-        fileToWrite.append(fileEnd)
+        addressFileToWrite.append(addressFileMiddle)
+        addressFileToWrite.append(addressFileEnd)
 
-        if (str.toString() != "") {
-            return fileToWrite.toString()
+        noteFileToWrite.append(noteFileMiddle)
+        noteFileToWrite.append(noteFileEnd)
+        if (addressFileMiddle.toString() != "" && noteFileMiddle.toString() == "") {
+            return Pair(addressFileToWrite.toString(), "")
+        } else if (addressFileMiddle.toString() != "" && noteFileMiddle.toString() != "") {
+            return Pair(addressFileToWrite.toString(), noteFileToWrite.toString())
+        } else if (addressFileMiddle.toString() == "" && noteFileMiddle.toString() != "") {
+            return Pair("", noteFileToWrite.toString())
         } else {
-            return ""
+            return Pair("", "")
         }
+    }
+
+    // adds a note to an xml representing an OSC file.
+    private fun addNoteToOscFile() {
+        TODO("Not yet implemented")
     }
 
     // Creates database to store the Addresses and Notes
@@ -179,7 +245,7 @@ class StoreHousenumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // Adds housenumber to database once it is created.
-    fun addHousenumber(address: AddressNodes) {
+    fun addHouseNumber(address: AddressNodes) {
 
         val db: SQLiteDatabase = this.writableDatabase
         val contentValues = ContentValues()

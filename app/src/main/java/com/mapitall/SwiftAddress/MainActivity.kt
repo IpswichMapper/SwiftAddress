@@ -25,7 +25,7 @@ import androidx.core.app.ActivityCompat.checkSelfPermission
 
 import androidx.core.content.ContextCompat
 import layout.AddressNodes
-import layout.StoreHousenumbers
+import layout.StoreHouseNumbers
 
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
     private lateinit var map : MapView
     private var markerList: MutableList<Marker> = mutableListOf()
-    private var storeHouseNumbersObject : StoreHousenumbers = StoreHousenumbers(this)
+    private var storeHouseNumbersObject : StoreHouseNumbers = StoreHouseNumbers(this)
     private var increment  = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                 addressToChange.longitude = map.mapCenter.longitude
                 addressToChange.buildingLevels = ""
 
-                storeHouseNumbersObject.addHousenumber(addressToChange)
+                storeHouseNumbersObject.addHouseNumber(addressToChange)
                 addHousenumberMarker(addressToChange)
             }
 
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                 addressToChange.longitude = map.mapCenter.longitude
                 addressToChange.buildingLevels = ""
 
-                storeHouseNumbersObject.addHousenumber(addressToChange)
+                storeHouseNumbersObject.addHouseNumber(addressToChange)
                 addHousenumberMarker(addressToChange)
             }
 
@@ -282,7 +282,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             val addressParcel = bundle?.getParcelable<AddressNodes>("address")
             Log.i(DEBUG_TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
-                storeHouseNumbersObject.addHousenumber(addressParcel)
+                storeHouseNumbersObject.addHouseNumber(addressParcel)
                 addHousenumberMarker(addressParcel)
             }
             Log.i(DEBUG_TAG, "House number added to database.")
@@ -295,7 +295,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             val addressParcel = bundle?.getParcelable<AddressNodes>("address")
             Log.i(DEBUG_TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
-                storeHouseNumbersObject.addHousenumber(addressParcel)
+                storeHouseNumbersObject.addHouseNumber(addressParcel)
                 addHousenumberMarker(addressParcel)
             }
             Log.i(DEBUG_TAG, "House number added to database.")

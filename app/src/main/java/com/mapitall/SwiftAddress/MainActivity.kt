@@ -63,24 +63,21 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
 
-
-        val test = BoundingBox(0.00, 0.01, 0.02, 0.03)
-
         val eventsOverlay = MapEventsOverlay(this)
         map.overlays.add(0, eventsOverlay)
 
         val mapController = map.controller
         mapController.setZoom(3.0)
-        var locationManager : LocationManager? = null
 
+        // Zoom to current position when the app starts.
         try {
-            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
             val criteria = Criteria()
             val provider = locationManager.getBestProvider(criteria, false)
             val location = locationManager.getLastKnownLocation(provider!!)
             mapController.animateTo(GeoPoint(location!!.latitude, location.longitude))
             mapController.zoomTo(17, null)
-            Log.i("test", "test")
+            Log.i(DEBUG_TAG, "zoomed to location")
         } catch (e : Exception) {
             e.printStackTrace()
         }
@@ -94,7 +91,9 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                     WRITE_EXTERNAL_STORAGE, ACCESS_FINE_LOCATION), 1)
         }
 
-        // Onclicklisteners on arrows to open up keypad
+        // Onclicklistener and onlongpresslistener for the left arrow.
+        // click open keypad, longpress automatically add housenumber
+
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
         leftArrow.setOnClickListener {
 
@@ -156,6 +155,8 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             return@OnLongClickListener true
         })
 
+        // Onclicklistener and onlongpresslistener for the right arrow.
+        // click open keypad, longpress automatically add housenumber
         val rightArrow = findViewById<ImageButton>(R.id.add_address_on_right)
         rightArrow.setOnClickListener {
 
@@ -219,6 +220,8 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         val reCenterButton = findViewById<ImageButton>(R.id.recenter)
         val northButton = findViewById<ImageButton>(R.id.north_orientation)
 
+        // Recenter the map to your current location if it exists. Zoom in if you are below
+        // zoom level 17. Show a toast if the location isn't available.
         reCenterButton.setOnClickListener {
             try {
                 val zoomInManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -243,6 +246,8 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                     .show()
             }
         }
+
+        // zoom in and out buttons.
         plusButton.setOnClickListener {
             map.controller.zoomIn()
         }
@@ -250,6 +255,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             map.controller.zoomOut()
         }
 
+        // 4th parameter is the orientation to zoom to. "0f" means north.
         northButton.setOnClickListener {
             map.controller.animateTo(null, null, null, 0f)
         }
@@ -390,6 +396,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         }
     }
 
+    // add a housenumber marker to the map.
     private fun addHousenumberMarker(address: AddressNodes) {
 
         markerList.add(Marker(map))
@@ -403,6 +410,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         Log.i("map", "housenumber marker added")
     }
 
+    // add a note to the map as a marker and to the database.
     private fun addNote(lat: Double, lon: Double) {
         Log.i("Long Click detected", "addNote() method started")
         val vibrator : Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator

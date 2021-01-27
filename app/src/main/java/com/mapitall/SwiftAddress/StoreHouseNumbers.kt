@@ -49,6 +49,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         1) {
     private val DEBUG_TAG = "StoreHouseNumbers"
 
+    // All the database table columns.
     private val TABLE_NAME = "address_database"
     private val COL_ID = "ID"
     private val COL_HOUSENUMBER = "HOUSENUMBER"
@@ -60,7 +61,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     private val COL_BUILDINGLEVELS = "BUILDINGLEVELS"
     private val COL_TYPE = "TYPE"
 
-    // Write housenumbers to OSM file
+    // Write housenumbers to .osm file and notes to .osc file.
     fun writeToOsmFile() {
 
         val (addressTextToWrite, noteTextToWrite) = databaseToXml()
@@ -138,7 +139,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
     }
 
-    // This converts a "AddressNodes" object to OSM-XML format.
+    // This converts a "AddressNodes" object to OSM-XML format (.osm)
+    // Converts a note to OsmChange format (.osc)
     private fun databaseToXml(): Pair<String, String> {
 
         // NOTE: THE GENERATOR USED TO BE CALLED "KEYPAD MAPPER 4"
@@ -221,11 +223,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
     }
 
-    // adds a note to an xml representing an OSC file.
-    private fun addNoteToOscFile() {
-        TODO("Not yet implemented")
-    }
-
     // Creates database to store the Addresses and Notes
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""CREATE TABLE ${TABLE_NAME}(ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -287,7 +284,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
     }
 
-    // TODO: Make this work with database
+    // removes the last object from database.
     fun undo() {
         val db: SQLiteDatabase = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $TABLE_NAME);")
@@ -297,7 +294,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun displayMarkers(map: MapView, marker_list: MutableList<Marker>)
             : MutableList<Marker> {
         val db: SQLiteDatabase = this.readableDatabase
-        var str = StringBuilder()
 
         Log.i("Database", "displayMarkers function started")
 
@@ -342,7 +338,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
         return marker_list
     }
-
 
     // Gets last address that was entered
     fun lastAddressEntry(side : String) : AddressNodes?{

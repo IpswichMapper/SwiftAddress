@@ -79,6 +79,14 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         }
 
         Log.i("street outside", street)
+
+        // Onclick listeners and ontouch listeners for the keypad buttons
+        // "Ontouch" is activated when you do any action on the buttons, for example touch or swipe
+        // After "ontouch", the code checks if you swiped your finger up or down
+        // and then if you did, the app executes the action for a swipe up or down.
+        // If you swiped up or down, the onclicklistener does nothing.
+        // Otherwise, if you tapped on the button, the onclick listener adds the number
+        // to the textbox.
         val numButton1 = findViewById<Button>(R.id.keypad_num1)
         numButton1.setOnTouchListener { _, event ->
             Log.i(DEBUG_TAG, "numButton1: onTouchListener Called")
@@ -397,6 +405,10 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         }
     }
 
+    // Modify the default increment used when you double tap or long press on the right/left arrow
+    // in the MainActivity. For example, if your last entered housenumber was "24", and the
+    // increment is "-3", then the next housenumber you add will be "21".
+    // Default increment is 2.
     private fun modifyIncrement() {
         val incrementButtonDimensions = 200
         val textBoxWidth = 200
@@ -715,7 +727,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         }
     }
 
-    // Increments the number in the textbox by one
+    // Decrements the number in the textbox by one
     // Firstly, all characters are removed, then the remaining number is incremented
     fun decrementTextbox(view: View) {
 
@@ -796,12 +808,12 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
 
     }
 
+    // Detects if a swipe action on a keypad button was done, and checks if it was a
+    // swipe up or swipe down action so that nothing happens when you swipe sideways.
     override fun onFling(downEvent: MotionEvent, moveEvent: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         Log.i("Keypad", "onFlingDetected")
 
         val swipeValue = 100
-        val velocityValue = 100
-
 
         val differenceInY = moveEvent.y - downEvent.y
         val differenceInX = moveEvent.x - downEvent.x
@@ -809,7 +821,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
         if (Math.abs(differenceInY) > Math.abs(differenceInX)) {
             // This is an up or down swipe
 
-            if(Math.abs(differenceInY) > swipeValue && Math.abs(velocityY) > velocityValue) {
+            if(Math.abs(differenceInY) > swipeValue) {
                 if (differenceInY < 0) {
                     // up swipe
                     Log.i("onFlingDetected", "up swipe")

@@ -12,10 +12,10 @@
         android:id="@+id/top_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:background="@android:color/darker_gray"
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="115dp"
-        android:background="@android:color/darker_gray">
+        tools:layout_editor_absoluteX="115dp">
 
 
         <ImageButton
@@ -75,10 +75,10 @@
         android:id="@+id/add_address_layout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_marginBottom="-7dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="204dp"
-        android:layout_marginBottom="-7dp">
+        tools:layout_editor_absoluteX="204dp">
 
 
         <ImageButton
@@ -90,9 +90,9 @@
             android:layout_marginEnd="-5dp"
             android:layout_marginBottom="-6dp"
             android:layout_weight="1"
-            android:tint="@color/black"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
+            android:tint="@color/black"
             app:srcCompat="@drawable/left_arrow" />
 
         <ImageButton
@@ -104,9 +104,9 @@
             android:layout_marginEnd="-5dp"
             android:layout_marginBottom="-6dp"
             android:layout_weight="1"
-            android:tint="@color/black"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
+            android:tint="@color/black"
             app:srcCompat="@drawable/right_arrow" />
     </LinearLayout>
 
@@ -128,6 +128,70 @@
         </org.osmdroid.views.MapView>
 
     </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/north_orientation"
+        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/rounded_button"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:tint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
+        android:src="@drawable/north_icon"
+        tools:srcCompat="@drawable/north_icon" />
+
+    <ImageButton
+        android:id="@+id/recenter"
+        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/rounded_button"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/center_focus"
+        android:tint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
+        tools:srcCompat="@drawable/center_focus" />
+
+    <ImageButton
+        android:id="@+id/zoom_in"
+        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/rounded_button"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/plus"
+        android:tint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/recenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:srcCompat="@drawable/plus" />
+
+    <ImageButton
+        android:id="@+id/zoom_out"
+        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/rounded_button"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/minus"
+        android:tint="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recenter"
+        tools:srcCompat="@drawable/minus" />
 
     <ImageView
         android:id="@+id/imageView2"

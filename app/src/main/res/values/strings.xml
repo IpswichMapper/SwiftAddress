@@ -36,4 +36,5 @@
     <string name="increment_value">increment_value</string>
     <string name="save_increment">Save Increment</string>
     <string name="osm_files_empty">No data to save</string>
+    <string name="location_not_found">Location is not available</string>
 </resources>

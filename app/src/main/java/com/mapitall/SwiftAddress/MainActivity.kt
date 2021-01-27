@@ -4,7 +4,6 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -16,9 +15,7 @@ import android.os.Vibrator
 import androidx.preference.PreferenceManager
 import android.util.Log
 import android.view.*
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.checkSelfPermission
@@ -35,6 +32,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.compass.CompassOverlay
+import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
@@ -73,6 +72,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         val mapController = map.controller
         mapController.setZoom(3.0)
         var locationManager : LocationManager? = null
+
         try {
             locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
             val criteria = Criteria()
@@ -214,7 +214,45 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
             return@OnLongClickListener true
         })
 
+        val plusButton = findViewById<ImageButton>(R.id.zoom_in)
+        val minusButton = findViewById<ImageButton>(R.id.zoom_out)
+        val reCenterButton = findViewById<ImageButton>(R.id.recenter)
+        val northButton = findViewById<ImageButton>(R.id.north_orientation)
 
+        reCenterButton.setOnClickListener {
+            try {
+                val zoomInManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                val criteria = Criteria()
+                val provider = zoomInManager.getBestProvider(criteria, false)
+                val location = zoomInManager.getLastKnownLocation(provider!!)
+
+                if (map.zoomLevelDouble < 17) {
+                    Log.i(DEBUG_TAG, "in the IF statement: ${map.zoomLevel}, ${map.zoomLevelDouble}")
+                    map.controller.zoomTo(17.0)
+                }
+                map.controller.animateTo(GeoPoint(location!!.latitude, location.longitude))
+
+                Log.i(DEBUG_TAG, "zoomLevel: ${map.zoomLevelDouble}")
+
+                Log.i("test", "test")
+            } catch (e : Exception) {
+                e.printStackTrace()
+                Toast.makeText(this,
+                    getString(R.string.location_not_found),
+                    Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+        plusButton.setOnClickListener {
+            map.controller.zoomIn()
+        }
+        minusButton.setOnClickListener {
+            map.controller.zoomOut()
+        }
+
+        northButton.setOnClickListener {
+            map.controller.animateTo(null, null, null, 0f)
+        }
 
         // Onclicklistener to open activity to change background imagery.
         findViewById<ImageButton>(R.id.change_background_imagery_button).setOnClickListener {
@@ -237,11 +275,11 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
         map.setMultiTouchControls(true)
         map.overlays.add(rotationGestureOverlay)
 
+        map.setBuiltInZoomControls(false)
+
         // Displays all the housenumbers that have already been
         // created but haven't been stored to an OSM file yet.
         markerList = storeHouseNumbersObject.displayMarkers(map, markerList)
-
-        map.setBuiltInZoomControls(false)
 
         for(marker: Marker in markerList) {
             map.overlays.add(marker)

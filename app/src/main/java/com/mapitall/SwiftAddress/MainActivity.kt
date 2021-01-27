@@ -304,7 +304,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
     // Function that switches imageries based on what was chosen in
     // "ChooseBackgroundImagery" activity
-    fun backgroundImagery(imagery: String) {
+    private fun backgroundImagery(imagery: String) {
 
         // All the different tile sources
         val mapnik = TileSourceFactory.MAPNIK
@@ -358,7 +358,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
 
         markerList.last().position = GeoPoint(address.latitude, address.longitude)
         markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.address)
-        markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         markerList.last().title = address.housenumber
 
         map.overlays.add(markerList.last())
@@ -407,7 +407,7 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                 markerList.add(Marker(map))
 
                 markerList.last().position = GeoPoint(lat, lon)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 markerList.last().title = noteContents
                 markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.note)
                 map.overlays.add(markerList.last())

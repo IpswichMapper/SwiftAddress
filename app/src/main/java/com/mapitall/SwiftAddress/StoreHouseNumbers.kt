@@ -316,7 +316,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 marker_list.last().position = GeoPoint(latitude, longitude)
                 marker_list.last()
                         .setIcon(ContextCompat.getDrawable(context, R.drawable.address))
-                marker_list.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                marker_list.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 marker_list.last().title = housenumber
                 Log.i("Marked added", "Address")
 
@@ -328,7 +328,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 marker_list.add(Marker(map))
                 marker_list.last().position = GeoPoint(latitude, longitude)
                 marker_list.last().icon = ContextCompat.getDrawable(context, R.drawable.address)
-                marker_list.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                marker_list.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 marker_list.last().title = noteContents
                 Log.i("Marker added", "Note")
 

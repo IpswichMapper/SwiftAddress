@@ -137,7 +137,7 @@
         app:layout_constraintEnd_toEndOf="@+id/frameLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
-        app:layout_constraintVertical_bias="0.48"
-        app:srcCompat="@drawable/crosshair" />
+        app:srcCompat="@drawable/crosshair"
+        app:tint="@color/black" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -236,8 +236,6 @@ class MainActivity : AppCompatActivity(), MapEventsReceiver {
                 map.controller.animateTo(GeoPoint(location!!.latitude, location.longitude))
 
                 Log.i(DEBUG_TAG, "zoomLevel: ${map.zoomLevelDouble}")
-
-                Log.i("test", "test")
             } catch (e : Exception) {
                 e.printStackTrace()
                 Toast.makeText(this,

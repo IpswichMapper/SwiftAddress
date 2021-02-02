@@ -18,7 +18,7 @@
     <string name="add_note">Add Note</string>
     <string name="unimplemented">This feature has not been implemented yet.</string>
     <string name="need_storage_permission">This app needs the storage permission in order to store any data.</string>
-    <string name="ok_button">Ok</string>
+    <string name="ok_button">OK</string>
     <string name="storage_permission_denied">Storage Permission Denied</string>
     <string name="location_permission_denied">Location Permission Denied</string>
     <string name="choose_location_permission_info">Do you want to disable location? While it is possible to survey without your location on the map, it will be more difficult.</string>
@@ -26,7 +26,7 @@
     <string name="deny_location_permission_button">Deny Permission</string>
     <string name="street_name">Street Name:</string>
     <string name="building_levels">Building Levels:</string>
-    <string name="remember_change_street_name">Remember to change the Street Name everytime you move to a new street.</string>
+    <string name="remember_change_street_name">Remember to change the Street Name every time you move to a new street.</string>
     <string name="change_street_name_button">Change Street name</string>
     <string name="give_storage_permission">Please grant storage permissions first.</string>
     <string name="saved_to_folder">Data saved in \'SwiftAddress\' folder.</string>
@@ -40,5 +40,7 @@
     <string name="left_side">LEFT SIDE</string>
     <string name="right_side">RIGHT SIDE</string>
     <string name="add_address_first">Please add an address first</string>
+
+    <!-- This shouldn't be translated -->
     <string name="preference_string">SwiftAddressPreferences</string>
 </resources>

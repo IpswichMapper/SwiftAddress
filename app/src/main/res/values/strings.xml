@@ -37,4 +37,7 @@
     <string name="save_increment">Save Increment</string>
     <string name="osm_files_empty">No data to save</string>
     <string name="location_not_found">Location is not available</string>
+    <string name="left_side">LEFT SIDE</string>
+    <string name="right_side">RIGHT SIDE</string>
+    <string name="add_address_first">Please add an address first</string>
 </resources>

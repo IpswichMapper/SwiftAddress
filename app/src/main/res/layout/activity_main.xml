@@ -8,6 +8,7 @@
     android:backgroundTint="#FFFFFF"
     tools:context=".MainActivity">
 
+
     <LinearLayout
         android:id="@+id/top_bar_layout"
         android:layout_width="match_parent"
@@ -194,7 +195,7 @@
         tools:srcCompat="@drawable/minus" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/crosshair"
         android:layout_width="19dp"
         android:layout_height="19dp"
         app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
@@ -203,5 +204,272 @@
         app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
         app:srcCompat="@drawable/crosshair"
         app:tint="@color/black" />
+
+    <RelativeLayout
+        android:id="@+id/basedView"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:background="@color/background_color"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/top_layout"
+            android:orientation="horizontal">
+
+            <ImageButton
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:onClick="closeMiniKeypad"
+                android:scaleType="fitCenter"
+                android:tint="@color/button_colors"
+                app:srcCompat="@drawable/clear" />
+
+            <ImageView
+                android:id="@+id/horizontal_bar"
+                android:layout_width="0dp"
+                android:layout_weight="10"
+                android:layout_height="50dp"
+                android:foreground="@drawable/horizontal_bar"
+                android:foregroundGravity="fill"
+                android:foregroundTint="@color/button_colors"
+                />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_weight="1.5"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_height="match_parent"
+                app:srcCompat="@drawable/gear_settings"
+                android:scaleType="fitCenter"
+                android:tint="@color/button_colors"
+                android:onClick="showMiniKeypadPopupMenu"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/top_layout"
+            android:id="@+id/no_roof_linear_layout">
+
+            <RelativeLayout
+
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/B1R0_mini_relative"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="swipeAddHousenumber"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/house"
+                    android:scaleType="fitCenter"
+                    android:paddingBottom="25dp"/>
+
+                <TextView
+                    android:id="@+id/B1R0_main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:text="B1 R0"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/button_colors" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/B2R0_mini_relative"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:onClick="swipeAddHousenumber"
+                    android:paddingBottom="25dp"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/house" />
+                <TextView
+                    android:id="@+id/B2R0_main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:text="B2 R0"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/button_colors" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="20dp"
+                >
+
+                <ImageButton
+                    android:id="@+id/B3R0_mini_relative"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:layout_weight="1"
+                    android:onClick="swipeAddHousenumber"
+                    android:paddingBottom="25dp"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/house" />
+                <TextView
+                    android:id="@+id/B3R0_main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:text="B3 R0"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/button_colors" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/no_roof_linear_layout"
+            android:layout_marginTop="10dp"
+            android:id="@+id/one_roof_linear_layout"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/B1R1_mini_relative"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="swipeAddHousenumber"
+                    android:paddingBottom="25dp"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/house" />
+                <TextView
+                    android:id="@+id/B1R1_main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:text="B1 R1"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/button_colors" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/B2R1_mini_relative"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="swipeAddHousenumber"
+                    android:paddingBottom="25dp"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/house" />
+                <TextView
+                    android:id="@+id/B2R1_main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:text="B2 R1"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/button_colors" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="20dp"
+                android:layout_toEndOf="@+id/B2R0_mini_relative">
+
+                <ImageButton
+                    android:id="@+id/B3R1_mini_relative"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:onClick="swipeAddHousenumber"
+                    android:paddingBottom="25dp"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/house" />
+
+                <TextView
+                    android:id="@+id/B3R1_main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:text="B3 R1"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/button_colors" />
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/one_roof_linear_layout"
+            android:orientation="horizontal"
+            android:id="@+id/increment_linear_layout">
+
+            <ImageButton
+                android:id="@+id/imageButton"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+
+                android:layout_weight="1"
+                android:onClick="decrementMiniHousenumber"
+                android:tint="@color/button_colors"
+                app:srcCompat="@drawable/minus" />
+
+            <TextView
+                android:id="@+id/mini_keypad_housenumber"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="3"
+                android:textColor="@color/button_colors"
+                android:textSize="30sp" />
+
+            <ImageButton
+                android:id="@+id/imageButton2"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_weight="1"
+                android:onClick="incrementMiniHousenumber"
+                android:tint="@color/button_colors"
+                app:srcCompat="@drawable/plus" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/increment_linear_layout"
+            android:id="@+id/mini_keypad_side"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/button_colors"/>
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

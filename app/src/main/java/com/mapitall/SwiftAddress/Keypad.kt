@@ -17,9 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 import layout.AddressNodes
 import org.apache.commons.lang3.StringUtils
+import kotlin.math.abs
 import java.net.URL
 
-class Keypad : AppCompatActivity(), View.OnTouchListener,
+class Keypad : AppCompatActivity(),
         GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     private lateinit var gestureDetector: GestureDetectorCompat
@@ -314,6 +315,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
             val swipeUpText = ""
             val swipeDownText = findViewById<TextView>(R.id.B3R1).text.toString()
 
+            Log.i("le out test", "onFlingDetected: $onFlingDetected")
             if (onFlingDetected != "no") {
                 addNum(numButton9, swipeUpText, swipeDownText)
                 touchEvent = true
@@ -527,7 +529,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
     // Finds the nearest street to the position of the housenumber that you want to add.
     // Uses Nominatim reverse geocoder to do this.
     @SuppressLint("SetTextI18n")
-    private fun reverseGeocodeStreet(lat: Double, lon: Double) {
+    fun reverseGeocodeStreet(lat: Double, lon: Double) {
         var nominatimReverseGeocode : URL
         Thread {
             nominatimReverseGeocode = URL(
@@ -783,10 +785,7 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
     }
 
 
-    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-        gestureDetector.onTouchEvent(event)
-        return super.onTouchEvent(event)
-    }
+
 
     override fun onDown(e: MotionEvent?): Boolean {
         return true
@@ -811,21 +810,22 @@ class Keypad : AppCompatActivity(), View.OnTouchListener,
     // Detects if a swipe action on a keypad button was done, and checks if it was a
     // swipe up or swipe down action so that nothing happens when you swipe sideways.
     override fun onFling(downEvent: MotionEvent, moveEvent: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-        Log.i("Keypad", "onFlingDetected")
+        Log.i(DEBUG_TAG, "onFlingDetected")
 
         val swipeValue = 100
 
         val differenceInY = moveEvent.y - downEvent.y
         val differenceInX = moveEvent.x - downEvent.x
 
-        if (Math.abs(differenceInY) > Math.abs(differenceInX)) {
+        if (abs(differenceInY) > abs(differenceInX)) {
             // This is an up or down swipe
 
-            if(Math.abs(differenceInY) > swipeValue) {
+            if(abs(differenceInY) > swipeValue) {
                 if (differenceInY < 0) {
                     // up swipe
                     Log.i("onFlingDetected", "up swipe")
                     this.onFlingDetected = "up"
+                    Log.i("le in test", "onFlingDetected : $onFlingDetected")
                 } else {
                     // down swipe
                     Log.i("onFlingDetected", "down swipe")

@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-
 }
 
 android {
@@ -50,4 +49,6 @@ dependencies {
     implementation 'com.github.MKergall:osmbonuspack:6.6.0'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+    implementation "com.github.mancj:SlideUp-Android:2.2.8"
+    implementation 'ru.ztrap:RxSlideUp2:2.0.1' //optional, for reactive listeners based on RxJava-2
 }

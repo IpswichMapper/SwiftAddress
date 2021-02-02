@@ -1255,11 +1255,9 @@ class MainActivity : AppCompatActivity(),
             val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
             val fileName = "image-$current.jpg"
 
-            //val folderPath = Environment.getExternalStorageDirectory().absolutePath +
-            //        File.separator + "SwiftAddress" + File.separator
+            val folderPath = Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator + "SwiftAddress" + File.separator
 
-            val folderPath = this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString() +
-                    "/"
             if (!File(folderPath).exists()) {
                 File(folderPath).mkdir()
             }

@@ -40,4 +40,5 @@
     <string name="left_side">LEFT SIDE</string>
     <string name="right_side">RIGHT SIDE</string>
     <string name="add_address_first">Please add an address first</string>
+    <string name="preference_string">SwiftAddressPreferences</string>
 </resources>

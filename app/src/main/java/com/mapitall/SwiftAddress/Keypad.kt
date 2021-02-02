@@ -416,7 +416,7 @@ class Keypad : AppCompatActivity(),
         val textBoxWidth = 200
         val textBoxTextSize = 40f
 
-        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
         increment = sharedPreferences.getInt("increment", 2)
 
         Log.i(DEBUG_TAG, "Increment before function: $increment")
@@ -511,7 +511,7 @@ class Keypad : AppCompatActivity(),
                 Log.i(DEBUG_TAG, "incrementValue in Dialog: $incrementValue")
                 increment = incrementValue.toInt()
 
-                val sharedPreferencesEditor = getPreferences(MODE_PRIVATE).edit()
+                val sharedPreferencesEditor = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE).edit()
                 sharedPreferencesEditor.putInt("increment", increment)
                 sharedPreferencesEditor.apply()
             } catch (e: TypeCastException) {

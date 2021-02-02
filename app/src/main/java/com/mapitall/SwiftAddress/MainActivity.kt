@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
 import android.location.Criteria
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         // set map details
 
-        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
         increment = sharedPreferences.getInt("increment", 2)
         val ctx: Context = applicationContext
         Configuration.getInstance().load(
@@ -457,8 +458,9 @@ class MainActivity : AppCompatActivity(),
 
         rightArrow.setOnLongClickListener {
             val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
+            Log.e(DEBUG_TAG, "increment; $increment")
             increment = sharedPreferences.getInt("increment", 2)
-
+            Log.e(DEBUG_TAG, "increment $increment")
             if (addressToChange != null) {
                 Log.i(DEBUG_TAG, "longPressDetected & address is not null")
                 val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
@@ -474,6 +476,7 @@ class MainActivity : AppCompatActivity(),
                     vibrator.vibrate(150)
                 }
                 try {
+                    Log.e(DEBUG_TAG, "increment: $increment")
                     var numToIncrement = addressToChange.housenumber.toInt()
                     numToIncrement += increment
                     addressToChange.housenumber = numToIncrement.toString()
@@ -492,14 +495,9 @@ class MainActivity : AppCompatActivity(),
                     }
                     Log.i("final text", textToSet)
                 }
-
-                when (addressToChange.buildingLevels) {
-                    "B1R0" -> findViewById<ImageButton>(R.id.B1R0_mini_relative).backgroundTintList =
-                            ColorStateList.valueOf(669900)
-
-                }
-
-
+                addressToChange.latitude = map.mapCenter.latitude
+                addressToChange.longitude = map.mapCenter.longitude
+                addressToChange.buildingLevels = ""
 
                 storeHouseNumbersObject.addHouseNumber(addressToChange)
                 addHousenumberMarker(addressToChange)
@@ -882,7 +880,7 @@ class MainActivity : AppCompatActivity(),
         val textBoxWidth = 200
         val textBoxTextSize = 40f
 
-        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
         increment = sharedPreferences.getInt("increment", 2)
 
         Log.i(DEBUG_TAG, "Increment before function: $increment")
@@ -981,7 +979,7 @@ class MainActivity : AppCompatActivity(),
                 Log.i(DEBUG_TAG, "incrementValue in Dialog: $incrementValue")
                 increment = incrementValue.toInt()
 
-                val sharedPreferencesEditor = getPreferences(MODE_PRIVATE).edit()
+                val sharedPreferencesEditor = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE).edit()
                 sharedPreferencesEditor.putInt("increment", increment)
                 sharedPreferencesEditor.apply()
             } catch (e: TypeCastException) {
@@ -1049,6 +1047,8 @@ class MainActivity : AppCompatActivity(),
 
         Log.i(DEBUG_TAG, "flingUpDetected & address is not null")
 
+        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+        increment = sharedPreferences.getInt("increment", 2)
 
         try {
             var numToIncrement = houseNumber.text.toString().toInt()

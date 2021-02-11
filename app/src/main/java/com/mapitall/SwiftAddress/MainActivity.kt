@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import android.os.*
+import android.provider.ContactsContract
 import android.provider.MediaStore
 import androidx.preference.PreferenceManager
 import android.util.Log
@@ -47,8 +48,12 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
+import java.net.URI
+import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(),
@@ -720,6 +725,7 @@ class MainActivity : AppCompatActivity(),
                         .show()
             }
 */
+        // Save image to internal storage
         else if (requestCode == 4 && resultCode == RESULT_OK) {
             try {
                 val exif = ExifInterface(File(currentImagePath))
@@ -756,7 +762,7 @@ class MainActivity : AppCompatActivity(),
                 exif.saveAttributes()
 
                 Log.i("exif latitude",
-                    exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE).toString())
+                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE).toString())
                 Log.i("exif longitude",
                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE).toString())
                 Log.i("Exif latituderef",
@@ -764,12 +770,67 @@ class MainActivity : AppCompatActivity(),
                 Log.i("exif longituderef",
                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
 
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
 
+        } else if (requestCode == 5 && resultCode == RESULT_OK) {
+
+
+            storeHouseNumbersObject.writeToOsmFile()
+
+            try {
+                // create zip file, delete app internal storage, store zip file to chosen location.
+                zipFilesAndDelete(data?.data!!)
+
+                // clear database
+                storeHouseNumbersObject.clearDatabase()
+
+                // clear markers
+                for (marker: Marker in markerList) {
+                    map.overlays.remove(marker)
+                    map.invalidate()
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
+    }
+
+    private fun zipFilesAndDelete(zipUri : Uri) {
+        val buffer = 2048
+
+        val surveyFolder = File(getExternalFilesDir(null)!!.absolutePath)
+        val surveyFiles: Array<File>? = surveyFolder.listFiles()
+
+        if (surveyFiles != null) {
+            val zipOutputStream = ZipOutputStream(
+                    contentResolver.openOutputStream(zipUri)
+            )
+
+            for (file in surveyFiles) {
+
+                val bufferByteArray = ByteArray(buffer)
+                val fileInputStream = FileInputStream(file)
+                zipOutputStream.putNextEntry(ZipEntry(file.name))
+
+                var length: Int = fileInputStream.read(bufferByteArray)
+                while (length > 0) {
+                    zipOutputStream.write(bufferByteArray, 0, length)
+                    length = fileInputStream.read(bufferByteArray)
+                }
+                zipOutputStream.closeEntry()
+                fileInputStream.close()
+            }
+            zipOutputStream.close()
+
+            for (file in surveyFiles) {
+                file.delete()
+            }
+
+        }
     }
 
     // Function that switches imageries based on what was chosen in
@@ -899,21 +960,28 @@ class MainActivity : AppCompatActivity(),
 
 
     // Save all the data collected to an .osm file, clear markers
-    fun saveFile(view: View) {
+    fun saveData(view: View) {
 
-        if (checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
-            Toast.makeText(
-                    this, getString(R.string.give_storage_permission),
-                    Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            storeHouseNumbersObject.writeToOsmFile()
+        val saveDataDialogue  = AlertDialog.Builder(this)
+        saveDataDialogue.setTitle(getString(R.string.change_increment))
+        saveDataDialogue.setMessage(getString(R.string.save_data_question))
 
-            for (marker: Marker in markerList) {
-                map.overlays.remove(marker)
-                map.invalidate()
-            }
+        saveDataDialogue.setNeutralButton("Cancel") { _, _ -> }
+
+        saveDataDialogue.setPositiveButton(getString(R.string.save_data)) { _, _ ->
+
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "application/zip"
+            intent.putExtra(Intent.EXTRA_TITLE, "survey.zip")
+
+            startActivityForResult(intent, 5)
         }
+
+        saveDataDialogue.create().show()
+        // storeHouseNumbersObject.writeToOsmFile()
+
+
     }
 
     override fun onDown(e: MotionEvent?): Boolean {
@@ -1254,7 +1322,7 @@ class MainActivity : AppCompatActivity(),
         if (isExternalStorageAvailable && !isExternalStorageReadOnly) {
             val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
             val fileName = "image-$current.jpg"
-
+/*
             val folderPath = Environment.getExternalStorageDirectory().absolutePath +
                     File.separator + "SwiftAddress" + File.separator
 
@@ -1262,11 +1330,12 @@ class MainActivity : AppCompatActivity(),
                 File(folderPath).mkdir()
             }
 
-            val imageFile = File(folderPath + fileName)
+ */
+            val imageFile = File(getExternalFilesDir(null), fileName)
             currentImagePath = imageFile.absolutePath
 
-            Log.i(DEBUG_TAG, "filePath: ${folderPath + fileName}")
-            Log.i(DEBUG_TAG, "filePath: ${currentImagePath}")
+            Log.i(DEBUG_TAG, "filePath: ${getExternalFilesDir(null)!!.absolutePath + fileName}")
+            Log.i(DEBUG_TAG, "filePath: $currentImagePath")
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             if (cameraIntent.resolveActivity(packageManager) != null) {
 
@@ -1274,7 +1343,7 @@ class MainActivity : AppCompatActivity(),
                     "com.mapitall.SwiftAddress.provider",
                     imageFile
                     )
-                Log.i(DEBUG_TAG, "URI filePath: ${imageURI}")
+                Log.i(DEBUG_TAG, "URI filePath: $imageURI")
                 cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
                 startActivityForResult(cameraIntent, 4)
                 }

@@ -43,4 +43,8 @@
 
     <!-- This shouldn't be translated -->
     <string name="preference_string">SwiftAddressPreferences</string>
+    <string name="save_or_share_data">Do you want to share the data or save it to storage?</string>
+    <string name="save_data">Save</string>
+    <string name="share_data">Share</string>
+    <string name="save_data_question">Are you sure you want to save?</string>
 </resources>

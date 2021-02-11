@@ -2,11 +2,13 @@ package layout
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Environment
 import android.os.Parcelable
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -68,12 +70,12 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         var isExternalStorageReadOnly: Boolean = false
         val extStorageState = Environment.getExternalStorageState()
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
+        if (Environment.MEDIA_MOUNTED_READ_ONLY == extStorageState) {
             isExternalStorageReadOnly = true
         }
         Log.i("ExtStorageReadOnly", "$isExternalStorageReadOnly")
         var isExternalStorageAvailable: Boolean = false
-        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
+        if (Environment.MEDIA_MOUNTED == extStorageState) {
             isExternalStorageAvailable = true
         }
 
@@ -85,8 +87,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             val noteFileName = "notes$current.osc"
 
             Log.i("ExtStorageAvailable", "$isExternalStorageAvailable")
-            val folderPath = Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator + "SwiftAddress" + File.separator
+
+
+            val folderPath = context.getExternalFilesDir(null)!!
+                    .absolutePath + File.separator
 
             if (!File(folderPath).exists()) {
                 File(folderPath).mkdir()
@@ -98,7 +102,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
 
             val noteFile = File(folderPath + noteFileName)
-            val noteFileOutputStream : FileOutputStream
+            val noteFileOutputStream: FileOutputStream
             try {
 
                 if (addressTextToWrite != "") {
@@ -107,6 +111,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                     addressFileOutputStream.write(addressTextToWrite.toByteArray())
                     addressFileOutputStream.flush()
                     addressFileOutputStream.close()
+
+                    Log.i(DEBUG_TAG, "addressFile written to Internal Storage")
                 }
                 if (noteTextToWrite != "") {
                     noteFile.createNewFile()
@@ -114,6 +120,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                     noteFileOutputStream.write(noteTextToWrite.toByteArray())
                     noteFileOutputStream.flush()
                     noteFileOutputStream.close()
+
+                    Log.i(DEBUG_TAG, "noteFile written to Internal Storage")
                 }
                 if (addressTextToWrite == "" && noteTextToWrite == "") {
                     Toast.makeText(context,
@@ -121,21 +129,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                             Toast.LENGTH_SHORT)
                             .show()
                 }
-
-
-                Log.i("FileWrite", "check your files")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
-            val db: SQLiteDatabase = this.writableDatabase
-            db.execSQL("DELETE FROM $TABLE_NAME")
-
-            Toast.makeText(context,
-                    context.getString(R.string.saved_to_folder),
-                    Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "Data failed to save.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -213,12 +210,16 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         noteFileToWrite.append(noteFileMiddle)
         noteFileToWrite.append(noteFileEnd)
         if (addressFileMiddle.toString() != "" && noteFileMiddle.toString() == "") {
+            Log.i(DEBUG_TAG, "Writing Addresses to File")
             return Pair(addressFileToWrite.toString(), "")
         } else if (addressFileMiddle.toString() != "" && noteFileMiddle.toString() != "") {
+            Log.i(DEBUG_TAG, "Writing Addresses and Notes to File")
             return Pair(addressFileToWrite.toString(), noteFileToWrite.toString())
         } else if (addressFileMiddle.toString() == "" && noteFileMiddle.toString() != "") {
+            Log.i(DEBUG_TAG, "Writing Notes to File")
             return Pair("", noteFileToWrite.toString())
         } else {
+            Log.i(DEBUG_TAG, "Writing Nothing to File")
             return Pair("", "")
         }
     }
@@ -239,6 +240,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS ${TABLE_NAME}")
         onCreate(db)
+    }
+
+    fun clearDatabase() {
+        val db: SQLiteDatabase = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_NAME")
     }
 
     // Adds housenumber to database once it is created.

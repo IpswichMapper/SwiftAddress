@@ -2,4 +2,14 @@
 <resources>
     <color name="button_colors">#FFFFFFFF</color>
     <color name="background_color">#FF000000</color>
+
+    <color name="B1_R0">#ffff00</color>
+    <color name="B2_R0">#00ffff</color>
+    <color name="B3_R0">#00ff00</color>
+    <color name="B1_R1">#ff00ff</color>
+    <color name="B2_R1">#ff0000</color>
+    <color name="B3_R1">#ff7f50</color>
+
+    <color name="street_name_previous">#00ff00</color>
+    <color name="street_name_new">#ff0000</color>
 </resources>

@@ -3,6 +3,7 @@ package com.mapitall.SwiftAddress
 import android.annotation.SuppressLint
 import android.app.ActionBar
 import android.content.Intent
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import layout.AddressNodes
 import org.apache.commons.lang3.StringUtils
@@ -67,15 +69,31 @@ class Keypad : AppCompatActivity(),
         } else {
             Log.i(DEBUG_TAG, "No internet connection available. Street name " +
                     "now equals lastAddress street name.")
+            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+
             if (lastAddress != null) {
                 street = lastAddress.street
 
-                val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+
                 if (street.length < 18) {
                     streetNameTextView.text = street
                 } else {
                     streetNameTextView.text = "${street.subSequence(0, 15)}..."
                 }
+
+                // If the current street name is the same as the previous one,
+                // the color of the street name text becomes green.
+                // Otherwise it becomes red.
+                if (street == lastAddress.street) {
+                    streetNameTextView.setTextColor(
+                        ContextCompat.getColor(this, R.color.street_name_previous))
+                } else {
+                    streetNameTextView.setTextColor(
+                        ContextCompat.getColor(this, R.color.street_name_new))
+                }
+            } else {
+                streetNameTextView.setTextColor(
+                    ContextCompat.getColor(this, R.color.button_colors))
             }
         }
 
@@ -536,27 +554,20 @@ class Keypad : AppCompatActivity(),
                     "https://nominatim.openstreetmap.org/reverse?format=xml&lat=$lat&lon=$lon")
             val result = nominatimReverseGeocode.readText()
             Log.i("result:", result)
+            var sameAsLastAddress = false
             val streetName: String
+            val lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
+
             try {
                 streetName = StringUtils.substringBetween(result, "<road>", "</road>")
                 street = streetName
                 Log.i("street name: ", streetName)
 
             } catch (e: NullPointerException) {
-                val lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
-                Log.i(DEBUG_TAG, "nullPointerException when trying to geocode street.")
 
+                Log.i(DEBUG_TAG, "nullPointerException when trying to geocode street.")
                 if (lastAddress != null) {
                     street = lastAddress.street
-
-                    val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
-                    runOnUiThread {
-                        if (street.length < 18) {
-                            streetNameTextView.text = street
-                        } else {
-                            streetNameTextView.text = "${street.subSequence(0, 15)}..."
-                        }
-                    }
                 } else {
                     street = ""
                 }
@@ -565,11 +576,25 @@ class Keypad : AppCompatActivity(),
             runOnUiThread {
                 val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
                 if (street.length < 18) {
-                    Log.i("stgert", "in if statement")
                     streetNameTextView.text = street
                 } else {
-                    Log.i("in else statement", street.subSequence(0, 15) as String)
                     streetNameTextView.text = "${street.subSequence(0, 15) as String}..."
+                }
+
+                // If the current street name is the same as the previous one,
+                // the color of the street name text becomes green.
+                // Otherwise it becomes red.
+                if (lastAddress != null) {
+                    if (street == lastAddress.street) {
+                        streetNameTextView.setTextColor(
+                            ContextCompat.getColor(this, R.color.street_name_previous))
+                    } else {
+                        streetNameTextView.setTextColor(
+                            ContextCompat.getColor(this, R.color.street_name_new))
+                    }
+                } else {
+                    streetNameTextView.setTextColor(
+                        ContextCompat.getColor(this, R.color.button_colors))
                 }
             }
         }.start()
@@ -645,6 +670,20 @@ class Keypad : AppCompatActivity(),
             } else {
                 val buildingLevelsValue = findViewById<TextView>(R.id.building_levels_value)
                 buildingLevelsValue.text = swipeDownText
+                when (swipeDownText) {
+                    "B1 R0" -> buildingLevelsValue.setTextColor(
+                        ContextCompat.getColor(this, R.color.B1_R0))
+                    "B2 R0" -> buildingLevelsValue.setTextColor(
+                        ContextCompat.getColor(this, R.color.B2_R0))
+                    "B3 R0" -> buildingLevelsValue.setTextColor(
+                        ContextCompat.getColor(this, R.color.B3_R0))
+                    "B1 R1" -> buildingLevelsValue.setTextColor(
+                        ContextCompat.getColor(this, R.color.B1_R1))
+                    "B2 R1" -> buildingLevelsValue.setTextColor(
+                        ContextCompat.getColor(this, R.color.B2_R1))
+                    "B3 R1" -> buildingLevelsValue.setTextColor(
+                        ContextCompat.getColor(this, R.color.B3_R1))
+                }
             }
         } else {
             Log.e("addNum()", "failed, onFlingDetected=$onFlingDetected")

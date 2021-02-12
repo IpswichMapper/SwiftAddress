@@ -9,4 +9,14 @@
     <color name="white">#FFFFFFFF</color>
     <color name="button_colors">#FF000000</color>
     <color name="background_color">#FFFFFFFF</color>
+
+    <color name="B1_R0">#ff0000</color>
+    <color name="B2_R0">#c9b003</color>
+    <color name="B3_R0">#800080</color>
+    <color name="B1_R1">#50851e</color>
+    <color name="B2_R1">#0000ff</color>
+    <color name="B3_R1">#40E0D0</color>
+
+    <color name="street_name_previous">#50851e</color>
+    <color name="street_name_new">#ff0000</color>
 </resources>

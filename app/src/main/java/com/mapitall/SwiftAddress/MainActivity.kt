@@ -561,11 +561,8 @@ class MainActivity : AppCompatActivity(),
                 val provider = zoomInManager.getBestProvider(criteria, false)
                 val location = zoomInManager.getLastKnownLocation(provider!!)
 
+                Log.i(DEBUG_TAG, location!!.latitude.toString())
                 if (map.zoomLevelDouble < 17) {
-                    Log.i(
-                            DEBUG_TAG,
-                            "in the IF statement: ${map.zoomLevel}, ${map.zoomLevelDouble}"
-                    )
                     map.controller.zoomTo(17.0)
                 }
                 map.controller.animateTo(GeoPoint(location!!.latitude, location.longitude))

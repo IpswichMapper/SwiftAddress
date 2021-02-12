@@ -21,3 +21,11 @@ This application is designed to be able to efficiently collect housenumbers for 
 * addr:interpolation
 
 And probably a few more features I haven't listed here
+
+## Images
+
+Most icons are provided by Google Material Icons, which are under Apache License.
+
+The icon for an address and note on the map is provided by streetcomplete, and they are licensed under CC-BY-SA.
+
+The icon for an image on the map (camera.xml) is provided by [Elegant Themes]( 	http://www.elegantthemes.com/blog/freebie-of-the-week/beautiful-flat-icons-for-free), however the camera icon was found on [Wikipedia](https://en.m.wikipedia.org/wiki/File:Circle-icons-camera.svg). The license of this camera icon is GNU GPL Version 2.

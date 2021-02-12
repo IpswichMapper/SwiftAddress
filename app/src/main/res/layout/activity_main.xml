@@ -59,7 +59,7 @@
             android:layout_weight="1"
             android:backgroundTint="@android:color/darker_gray"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/background_imagery" />
+            app:srcCompat="@drawable/map" />
 
         <ImageButton
             android:id="@+id/undo_button"

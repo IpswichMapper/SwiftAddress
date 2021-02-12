@@ -3,20 +3,16 @@ package com.mapitall.SwiftAddress
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
-import androidx.exifinterface.media.ExifInterface
 import android.os.*
-import android.provider.ContactsContract
 import android.provider.MediaStore
-import androidx.preference.PreferenceManager
 import android.util.Log
 import android.view.*
 import android.view.Gravity.CENTER
@@ -26,17 +22,18 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.checkSelfPermission
-
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.GestureDetectorCompat
+import androidx.exifinterface.media.ExifInterface
+import androidx.preference.PreferenceManager
 import com.mancj.slideup.SlideUp
 import com.mancj.slideup.SlideUpBuilder
 import layout.AddressNodes
 import layout.StoreHouseNumbers
-
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -48,8 +45,6 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
-import java.net.URI
-import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.ZipEntry
@@ -72,8 +67,10 @@ class MainActivity : AppCompatActivity(),
     private var flingUpDetected = false
     private var longPressDetected = false
     private lateinit var slideUp: SlideUp
+    private val instandepic = this
 
     @SuppressLint("ClickableViewAccessibility")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -253,9 +250,11 @@ class MainActivity : AppCompatActivity(),
                     button1.tag = "left"; button2.tag = "left"; button3.tag = "left"
                     button4.tag = "left"; button5.tag = "left"; button6.tag = "left"
                     slideUp.show()
+                } else {
+                    Toast.makeText(this, getString(R.string.add_address_first),
+                            Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(this, getString(R.string.add_address_first), Toast.LENGTH_SHORT)
                 noOnTouchActions = true
             }
 
@@ -310,6 +309,9 @@ class MainActivity : AppCompatActivity(),
                 addHousenumberMarker(addressToChange)
 
                 map.invalidate()
+            } else {
+                Toast.makeText(this, getString(R.string.add_address_first),
+                        Toast.LENGTH_SHORT).show()
             }
             return@setOnLongClickListener true
         }
@@ -460,6 +462,9 @@ class MainActivity : AppCompatActivity(),
                     slideUp.show()
 
 
+                } else {
+                    Toast.makeText(this, getString(R.string.add_address_first),
+                            Toast.LENGTH_SHORT).show()
                 }
             } else {
                 noOnTouchActions = true
@@ -518,6 +523,9 @@ class MainActivity : AppCompatActivity(),
                 addHousenumberMarker(addressToChange)
 
                 map.invalidate()
+            } else {
+                Toast.makeText(this, getString(R.string.add_address_first),
+                        Toast.LENGTH_SHORT).show()
             }
             return@setOnLongClickListener true
 
@@ -617,11 +625,8 @@ class MainActivity : AppCompatActivity(),
         for (marker: Marker in markerList) {
             map.overlays.add(marker)
         }
-
-        val factory = LayoutInflater.from(this)
-
-
     }
+
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
 
@@ -728,25 +733,25 @@ class MainActivity : AppCompatActivity(),
         // Save image to internal storage
         else if (requestCode == 4 && resultCode == RESULT_OK) {
             try {
-                val exif = ExifInterface(File(currentImagePath))
+                val exif = ExifInterface(File(currentImagePath!!))
                 Log.i(DEBUG_TAG, "filePath: $currentImagePath")
 
-                var longitude = map.mapCenter.longitude
-                longitude = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
-                var trueLon = longitude.toInt().toString() + "/1," // 105/1,
-                longitude = (longitude % 1) * 60 // .987654321 * 60 = 59.259258
-                trueLon = trueLon + longitude.toInt().toString() + "/1," // 105/1,59/1,
-                longitude = (longitude % 1) * 60000 // .259258 * 6000 = 1555
-                trueLon = trueLon + longitude.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
-
-                var latitude = map.mapCenter.latitude
+                val latitude = map.mapCenter.latitude
                 Log.i("lat", "$latitude")
-                latitude = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
-                var trueLat = latitude.toInt().toString() + "/1," // 105/1,
-                latitude = (latitude % 1) * 60 // .987654321 * 60 = 59.259258
-                trueLat = trueLat + latitude.toInt().toString() + "/1," // 105/1,59/1,
-                latitude = (latitude % 1) * 60000 // .259258 * 6000 = 1555
-                trueLat = trueLat + latitude.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
+                val latitudeHours = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
+                var trueLat = latitudeHours.toInt().toString() + "/1," // 105/1,
+                val latitudeMinutes = (latitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
+                trueLat = trueLat + latitudeMinutes.toInt().toString() + "/1," // 105/1,59/1,
+                val latitudeSeconds = (latitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
+                trueLat = trueLat + latitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
+
+                val longitude = map.mapCenter.longitude
+                val longitudeHours = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
+                var trueLon = longitudeHours.toInt().toString() + "/1," // 105/1,
+                val longitudeMinutes = (longitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
+                trueLon = trueLon + longitudeMinutes.toInt().toString() + "/1," // 105/1,59/1,
+                val longitudeSeconds = (longitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
+                trueLon = trueLon + longitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/100
 
                 Log.i(DEBUG_TAG, "lat: $latitude, lon: $longitude")
                 Log.i(DEBUG_TAG, "trueLat: $trueLat, trueLong: $trueLon")
@@ -770,27 +775,42 @@ class MainActivity : AppCompatActivity(),
                 Log.i("exif longituderef",
                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
 
+                markerList.add(Marker(map))
+
+                markerList.last().position = GeoPoint(latitude, longitude)
+                markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.camera)
+                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                // TODO : Show image when marker is clicked.
+                map.overlays.add(markerList.last())
+                Log.i(DEBUG_TAG, "Image Marker Added to Map")
+
+                storeHouseNumbersObject.addImage(currentImagePath!!, latitude, longitude)
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
         } else if (requestCode == 5 && resultCode == RESULT_OK) {
 
+            Log.i(DEBUG_TAG, "attempting to store zip file.")
 
             storeHouseNumbersObject.writeToOsmFile()
+
+            Log.i(DEBUG_TAG, "Addresses and Notes written to XML file in internal storage.")
 
             try {
                 // create zip file, delete app internal storage, store zip file to chosen location.
                 zipFilesAndDelete(data?.data!!)
-
+                Log.i(DEBUG_TAG, "Data has been zipped and stored")
                 // clear database
                 storeHouseNumbersObject.clearDatabase()
-
+                Log.i(DEBUG_TAG, "Database cleared.")
                 // clear markers
                 for (marker: Marker in markerList) {
                     map.overlays.remove(marker)
                     map.invalidate()
                 }
+                Log.i(DEBUG_TAG, "Database cleared and markers have been removed.")
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -825,10 +845,11 @@ class MainActivity : AppCompatActivity(),
                 fileInputStream.close()
             }
             zipOutputStream.close()
-
+            Log.i(DEBUG_TAG, "zipFilesAndDelete: files zipped")
             for (file in surveyFiles) {
                 file.delete()
             }
+            Log.i(DEBUG_TAG, "zipFilesAndDelete: files deleted")
 
         }
     }
@@ -869,19 +890,38 @@ class MainActivity : AppCompatActivity(),
             //"mapbox_satellite" -> map.setTileSource(mapbox_satellite)
             "public_transport_map" -> map.setTileSource(publicTransportMap)
         }
+
     }
 
     // If undo button is pressed
     fun undo(view: View) {
-        if (markerList.isNotEmpty()) {
-            map.overlays.remove(markerList.last())
-            map.invalidate()
-            markerList.removeLast()
+        if (markerList.isNotEmpty() ) {
+            if (storeHouseNumbersObject.lastItemType() == "Image") {
+                Log.i(DEBUG_TAG, "Last Item was an image.")
+                val deleteFileDialog = AlertDialog.Builder(this)
 
-            // Remove item from database
-            storeHouseNumbersObject.undo()
+                deleteFileDialog.setPositiveButton(getString(R.string.delete)) { _, _ ->
+                    storeHouseNumbersObject.undo(true)
+                    map.overlays.remove(markerList.last())
+                    map.invalidate()
+                    markerList.removeLast()
+                }
+
+                deleteFileDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+                deleteFileDialog.setTitle(getString(R.string.delete_image))
+                deleteFileDialog.setMessage(getString(R.string.delete_image_question))
+                deleteFileDialog.create().show()
+            } else {
+                storeHouseNumbersObject.undo(false)
+                map.overlays.remove(markerList.last())
+                map.invalidate()
+                markerList.removeLast()
+            }
+
+
         }
     }
+
 
     // add a housenumber marker to the map.
     private fun addHousenumberMarker(address: AddressNodes) {
@@ -1353,4 +1393,6 @@ class MainActivity : AppCompatActivity(),
                     Toast.LENGTH_SHORT).show()
         }
     }
+
+
 }

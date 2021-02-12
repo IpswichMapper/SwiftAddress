@@ -47,4 +47,7 @@
     <string name="save_data">Save</string>
     <string name="share_data">Share</string>
     <string name="save_data_question">Are you sure you want to save?</string>
+    <string name="delete">Delete</string>
+    <string name="delete_image">Delete Image</string>
+    <string name="delete_image_question">Are you sure you want to delete an image?</string>
 </resources>

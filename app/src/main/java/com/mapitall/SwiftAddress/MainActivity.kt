@@ -794,24 +794,44 @@ class MainActivity : AppCompatActivity(),
             storeHouseNumbersObject.writeToOsmFile()
 
             Log.i(DEBUG_TAG, "Addresses and Notes written to XML file in internal storage.")
+            val savingFilesDialog = AlertDialog.Builder(this)
+            savingFilesDialog.setTitle(getString(R.string.saving_files))
+            savingFilesDialog.setMessage("Please wait...")
+            savingFilesDialog.setCancelable(false)
+            val dialog = savingFilesDialog.create()
 
-            try {
-                // create zip file, delete app internal storage, store zip file to chosen location.
-                zipFilesAndDelete(data?.data!!)
-                Log.i(DEBUG_TAG, "Data has been zipped and stored")
-                // clear database
-                storeHouseNumbersObject.clearDatabase()
-                Log.i(DEBUG_TAG, "Database cleared.")
-                // clear markers
-                for (marker: Marker in markerList) {
-                    map.overlays.remove(marker)
-                    map.invalidate()
+            Thread {
+
+                try {
+                    runOnUiThread {
+                        dialog.show()
+                    }
+                    // create zip file, delete app internal storage, store zip file to chosen location.
+                    zipFilesAndDelete(data?.data!!)
+                    Log.i(DEBUG_TAG, "Data has been zipped and stored")
+                    // clear database
+                    storeHouseNumbersObject.clearDatabase()
+                    Log.i(DEBUG_TAG, "Database cleared.")
+                    // clear markers
+                    for (marker: Marker in markerList) {
+                        map.overlays.remove(marker)
+                        map.invalidate()
+                    }
+                    Log.i(DEBUG_TAG, "Database cleared and markers have been removed.")
+                    runOnUiThread {
+                        dialog.dismiss()
+                    }
+                    Log.i(DEBUG_TAG, "Dialog dismissed")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this,
+                            getString(R.string.failed_save), Toast.LENGTH_SHORT).show()
+                    runOnUiThread {
+                        dialog.dismiss()
+                    }
+                    Log.i(DEBUG_TAG, "Dialog dismissed")
                 }
-                Log.i(DEBUG_TAG, "Database cleared and markers have been removed.")
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            }.start()
         }
 
     }

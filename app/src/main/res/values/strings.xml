@@ -1,4 +1,8 @@
 <resources>
+    <!-- This shouldn't be translated -->
+    <string name="preference_string">SwiftAddressPreferences</string>
+
+    <!-- All of this should be translated-->
     <string name="app_name">SwiftAddress</string>
     <string name="num1">1</string>
     <string name="num2">2</string>
@@ -29,7 +33,6 @@
     <string name="remember_change_street_name">Remember to change the Street Name every time you move to a new street.</string>
     <string name="change_street_name_button">Change Street name</string>
     <string name="give_storage_permission">Please grant storage permissions first.</string>
-    <string name="saved_to_folder">Data saved in \'SwiftAddress\' folder.</string>
     <string name="change_increment">Change Increment</string>
     <string name="increment_not_integer">Increment given wasn\'t an integer.</string>
     <string name="increment_explanation">Change the default increment used when long pressing on an arrow. For example, if your increment is 2, and the last housenumber on the left side you added was \'24\', then long pressing the left arrow will add \'26\' because that is 2 higher than the previous number.</string>
@@ -40,9 +43,6 @@
     <string name="left_side">LEFT SIDE</string>
     <string name="right_side">RIGHT SIDE</string>
     <string name="add_address_first">Please add an address first</string>
-
-    <!-- This shouldn't be translated -->
-    <string name="preference_string">SwiftAddressPreferences</string>
     <string name="save_or_share_data">Do you want to share the data or save it to storage?</string>
     <string name="save">Save</string>
     <string name="share_data">Share</string>
@@ -54,4 +54,7 @@
     <string name="building_levels_question">What are the building levels of this address?</string>
     <string name="building_levels_hint">Building Levels</string>
     <string name="roof_levels_hint">Roof Levels</string>
+    <string name="saving_files">Saving Files</string>
+    <string name="failed_save">Data failed to save</string>
+
 </resources>

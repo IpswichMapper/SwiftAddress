@@ -1240,6 +1240,28 @@ class MainActivity : AppCompatActivity(),
         val buildingLevelsTextView = relativeLayout.getChildAt(1) as TextView
         val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
 
+        val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        Thread {
+            if (Build.VERSION.SDK_INT >= 26) {
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                80, VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                )
+                Thread.sleep(100)
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                80, VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(80)
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(80)
+            }
+        }.start()
+
         Log.i(DEBUG_TAG, "buildingLevels: ${buildingLevelsTextView.text}")
         val addressToChange = storeHouseNumbersObject.lastAddressEntry(
                 buildingLevelsButton.tag.toString()

@@ -991,7 +991,10 @@ class MainActivity : AppCompatActivity(),
 
         addNoteBuilder.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
 
-        addNoteBuilder.create().show()
+        val dialog = addNoteBuilder.create()
+        dialog.show()
+        note.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 
     }
 
@@ -1005,7 +1008,7 @@ class MainActivity : AppCompatActivity(),
 
         saveDataDialogue.setNeutralButton("Cancel") { _, _ -> }
 
-        saveDataDialogue.setPositiveButton(getString(R.string.save_data)) { _, _ ->
+        saveDataDialogue.setPositiveButton(getString(R.string.save)) { _, _ ->
 
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)

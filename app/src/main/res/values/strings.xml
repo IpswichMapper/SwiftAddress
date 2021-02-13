@@ -44,10 +44,14 @@
     <!-- This shouldn't be translated -->
     <string name="preference_string">SwiftAddressPreferences</string>
     <string name="save_or_share_data">Do you want to share the data or save it to storage?</string>
-    <string name="save_data">Save</string>
+    <string name="save">Save</string>
     <string name="share_data">Share</string>
     <string name="save_data_question">Are you sure you want to save?</string>
     <string name="delete">Delete</string>
     <string name="delete_image">Delete Image</string>
     <string name="delete_image_question">Are you sure you want to delete an image?</string>
+    <string name="modify_building_levels">Modify Building Levels</string>
+    <string name="building_levels_question">What are the building levels of this address?</string>
+    <string name="building_levels_hint">Building Levels</string>
+    <string name="roof_levels_hint">Roof Levels</string>
 </resources>

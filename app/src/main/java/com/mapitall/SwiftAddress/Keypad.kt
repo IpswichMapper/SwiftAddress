@@ -3,7 +3,6 @@ package com.mapitall.SwiftAddress
 import android.annotation.SuppressLint
 import android.app.ActionBar
 import android.content.Intent
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import layout.AddressNodes
 import org.apache.commons.lang3.StringUtils
+import java.lang.Exception
 import kotlin.math.abs
 import java.net.URL
 
@@ -603,9 +603,65 @@ class Keypad : AppCompatActivity(),
 
     // Change the building levels of this address
     private fun modBuildLevels() {
-        // TODO : Implement
-        Toast.makeText(this, getString(R.string.unimplemented),
-                Toast.LENGTH_SHORT).show()
+
+        val modifyBuildLevelsDialog = AlertDialog.Builder(this)
+
+        modifyBuildLevelsDialog.setTitle(getString(R.string.modify_building_levels))
+        modifyBuildLevelsDialog.setMessage(getString(R.string.building_levels_question))
+
+        var buildingLevelsValue : String
+        var roofLevelsValue : String
+        val buildingLevelsInput = EditText(this)
+        val roofLevelsInput = EditText(this)
+
+        buildingLevelsInput.hint = getString(R.string.building_levels_hint)
+        roofLevelsInput.hint = getString(R.string.roof_levels_hint)
+
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+            MATCH_PARENT, WRAP_CONTENT
+        )
+
+        val linearLayout = LinearLayout(this)
+        linearLayout.orientation = LinearLayout.VERTICAL
+
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        linearLayout.layoutParams = params
+
+        linearLayout.addView(buildingLevelsInput)
+        linearLayout.addView(roofLevelsInput)
+        container.addView(linearLayout)
+        modifyBuildLevelsDialog.setView(container)
+        
+        modifyBuildLevelsDialog.setPositiveButton(getString(R.string.save)) { _, _ ->
+
+            try {
+                buildingLevelsValue = buildingLevelsInput.text.toString()
+                try {
+                    roofLevelsValue = roofLevelsInput.text.toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    roofLevelsValue = "0"
+                }
+                buildingLevels = "B$buildingLevelsValue R$roofLevelsValue"
+            } catch (e : Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Please enter a number", Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        }
+        modifyBuildLevelsDialog.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
+
+
+
+        val dialog = modifyBuildLevelsDialog.create()
+        dialog.show()
+        buildingLevelsInput.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
     }
 
     // Change the street name corresponding to this address.
@@ -645,7 +701,10 @@ class Keypad : AppCompatActivity(),
             street = streetNameValue
         }
         changeStreetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
-        changeStreetDialogue.create().show()
+        val dialog = changeStreetDialogue.create()
+        dialog.show()
+        streetNameInput.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
     }
 
     // Adds value of number pressed to textbox.

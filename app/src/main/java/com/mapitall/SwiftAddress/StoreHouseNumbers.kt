@@ -10,6 +10,7 @@ import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.mapitall.SwiftAddress.MarkerWindow
 import com.mapitall.SwiftAddress.R
 import kotlinx.android.parcel.Parcelize
 import org.osmdroid.util.GeoPoint
@@ -343,6 +344,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.address)
                 markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 markerList.last().title = housenumber
+                val infoWindow = MarkerWindow(
+                        R.layout.address_press_layout_linear,
+                        map,
+                        context)
+                markerList.last().infoWindow = infoWindow
                 Log.i(DEBUG_TAG, "Address Marker added")
 
             } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Note") {

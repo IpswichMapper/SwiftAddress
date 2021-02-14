@@ -48,6 +48,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:backgroundTint="@android:color/darker_gray"
+            android:onClick="captureAudio"
             android:scaleType="fitCenter"
             android:tint="@color/black"
             app:srcCompat="@drawable/microphone" />

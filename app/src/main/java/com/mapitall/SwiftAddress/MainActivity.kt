@@ -9,6 +9,7 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
 import android.location.Criteria
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.*
@@ -23,6 +24,7 @@ import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.checkSelfPermission
 import androidx.core.content.ContextCompat
@@ -42,11 +44,13 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
+import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.jar.Manifest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.math.abs
@@ -54,20 +58,21 @@ import kotlin.math.abs
 class MainActivity : AppCompatActivity(),
     MapEventsReceiver,
     GestureDetector.OnGestureListener,
-    PopupMenu.OnMenuItemClickListener {
+    PopupMenu.OnMenuItemClickListener, LocationListener {
 
     private var currentImagePath: String? = null
+    private var currentAudioPath: String? = null
     private var DEBUG_TAG = "MainActivity"
 
     private lateinit var map: MapView
     private var markerList: MutableList<Marker> = mutableListOf()
+    private lateinit var locationOverlay : MyLocationNewOverlay
     private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
     private var increment = 2
     private var noOnTouchActions = true
     private var flingUpDetected = false
     private var longPressDetected = false
     private lateinit var slideUp: SlideUp
-    private val instandepic = this
 
     @SuppressLint("ClickableViewAccessibility")
 
@@ -603,7 +608,7 @@ class MainActivity : AppCompatActivity(),
         supportActionBar?.hide()
 
         // Shows current location
-        val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map)
+        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map)
         locationOverlay.enableMyLocation()
         map.overlays.add(locationOverlay)
 
@@ -624,6 +629,12 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onLocationChanged(location: Location) {
+        map.overlays.remove(locationOverlay)
+        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map)
+        locationOverlay.enableMyLocation()
+        map.overlays.add(locationOverlay)
+    }
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
 
@@ -778,6 +789,7 @@ class MainActivity : AppCompatActivity(),
                 markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.camera)
                 markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 // TODO : Show image when marker is clicked.
+
                 map.overlays.add(markerList.last())
                 Log.i(DEBUG_TAG, "Image Marker Added to Map")
 
@@ -817,6 +829,9 @@ class MainActivity : AppCompatActivity(),
                         map.overlays.remove(marker)
                         map.invalidate()
                     }
+                    runOnUiThread {
+                        InfoWindow.closeAllInfoWindowsOn(map)
+                    }
                     Log.i(DEBUG_TAG, "Database cleared and markers have been removed.")
                     runOnUiThread {
                         dialog.dismiss()
@@ -832,6 +847,65 @@ class MainActivity : AppCompatActivity(),
                     Log.i(DEBUG_TAG, "Dialog dismissed")
                 }
             }.start()
+        } else if (requestCode == 6 && resultCode == RESULT_OK) {
+            try {
+                val exif = ExifInterface(File(currentAudioPath!!))
+                Log.i(DEBUG_TAG, "filePath: $currentAudioPath")
+
+                val latitude = map.mapCenter.latitude
+                Log.i("lat", "$latitude")
+                val latitudeHours = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
+                var trueLat = latitudeHours.toInt().toString() + "/1," // 105/1,
+                val latitudeMinutes = (latitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
+                trueLat = trueLat + latitudeMinutes.toInt().toString() + "/1," // 105/1,59/1,
+                val latitudeSeconds = (latitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
+                trueLat = trueLat + latitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
+
+                val longitude = map.mapCenter.longitude
+                val longitudeHours = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
+                var trueLon = longitudeHours.toInt().toString() + "/1," // 105/1,
+                val longitudeMinutes = (longitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
+                trueLon = trueLon + longitudeMinutes.toInt().toString() + "/1," // 105/1,59/1,
+                val longitudeSeconds = (longitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
+                trueLon = trueLon + longitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/100
+
+                Log.i(DEBUG_TAG, "lat: $latitude, lon: $longitude")
+                Log.i(DEBUG_TAG, "trueLat: $trueLat, trueLong: $trueLon")
+
+                exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, trueLat)
+                exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, trueLon)
+                exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF,
+                        if (latitude > 0) "N" else "S")
+                exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF,
+                        if (longitude > 0) "E" else "W")
+
+
+                exif.saveAttributes()
+
+                Log.i("exif latitude",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE).toString())
+                Log.i("exif longitude",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE).toString())
+                Log.i("Exif latituderef",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF).toString())
+                Log.i("exif longituderef",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
+
+                markerList.add(Marker(map))
+
+                markerList.last().position = GeoPoint(latitude, longitude)
+                markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.audio)
+                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                // TODO : Show image when marker is clicked.
+                map.overlays.add(markerList.last())
+                Log.i(DEBUG_TAG, "Audio Marker Added to Map")
+
+                storeHouseNumbersObject.addImage(currentAudioPath!!, latitude, longitude)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         }
 
     }
@@ -950,6 +1024,11 @@ class MainActivity : AppCompatActivity(),
         markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         markerList.last().title = address.housenumber
 
+        val infoWindow = MarkerWindow(
+                R.layout.address_press_layout_linear,
+                map,
+                this)
+        markerList.last().infoWindow = infoWindow
         map.overlays.add(markerList.last())
         Log.i("map", "housenumber marker added")
     }
@@ -1018,6 +1097,9 @@ class MainActivity : AppCompatActivity(),
 
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+   }
 
     // Save all the data collected to an .osm file, clear markers
     fun saveData(view: View) {
@@ -1390,51 +1472,31 @@ class MainActivity : AppCompatActivity(),
 
     fun takePhoto(view: View) {
 
-        var isExternalStorageReadOnly: Boolean = false
-        val extStorageState = Environment.getExternalStorageState()
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
-            isExternalStorageReadOnly = true
-        }
-        Log.i("ExtStorageReadOnly", "$isExternalStorageReadOnly")
-        var isExternalStorageAvailable: Boolean = false
-        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
-            isExternalStorageAvailable = true
-        }
+        val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
+        val fileName = "image-$current.jpg"
 
-        if (isExternalStorageAvailable && !isExternalStorageReadOnly) {
-            val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
-            val fileName = "image-$current.jpg"
-/*
-            val folderPath = Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator + "SwiftAddress" + File.separator
+        val imageFile = File(getExternalFilesDir(null), fileName)
+        currentImagePath = imageFile.absolutePath
 
-            if (!File(folderPath).exists()) {
-                File(folderPath).mkdir()
-            }
+        Log.i(DEBUG_TAG, "filePath: ${getExternalFilesDir(null)!!.absolutePath + fileName}")
+        Log.i(DEBUG_TAG, "filePath: $currentImagePath")
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (cameraIntent.resolveActivity(packageManager) != null) {
 
- */
-            val imageFile = File(getExternalFilesDir(null), fileName)
-            currentImagePath = imageFile.absolutePath
-
-            Log.i(DEBUG_TAG, "filePath: ${getExternalFilesDir(null)!!.absolutePath + fileName}")
-            Log.i(DEBUG_TAG, "filePath: $currentImagePath")
-            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            if (cameraIntent.resolveActivity(packageManager) != null) {
-
-                val imageURI : Uri = FileProvider.getUriForFile(this,
+            val imageURI : Uri = FileProvider.getUriForFile(this,
                     "com.mapitall.SwiftAddress.provider",
                     imageFile
-                    )
-                Log.i(DEBUG_TAG, "URI filePath: $imageURI")
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
-                startActivityForResult(cameraIntent, 4)
-                }
-            }
-        else {
-            Toast.makeText(this, R.string.give_storage_permission,
-                    Toast.LENGTH_SHORT).show()
+            )
+            Log.i(DEBUG_TAG, "URI filePath: $imageURI")
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
+            startActivityForResult(cameraIntent, 4)
         }
     }
 
+    fun captureAudio(view: View) {
+
+        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT)
+
+    }
 
 }

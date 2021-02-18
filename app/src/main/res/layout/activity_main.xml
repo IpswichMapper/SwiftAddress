@@ -43,17 +43,6 @@
             app:srcCompat="@drawable/add_photo" />
 
         <ImageButton
-            android:id="@+id/record_audio_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:onClick="captureAudio"
-            android:scaleType="fitCenter"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/microphone" />
-
-        <ImageButton
             android:id="@+id/change_background_imagery_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

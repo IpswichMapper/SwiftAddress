@@ -1,6 +1,10 @@
 # SwiftAddress
 
-This application is designed to be able to efficiently collect housenumbers for OSM. It is still a work in progress. 
+**WARNING: If you decide to take surveys with this app, please, please test if it works first. Either take a small survey (e.g. a 10 minute one) and open the files in JOSM and check that everything works, or simply add some fake addresses, notes and images and see if you can open this data in JOSM. You could lose data if you don't test that this application works.**
+
+This application is designed to be able to efficiently collect housenumbers for OSM. 
+
+**It is still a work in progress**. 
 
 ## Missing features
 

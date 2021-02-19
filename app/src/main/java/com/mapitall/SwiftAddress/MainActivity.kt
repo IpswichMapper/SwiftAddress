@@ -7,11 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.media.Image
 import android.net.Uri
+import android.net.sip.SipSession
 import android.os.*
 import android.provider.MediaStore
 import android.util.Log
@@ -22,25 +25,30 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.checkSelfPermission
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.exifinterface.media.ExifInterface
-import androidx.preference.PreferenceManager
+import com.google.android.material.internal.NavigationMenu
+import com.google.android.material.navigation.NavigationView
 import com.mancj.slideup.SlideUp
 import com.mancj.slideup.SlideUpBuilder
 import layout.AddressNodes
 import layout.StoreHouseNumbers
-import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
@@ -50,24 +58,25 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.jar.Manifest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(),
-    MapEventsReceiver,
-    GestureDetector.OnGestureListener,
-    PopupMenu.OnMenuItemClickListener, LocationListener {
+        MapEventsReceiver,
+        GestureDetector.OnGestureListener,
+        PopupMenu.OnMenuItemClickListener,
+        LocationListener {
 
     private var currentImagePath: String? = null
     private var currentAudioPath: String? = null
-    private var DEBUG_TAG = "MainActivity"
+    private var TAG = "MainActivity"
 
-    private lateinit var map: MapView
+    private lateinit var map : Map
     private var markerList: MutableList<Marker> = mutableListOf()
+
     private lateinit var locationOverlay : MyLocationNewOverlay
-    private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
+    private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this, this)
     private var increment = 2
     private var noOnTouchActions = true
     private var flingUpDetected = false
@@ -81,27 +90,19 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
 
         // set map details
+        map = Map(findViewById(R.id.map), this, this)
 
         val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
         increment = sharedPreferences.getInt("increment", 2)
-        val ctx: Context = applicationContext
-        Configuration.getInstance().load(
-                ctx,
-                PreferenceManager.getDefaultSharedPreferences(ctx)
-        )
 
-        map = findViewById(R.id.map)
-        map.setTileSource(TileSourceFactory.MAPNIK)
 
-        val eventsOverlay = MapEventsOverlay(this)
-        map.overlays.add(0, eventsOverlay)
 
-        val mapController = map.controller
+        // zoom to current location when app starts.
+        val mapController = map.mapView.controller
         mapController.setZoom(3.0)
 
-        val gestureDetector = GestureDetectorCompat(this, this)
-
-        // Zoom to current position when the app starts.
+        val eventsOverlay = MapEventsOverlay(this)
+        map.mapView.overlays.add(0, eventsOverlay)
         try {
             val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
             val criteria = Criteria()
@@ -109,14 +110,12 @@ class MainActivity : AppCompatActivity(),
             val location = locationManager.getLastKnownLocation(provider!!)
             mapController.animateTo(GeoPoint(location!!.latitude, location.longitude))
             mapController.zoomTo(17, null)
-            Log.i(DEBUG_TAG, "zoomed to location")
+            Log.i(TAG, "zoomed to location")
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        val gestureDetector = GestureDetectorCompat(this, this)
 
-        // Ask for user permissions
-        // TODO: improve this code so that it asks for external storage permission again
-        //  if the user denied.
         if (checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED ||
                 checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
         ) {
@@ -141,7 +140,7 @@ class MainActivity : AppCompatActivity(),
                 .build()
 
         leftArrow.setOnTouchListener { _, event ->
-            Log.i(DEBUG_TAG, "leftArrow: onTouchListener Called")
+            Log.i(TAG, "leftArrow: onTouchListener Called")
 
             flingUpDetected = false
 
@@ -154,7 +153,7 @@ class MainActivity : AppCompatActivity(),
 
 
                 if (addressToChange != null) {
-                    Log.i(DEBUG_TAG, "flingUpDetected & address is not null")
+                    Log.i(TAG, "flingUpDetected & address is not null")
                     val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
 
                     try {
@@ -206,7 +205,7 @@ class MainActivity : AppCompatActivity(),
                             ContextCompat.getColor(this, android.R.color.darker_gray)
                     )
 
-                    Log.i(DEBUG_TAG, "buildingLevels, ${addressToChange.buildingLevels}")
+                    Log.i(TAG, "buildingLevels, ${addressToChange.buildingLevels}")
                     when (addressToChange.buildingLevels) {
                         "B1 R0" -> button1.backgroundTintList =
                                 ColorStateList.valueOf(
@@ -273,7 +272,7 @@ class MainActivity : AppCompatActivity(),
             increment = sharedPreferences.getInt("increment", 2)
 
             if (addressToChange != null) {
-                Log.i(DEBUG_TAG, "longPressDetected & address is not null")
+                Log.i(TAG, "longPressDetected & address is not null")
                 val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
 
@@ -306,14 +305,18 @@ class MainActivity : AppCompatActivity(),
                     }
                     Log.i("final text", textToSet)
                 }
-                addressToChange.latitude = map.mapCenter.latitude
-                addressToChange.longitude = map.mapCenter.longitude
+                addressToChange.latitude = map.mapView.mapCenter.latitude
+                addressToChange.longitude = map.mapView.mapCenter.longitude
                 addressToChange.buildingLevels = ""
 
-                storeHouseNumbersObject.addHouseNumber(addressToChange)
-                addHousenumberMarker(addressToChange)
+                val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
+                if (id != -1) {
+                    map.addHousenumberMarker(addressToChange, id)
+                } else {
+                    Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
+                }
 
-                map.invalidate()
+                map.mapView.invalidate()
             } else {
                 Toast.makeText(this, getString(R.string.add_address_first),
                         Toast.LENGTH_SHORT).show()
@@ -322,9 +325,9 @@ class MainActivity : AppCompatActivity(),
         }
 
         leftArrow.setOnClickListener {
-            Log.i(DEBUG_TAG, "onclickcalled")
+            Log.i(TAG, "onclickcalled")
             if (noOnTouchActions) {
-                val coordinates = map.mapCenter
+                val coordinates = map.mapView.mapCenter
                 val intent = Intent(this, Keypad::class.java)
                 intent.putExtra("lat", coordinates.latitude)
                 intent.putExtra("lon", coordinates.longitude)
@@ -359,7 +362,7 @@ class MainActivity : AppCompatActivity(),
 
 
                 if (addressToChange != null) {
-                    Log.i(DEBUG_TAG, "flingUpDetected & address is not null")
+                    Log.i(TAG, "flingUpDetected & address is not null")
                     val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
 
                     try {
@@ -385,7 +388,7 @@ class MainActivity : AppCompatActivity(),
                     val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
                     miniKeypadSide.text = getString(R.string.right_side)
                     Log.i(
-                            DEBUG_TAG,
+                            TAG,
                             "backgroundTint, ${findViewById<ImageButton>(R.id.B1R0_mini_relative).backgroundTintList}"
                     )
 
@@ -416,7 +419,7 @@ class MainActivity : AppCompatActivity(),
                     )
 
 
-                    Log.i(DEBUG_TAG, "buildingLevels, ${addressToChange.buildingLevels}")
+                    Log.i(TAG, "buildingLevels, ${addressToChange.buildingLevels}")
                     when (addressToChange.buildingLevels) {
                         "B1 R0" -> button1.backgroundTintList =
                                 ColorStateList.valueOf(
@@ -478,16 +481,16 @@ class MainActivity : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
 
-        val degreeLatitude = Location.convert(map.mapCenter.latitude, Location.FORMAT_DEGREES)
-        Log.i(DEBUG_TAG, "degreeLatitude  $degreeLatitude")
+        val degreeLatitude = Location.convert(map.mapView.mapCenter.latitude, Location.FORMAT_DEGREES)
+        Log.i(TAG, "degreeLatitude  $degreeLatitude")
 
         rightArrow.setOnLongClickListener {
             val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
-            Log.e(DEBUG_TAG, "increment; $increment")
+            Log.e(TAG, "increment; $increment")
             increment = sharedPreferences.getInt("increment", 2)
-            Log.e(DEBUG_TAG, "increment $increment")
+            Log.e(TAG, "increment $increment")
             if (addressToChange != null) {
-                Log.i(DEBUG_TAG, "longPressDetected & address is not null")
+                Log.i(TAG, "longPressDetected & address is not null")
                 val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
                 if (Build.VERSION.SDK_INT >= 26) {
@@ -501,7 +504,7 @@ class MainActivity : AppCompatActivity(),
                     vibrator.vibrate(150)
                 }
                 try {
-                    Log.e(DEBUG_TAG, "increment: $increment")
+                    Log.e(TAG, "increment: $increment")
                     var numToIncrement = addressToChange.housenumber.toInt()
                     numToIncrement += increment
                     addressToChange.housenumber = numToIncrement.toString()
@@ -520,14 +523,18 @@ class MainActivity : AppCompatActivity(),
                     }
                     Log.i("final text", textToSet)
                 }
-                addressToChange.latitude = map.mapCenter.latitude
-                addressToChange.longitude = map.mapCenter.longitude
+                addressToChange.latitude = map.mapView.mapCenter.latitude
+                addressToChange.longitude = map.mapView.mapCenter.longitude
                 addressToChange.buildingLevels = ""
 
-                storeHouseNumbersObject.addHouseNumber(addressToChange)
-                addHousenumberMarker(addressToChange)
+                val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
+                if (id != -1) {
+                    map.addHousenumberMarker(addressToChange, id)
+                } else {
+                    Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
+                }
 
-                map.invalidate()
+                map.mapView.invalidate()
             } else {
                 Toast.makeText(this, getString(R.string.add_address_first),
                         Toast.LENGTH_SHORT).show()
@@ -539,7 +546,7 @@ class MainActivity : AppCompatActivity(),
         rightArrow.setOnClickListener {
 
             if (noOnTouchActions) {
-                val coordinates = map.mapCenter
+                val coordinates = map.mapView.mapCenter
                 val intent = Intent(this, Keypad::class.java)
                 intent.putExtra("lat", coordinates.latitude)
                 intent.putExtra("lon", coordinates.longitude)
@@ -566,13 +573,13 @@ class MainActivity : AppCompatActivity(),
                 val provider = zoomInManager.getBestProvider(criteria, false)
                 val location = zoomInManager.getLastKnownLocation(provider!!)
 
-                Log.i(DEBUG_TAG, location!!.latitude.toString())
-                if (map.zoomLevelDouble < 17) {
-                    map.controller.zoomTo(17.0)
+                Log.i(TAG, location!!.latitude.toString())
+                if (map.mapView.zoomLevelDouble < 17) {
+                    map.mapView.controller.zoomTo(17.0)
                 }
-                map.controller.animateTo(GeoPoint(location!!.latitude, location.longitude))
+                map.mapView.controller.animateTo(GeoPoint(location!!.latitude, location.longitude))
 
-                Log.i(DEBUG_TAG, "zoomLevel: ${map.zoomLevelDouble}")
+                Log.i(TAG, "zoomLevel: ${map.mapView.zoomLevelDouble}")
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(
@@ -586,15 +593,15 @@ class MainActivity : AppCompatActivity(),
 
         // zoom in and out buttons.
         plusButton.setOnClickListener {
-            map.controller.zoomIn()
+            map.mapView.controller.zoomIn()
         }
         minusButton.setOnClickListener {
-            map.controller.zoomOut()
+            map.mapView.controller.zoomOut()
         }
 
         // 4th parameter is the orientation to zoom to. "0f" means north.
         northButton.setOnClickListener {
-            map.controller.animateTo(null, null, null, 0f)
+            map.mapView.controller.animateTo(null, null, null, 0f)
         }
 
         // Onclicklistener to open activity to change background imagery.
@@ -608,37 +615,56 @@ class MainActivity : AppCompatActivity(),
         supportActionBar?.hide()
 
         // Shows current location
-        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map)
+        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map.mapView)
         locationOverlay.enableMyLocation()
-        map.overlays.add(locationOverlay)
+        map.mapView.overlays.add(locationOverlay)
 
         // Allows you to pinch & zoom as well as rotate the map.
-        val rotationGestureOverlay = RotationGestureOverlay(map)
+        val rotationGestureOverlay = RotationGestureOverlay(map.mapView)
         rotationGestureOverlay.isEnabled
-        map.setMultiTouchControls(true)
-        map.overlays.add(rotationGestureOverlay)
+        map.mapView.setMultiTouchControls(true)
+        map.mapView.overlays.add(rotationGestureOverlay)
 
-        map.setBuiltInZoomControls(false)
+        // Turns off automatic zoom buttons
+        map.mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
-        // Displays all the housenumbers that have already been
-        // created but haven't been stored to an OSM file yet.
-        markerList = storeHouseNumbersObject.displayMarkers(map, markerList)
+        val navMenu = findViewById<NavigationView>(R.id.nav_menu)
 
-        for (marker: Marker in markerList) {
-            map.overlays.add(marker)
+        navMenu.setNavigationItemSelectedListener { menuItem ->
+            val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+            val itemID = menuItem.itemId
+            when(itemID) {
+                R.id.recover_data_menu_option -> {
+
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    storeHouseNumbersObject.recoverData(map)
+                }
+                R.id.save_data_menu_option -> {
+
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    saveData(findViewById(itemID))
+                }
+                R.id.upload_data_menu_option -> uploadData()
+            }
+
+            return@setNavigationItemSelectedListener true
         }
+
+    }
+
+    private fun uploadData() {
+        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
     }
 
     override fun onLocationChanged(location: Location) {
-        map.overlays.remove(locationOverlay)
-        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map)
+        map.mapView.overlays.remove(locationOverlay)
+        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map.mapView)
         locationOverlay.enableMyLocation()
-        map.overlays.add(locationOverlay)
+        map.mapView.overlays.add(locationOverlay)
     }
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
-
-        val location = map.mapCenter
+        val location = map.mapView.mapCenter
         addNote(location.latitude, location.longitude)
         return true
     }
@@ -667,12 +693,16 @@ class MainActivity : AppCompatActivity(),
 
             val bundle = data?.extras
             val addressParcel = bundle?.getParcelable<AddressNodes>("address")
-            Log.i(DEBUG_TAG, "Address Latitude: ${addressParcel!!.latitude}")
+            Log.i(TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
-                storeHouseNumbersObject.addHouseNumber(addressParcel)
-                addHousenumberMarker(addressParcel)
+                val id = storeHouseNumbersObject.addHouseNumber(addressParcel)
+                if (id != -1) {
+                    map.addHousenumberMarker(addressParcel, id)
+                } else {
+                    Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
+                }
             }
-            Log.i(DEBUG_TAG, "House number added to database.")
+            Log.i(TAG, "House number added to database.")
         }
 
         // Following if statement is for "keypad" activity if right button was pressed.
@@ -680,12 +710,16 @@ class MainActivity : AppCompatActivity(),
 
             val bundle = data?.extras
             val addressParcel = bundle?.getParcelable<AddressNodes>("address")
-            Log.i(DEBUG_TAG, "Address Latitude: ${addressParcel!!.latitude}")
+            Log.i(TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
-                storeHouseNumbersObject.addHouseNumber(addressParcel)
-                addHousenumberMarker(addressParcel)
+                val id = storeHouseNumbersObject.addHouseNumber(addressParcel)
+                if (id != -1) {
+                    map.addHousenumberMarker(addressParcel, id)
+                } else {
+                    Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
+                }
             }
-            Log.i(DEBUG_TAG, "House number added to database.")
+            Log.i(TAG, "House number added to database.")
         }
 
         /*
@@ -742,9 +776,9 @@ class MainActivity : AppCompatActivity(),
         else if (requestCode == 4 && resultCode == RESULT_OK) {
             try {
                 val exif = ExifInterface(File(currentImagePath!!))
-                Log.i(DEBUG_TAG, "filePath: $currentImagePath")
+                Log.i(TAG, "filePath: $currentImagePath")
 
-                val latitude = map.mapCenter.latitude
+                val latitude = map.mapView.mapCenter.latitude
                 Log.i("lat", "$latitude")
                 val latitudeHours = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
                 var trueLat = latitudeHours.toInt().toString() + "/1," // 105/1,
@@ -753,7 +787,7 @@ class MainActivity : AppCompatActivity(),
                 val latitudeSeconds = (latitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
                 trueLat = trueLat + latitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
 
-                val longitude = map.mapCenter.longitude
+                val longitude = map.mapView.mapCenter.longitude
                 val longitudeHours = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
                 var trueLon = longitudeHours.toInt().toString() + "/1," // 105/1,
                 val longitudeMinutes = (longitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
@@ -761,8 +795,8 @@ class MainActivity : AppCompatActivity(),
                 val longitudeSeconds = (longitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
                 trueLon = trueLon + longitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/100
 
-                Log.i(DEBUG_TAG, "lat: $latitude, lon: $longitude")
-                Log.i(DEBUG_TAG, "trueLat: $trueLat, trueLong: $trueLon")
+                Log.i(TAG, "lat: $latitude, lon: $longitude")
+                Log.i(TAG, "trueLat: $trueLat, trueLong: $trueLon")
 
                 exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, trueLat)
                 exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, trueLon)
@@ -782,7 +816,7 @@ class MainActivity : AppCompatActivity(),
                         exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF).toString())
                 Log.i("exif longituderef",
                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
-
+/*
                 markerList.add(Marker(map))
 
                 markerList.last().position = GeoPoint(latitude, longitude)
@@ -792,8 +826,16 @@ class MainActivity : AppCompatActivity(),
 
                 map.overlays.add(markerList.last())
                 Log.i(DEBUG_TAG, "Image Marker Added to Map")
+*/
+                val imageID = storeHouseNumbersObject.addImage(currentImagePath!!, latitude, longitude)
 
-                storeHouseNumbersObject.addImage(currentImagePath!!, latitude, longitude)
+                if (imageID != -1) {
+                    map.addImageMarker(imageID, latitude, longitude)
+                    Log.i(TAG, "Image Marker added to map")
+                } else {
+                    Toast.makeText(this, getString(R.string.failed_save),
+                            Toast.LENGTH_SHORT).show()
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -801,11 +843,11 @@ class MainActivity : AppCompatActivity(),
 
         } else if (requestCode == 5 && resultCode == RESULT_OK) {
 
-            Log.i(DEBUG_TAG, "attempting to store zip file.")
+            Log.i(TAG, "attempting to store zip file.")
 
             storeHouseNumbersObject.writeToOsmFile()
 
-            Log.i(DEBUG_TAG, "Addresses and Notes written to XML file in internal storage.")
+            Log.i(TAG, "Addresses and Notes written to XML file in internal storage.")
             val savingFilesDialog = AlertDialog.Builder(this)
             savingFilesDialog.setTitle(getString(R.string.saving_files))
             savingFilesDialog.setMessage("Please wait...")
@@ -820,39 +862,32 @@ class MainActivity : AppCompatActivity(),
                     }
                     // create zip file, delete app internal storage, store zip file to chosen location.
                     zipFilesAndDelete(data?.data!!)
-                    Log.i(DEBUG_TAG, "Data has been zipped and stored")
+                    Log.i(TAG, "Data has been zipped and stored")
                     // clear database
                     storeHouseNumbersObject.clearDatabase()
-                    Log.i(DEBUG_TAG, "Database cleared.")
-                    // clear markers
-                    for (marker: Marker in markerList) {
-                        map.overlays.remove(marker)
-                        map.invalidate()
-                    }
+                    Log.i(TAG, "Database cleared.")
+
                     runOnUiThread {
-                        InfoWindow.closeAllInfoWindowsOn(map)
-                    }
-                    Log.i(DEBUG_TAG, "Database cleared and markers have been removed.")
-                    runOnUiThread {
+                        // clear markers
+                        map.removeAllMarkers()
                         dialog.dismiss()
                     }
-                    Log.i(DEBUG_TAG, "Dialog dismissed")
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Toast.makeText(this,
-                            getString(R.string.failed_save), Toast.LENGTH_SHORT).show()
                     runOnUiThread {
+                        Toast.makeText(this,
+                                getString(R.string.failed_save), Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
                     }
-                    Log.i(DEBUG_TAG, "Dialog dismissed")
+                    Log.i(TAG, "Dialog dismissed")
                 }
             }.start()
         } else if (requestCode == 6 && resultCode == RESULT_OK) {
             try {
                 val exif = ExifInterface(File(currentAudioPath!!))
-                Log.i(DEBUG_TAG, "filePath: $currentAudioPath")
+                Log.i(TAG, "filePath: $currentAudioPath")
 
-                val latitude = map.mapCenter.latitude
+                val latitude = map.mapView.mapCenter.latitude
                 Log.i("lat", "$latitude")
                 val latitudeHours = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
                 var trueLat = latitudeHours.toInt().toString() + "/1," // 105/1,
@@ -861,7 +896,7 @@ class MainActivity : AppCompatActivity(),
                 val latitudeSeconds = (latitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
                 trueLat = trueLat + latitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
 
-                val longitude = map.mapCenter.longitude
+                val longitude = map.mapView.mapCenter.longitude
                 val longitudeHours = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
                 var trueLon = longitudeHours.toInt().toString() + "/1," // 105/1,
                 val longitudeMinutes = (longitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
@@ -869,8 +904,8 @@ class MainActivity : AppCompatActivity(),
                 val longitudeSeconds = (longitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
                 trueLon = trueLon + longitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/100
 
-                Log.i(DEBUG_TAG, "lat: $latitude, lon: $longitude")
-                Log.i(DEBUG_TAG, "trueLat: $trueLat, trueLong: $trueLon")
+                Log.i(TAG, "lat: $latitude, lon: $longitude")
+                Log.i(TAG, "trueLat: $trueLat, trueLong: $trueLon")
 
                 exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, trueLat)
                 exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, trueLon)
@@ -891,14 +926,14 @@ class MainActivity : AppCompatActivity(),
                 Log.i("exif longituderef",
                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
 
-                markerList.add(Marker(map))
+                markerList.add(Marker(map.mapView))
 
                 markerList.last().position = GeoPoint(latitude, longitude)
                 markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.audio)
                 markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 // TODO : Show image when marker is clicked.
-                map.overlays.add(markerList.last())
-                Log.i(DEBUG_TAG, "Audio Marker Added to Map")
+                map.mapView.overlays.add(markerList.last())
+                Log.i(TAG, "Audio Marker Added to Map")
 
                 storeHouseNumbersObject.addImage(currentAudioPath!!, latitude, longitude)
 
@@ -936,11 +971,11 @@ class MainActivity : AppCompatActivity(),
                 fileInputStream.close()
             }
             zipOutputStream.close()
-            Log.i(DEBUG_TAG, "zipFilesAndDelete: files zipped")
+            Log.i(TAG, "zipFilesAndDelete: files zipped")
             for (file in surveyFiles) {
                 file.delete()
             }
-            Log.i(DEBUG_TAG, "zipFilesAndDelete: files deleted")
+            Log.i(TAG, "zipFilesAndDelete: files deleted")
 
         }
     }
@@ -977,25 +1012,22 @@ class MainActivity : AppCompatActivity(),
 
         // Switch statement to set tile source based on what string was given.
         when (imagery) {
-            "mapnik_imagery" -> map.setTileSource(mapnik)
+            "mapnik_imagery" -> map.mapView.setTileSource(mapnik)
             //"mapbox_satellite" -> map.setTileSource(mapbox_satellite)
-            "public_transport_map" -> map.setTileSource(publicTransportMap)
+            "public_transport_map" -> map.mapView.setTileSource(publicTransportMap)
         }
 
     }
 
     // If undo button is pressed
     fun undo(view: View) {
-        if (markerList.isNotEmpty() ) {
+        if (map.undo()) {
             if (storeHouseNumbersObject.lastItemType() == "Image") {
-                Log.i(DEBUG_TAG, "Last Item was an image.")
+                Log.i(TAG, "Last Item was an image.")
                 val deleteFileDialog = AlertDialog.Builder(this)
 
                 deleteFileDialog.setPositiveButton(getString(R.string.delete)) { _, _ ->
                     storeHouseNumbersObject.undo(true)
-                    map.overlays.remove(markerList.last())
-                    map.invalidate()
-                    markerList.removeLast()
                 }
 
                 deleteFileDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
@@ -1004,38 +1036,15 @@ class MainActivity : AppCompatActivity(),
                 deleteFileDialog.create().show()
             } else {
                 storeHouseNumbersObject.undo(false)
-                map.overlays.remove(markerList.last())
-                map.invalidate()
-                markerList.removeLast()
             }
-
-
+        } else {
+            Toast.makeText(this, getString(R.string.no_markers), Toast.LENGTH_SHORT).show()
         }
-    }
-
-
-    // add a housenumber marker to the map.
-    private fun addHousenumberMarker(address: AddressNodes) {
-
-        markerList.add(Marker(map))
-
-        markerList.last().position = GeoPoint(address.latitude, address.longitude)
-        markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.address)
-        markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-        markerList.last().title = address.housenumber
-
-        val infoWindow = MarkerWindow(
-                R.layout.address_press_layout_linear,
-                map,
-                this)
-        markerList.last().infoWindow = infoWindow
-        map.overlays.add(markerList.last())
-        Log.i("map", "housenumber marker added")
     }
 
     // add a note to the map as a marker and to the database.
     private fun addNote(lat: Double, lon: Double) {
-        Log.i("Long Click detected", "addNote() method started")
+        Log.i(TAG, "addNote() method started")
         val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
         if (Build.VERSION.SDK_INT >= 26) {
@@ -1072,17 +1081,16 @@ class MainActivity : AppCompatActivity(),
         addNoteBuilder.setPositiveButton(getString(R.string.save_note)) { _, _ ->
             noteContents = note.text.toString()
 
-            Log.i("inside positive button", "noteContents: $noteContents")
+            Log.i(TAG, "noteContents: $noteContents")
             if (noteContents != "") {
-                storeHouseNumbersObject.addNote(noteContents, lat, lon)
+                val noteID = storeHouseNumbersObject.addNote(noteContents, lat, lon)
+                if (noteID != 1) {
+                    map.addNoteMarker(noteID, lat, lon, noteContents)
+                } else {
+                    Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
+                }
 
-                markerList.add(Marker(map))
 
-                markerList.last().position = GeoPoint(lat, lon)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerList.last().title = noteContents
-                markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.note)
-                map.overlays.add(markerList.last())
 
                 Log.i("button press", "setPositiveButton pressed")
             }
@@ -1146,7 +1154,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onLongPress(e: MotionEvent?) {
-        Log.i(DEBUG_TAG, "onLongPress")
+        Log.i(TAG, "onLongPress")
         longPressDetected = true
         Log.i("in le test", "longpressdetected $longPressDetected")
     }
@@ -1157,7 +1165,7 @@ class MainActivity : AppCompatActivity(),
             velocityX: Float,
             velocityY: Float
     ): Boolean {
-        Log.i(DEBUG_TAG, "onFling")
+        Log.i(TAG, "onFling")
         val swipeValue = 100
 
         val differenceInY = moveEvent.y - downEvent.y
@@ -1204,7 +1212,7 @@ class MainActivity : AppCompatActivity(),
         val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
         increment = sharedPreferences.getInt("increment", 2)
 
-        Log.i(DEBUG_TAG, "Increment before function: $increment")
+        Log.i(TAG, "Increment before function: $increment")
         val modifyIncrementDialogue = AlertDialog.Builder(this)
         modifyIncrementDialogue.setTitle(getString(R.string.change_increment))
 
@@ -1247,7 +1255,7 @@ class MainActivity : AppCompatActivity(),
                     Log.i(textToSet, "final text")
                 }
             }
-            Log.i(DEBUG_TAG, "modifyIncrementDialog: minusButton pressed")
+            Log.i(TAG, "modifyIncrementDialog: minusButton pressed")
         }
 
         val plusButton = ImageButton(this)
@@ -1279,7 +1287,7 @@ class MainActivity : AppCompatActivity(),
                     Log.i(textToSet, "final text")
                 }
             }
-            Log.i(DEBUG_TAG, "modifyIncrementDialog: plusButton pressed")
+            Log.i(TAG, "modifyIncrementDialog: plusButton pressed")
         }
 
         val linearLayout = LinearLayout(this)
@@ -1297,7 +1305,7 @@ class MainActivity : AppCompatActivity(),
         modifyIncrementDialogue.setPositiveButton(getString(R.string.save_increment)) { _, _ ->
             incrementValue = modifyIncrementInput.text.toString()
             try {
-                Log.i(DEBUG_TAG, "incrementValue in Dialog: $incrementValue")
+                Log.i(TAG, "incrementValue in Dialog: $incrementValue")
                 increment = incrementValue.toInt()
 
                 val sharedPreferencesEditor = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE).edit()
@@ -1305,7 +1313,7 @@ class MainActivity : AppCompatActivity(),
                 sharedPreferencesEditor.apply()
             } catch (e: TypeCastException) {
                 e.printStackTrace()
-                Log.e(DEBUG_TAG, getString(R.string.increment_not_integer))
+                Log.e(TAG, getString(R.string.increment_not_integer))
                 Toast.makeText(
                         this, getString(R.string.increment_not_integer),
                         Toast.LENGTH_SHORT
@@ -1344,18 +1352,23 @@ class MainActivity : AppCompatActivity(),
             }
         }.start()
 
-        Log.i(DEBUG_TAG, "buildingLevels: ${buildingLevelsTextView.text}")
+        Log.i(TAG, "buildingLevels: ${buildingLevelsTextView.text}")
         val addressToChange = storeHouseNumbersObject.lastAddressEntry(
                 buildingLevelsButton.tag.toString()
         )
 
         addressToChange!!.buildingLevels = buildingLevelsTextView.text.toString()
-        addressToChange.latitude = map.mapCenter.latitude
-        addressToChange.longitude = map.mapCenter.longitude
+        addressToChange.latitude = map.mapView.mapCenter.latitude
+        addressToChange.longitude = map.mapView.mapCenter.longitude
         addressToChange.housenumber = houseNumber.text.toString()
 
-        addHousenumberMarker(addressToChange)
-        storeHouseNumbersObject.addHouseNumber(addressToChange)
+        val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
+        if (id != -1) {
+            map.addHousenumberMarker(addressToChange, id)
+        } else {
+            Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
+        }
+
 
         val button1 = findViewById<ImageButton>(R.id.B1R0_mini_relative)
         val button2 = findViewById<ImageButton>(R.id.B2R0_mini_relative)
@@ -1383,12 +1396,12 @@ class MainActivity : AppCompatActivity(),
                 ContextCompat.getColor(this, android.R.color.darker_gray)
         )
 
-        Log.i(DEBUG_TAG, "buildingLevels, ${addressToChange.buildingLevels}")
+        Log.i(TAG, "buildingLevels, ${addressToChange.buildingLevels}")
         buildingLevelsButton.backgroundTintList = ColorStateList.valueOf(
                 ContextCompat.getColor(this, android.R.color.holo_green_dark)
         )
 
-        Log.i(DEBUG_TAG, "flingUpDetected & address is not null")
+        Log.i(TAG, "flingUpDetected & address is not null")
 
         val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
         increment = sharedPreferences.getInt("increment", 2)
@@ -1413,7 +1426,7 @@ class MainActivity : AppCompatActivity(),
             Log.i("final text", textToSet)
 
         }
-        map.invalidate()
+        map.mapView.invalidate()
     }
 
     fun decrementMiniHousenumber(view: View) {
@@ -1478,8 +1491,8 @@ class MainActivity : AppCompatActivity(),
         val imageFile = File(getExternalFilesDir(null), fileName)
         currentImagePath = imageFile.absolutePath
 
-        Log.i(DEBUG_TAG, "filePath: ${getExternalFilesDir(null)!!.absolutePath + fileName}")
-        Log.i(DEBUG_TAG, "filePath: $currentImagePath")
+        Log.i(TAG, "filePath: ${getExternalFilesDir(null)!!.absolutePath + fileName}")
+        Log.i(TAG, "filePath: $currentImagePath")
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (cameraIntent.resolveActivity(packageManager) != null) {
 
@@ -1487,7 +1500,7 @@ class MainActivity : AppCompatActivity(),
                     "com.mapitall.SwiftAddress.provider",
                     imageFile
             )
-            Log.i(DEBUG_TAG, "URI filePath: $imageURI")
+            Log.i(TAG, "URI filePath: $imageURI")
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
             startActivityForResult(cameraIntent, 4)
         }
@@ -1496,6 +1509,77 @@ class MainActivity : AppCompatActivity(),
     fun captureAudio(view: View) {
 
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT)
+
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun moveMarker(ID : Int, marker : Marker) {
+        val moveButton = findViewById<Button>(R.id.move_marker)
+        val cancelButton = findViewById<Button>(R.id.cancel_move_marker)
+        val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
+        val rightArrow = findViewById<ImageButton>(R.id.add_address_on_right)
+        val frameLayout = findViewById<FrameLayout>(R.id.frameLayout)
+        val params = frameLayout.layoutParams as ConstraintLayout.LayoutParams
+        var runCondition = true
+        var cancelled = false
+        var done = false
+        val oldPosition = marker.position
+        moveButton.visibility = View.VISIBLE
+        cancelButton.visibility = View.VISIBLE
+        leftArrow.visibility = View.GONE
+        rightArrow.visibility = View.GONE
+
+        params.bottomToBottom = R.id.constraint_layout
+        frameLayout.requestLayout()
+
+        moveButton.setOnClickListener {
+            runCondition = false
+            moveButton.visibility = View.GONE
+            cancelButton.visibility = View.GONE
+            leftArrow.visibility = View.VISIBLE
+            rightArrow.visibility = View.VISIBLE
+
+            params.bottomToTop = R.id.add_address_layout
+            frameLayout.requestLayout()
+
+            storeHouseNumbersObject.changeLocation(ID,
+                    map.mapView.mapCenter.latitude,
+                    map.mapView.mapCenter.longitude)
+
+        }
+
+        cancelButton.setOnClickListener {
+            runCondition = false
+            cancelled = true
+            moveButton.visibility = View.GONE
+            cancelButton.visibility = View.GONE
+            leftArrow.visibility = View.VISIBLE
+            rightArrow.visibility = View.VISIBLE
+
+            val params = frameLayout.layoutParams as ConstraintLayout.LayoutParams
+            params.bottomToTop = R.id.add_address_layout
+            frameLayout.requestLayout()
+        }
+
+        map.mapView.setOnTouchListener { _, event ->
+            if (runCondition && !done) {
+                marker.position = map.mapView.mapCenter as GeoPoint
+                // marker.position = GeoPoint(map.mapView.mapCenter.latitude, map.mapView.mapCenter.longitude)
+            } else {
+                if (cancelled) {
+                    marker.position = oldPosition
+                    map.mapView.invalidate()
+                }
+                done = true
+            }
+            return@setOnTouchListener super.onTouchEvent(event)
+        }
+    }
+
+    fun openDrawer(view: View) {
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        drawerLayout.openDrawer(GravityCompat.START)
+
 
     }
 

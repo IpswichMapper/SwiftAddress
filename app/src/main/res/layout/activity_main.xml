@@ -1,466 +1,540 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:backgroundTint="#FFFFFF"
-    tools:context=".MainActivity">
+    android:layout_width="match_parent"
+    tools:context=".MainActivity"
+    android:id="@+id/drawer_layout">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
 
-    <LinearLayout
-        android:id="@+id/top_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@android:color/darker_gray"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="115dp">
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:backgroundTint="#FFFFFF"
+        android:id="@+id/constraint_layout">
 
-
-        <ImageButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:onClick="saveData"
-            android:scaleType="fitCenter"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/save"
-            tools:srcCompat="@drawable/save" />
-
-        <ImageButton
-            android:id="@+id/add_photo_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:onClick="takePhoto"
-            android:scaleType="fitCenter"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/add_photo" />
-
-        <ImageButton
-            android:id="@+id/change_background_imagery_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/map" />
-
-        <ImageButton
-            android:id="@+id/undo_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:onClick="undo"
-            android:scaleType="fitCenter"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/undo" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/add_address_layout"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginBottom="-7dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="204dp">
-
-
-        <ImageButton
-            android:id="@+id/add_address_on_left"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="-5dp"
-            android:layout_marginTop="-6dp"
-            android:layout_marginEnd="-5dp"
-            android:layout_marginBottom="-6dp"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:scaleType="fitCenter"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/left_arrow" />
-
-        <ImageButton
-            android:id="@+id/add_address_on_right"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="-5dp"
-            android:layout_marginTop="-6dp"
-            android:layout_marginEnd="-5dp"
-            android:layout_marginBottom="-6dp"
-            android:layout_weight="1"
-            android:backgroundTint="@android:color/darker_gray"
-            android:scaleType="fitCenter"
-            android:tint="@color/black"
-            app:srcCompat="@drawable/right_arrow" />
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/frameLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_bar_layout">
-
-        <org.osmdroid.views.MapView
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:usesCleartextTraffic="true">
-
-        </org.osmdroid.views.MapView>
-
-    </FrameLayout>
-
-    <ImageButton
-        android:id="@+id/north_orientation"
-        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="10dp"
-        android:background="@drawable/rounded_button"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:tint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
-        android:src="@drawable/north_icon"
-        tools:srcCompat="@drawable/north_icon" />
-
-    <ImageButton
-        android:id="@+id/recenter"
-        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/rounded_button"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/center_focus"
-        android:tint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
-        tools:srcCompat="@drawable/center_focus" />
-
-    <ImageButton
-        android:id="@+id/zoom_in"
-        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/rounded_button"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/plus"
-        android:tint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/recenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:srcCompat="@drawable/plus" />
-
-    <ImageButton
-        android:id="@+id/zoom_out"
-        style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/rounded_button"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/minus"
-        android:tint="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recenter"
-        tools:srcCompat="@drawable/minus" />
-
-    <ImageView
-        android:id="@+id/crosshair"
-        android:layout_width="19dp"
-        android:layout_height="19dp"
-        app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
-        app:layout_constraintEnd_toEndOf="@+id/frameLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
-        app:srcCompat="@drawable/crosshair"
-        app:tint="@color/black" />
-
-    <RelativeLayout
-        android:id="@+id/basedView"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:background="@color/background_color"
-        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
+            android:id="@+id/top_bar_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/top_layout"
-            android:orientation="horizontal">
-
-            <ImageButton
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.5"
-                android:onClick="closeMiniKeypad"
-                android:scaleType="fitCenter"
-                android:tint="@color/button_colors"
-                app:srcCompat="@drawable/clear" />
-
-            <ImageView
-                android:id="@+id/horizontal_bar"
-                android:layout_width="0dp"
-                android:layout_weight="10"
-                android:layout_height="50dp"
-                android:foreground="@drawable/horizontal_bar"
-                android:foregroundGravity="fill"
-                android:foregroundTint="@color/button_colors"
-                />
-
-            <ImageButton
-                android:layout_width="0dp"
-                android:layout_weight="1.5"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/gear_settings"
-                android:scaleType="fitCenter"
-                android:tint="@color/button_colors"
-                android:onClick="showMiniKeypadPopupMenu"/>
-        </LinearLayout>
-
-        <LinearLayout
+            android:layout_height="50dp"
+            android:background="@android:color/darker_gray"
             android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/top_layout"
-            android:id="@+id/no_roof_linear_layout">
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="115dp">
 
-            <RelativeLayout
+            <ImageButton
 
+                android:id="@+id/main_menu_button"
+                android:backgroundTint="@android:color/darker_gray"
+                android:scaleType="fitCenter"
+                android:tint="@color/black"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_marginStart="20dp"
-                android:layout_weight="1">
-
-                <ImageButton
-                    android:id="@+id/B1R0_mini_relative"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:onClick="swipeAddHousenumber"
-                    android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/house"
-                    android:scaleType="fitCenter"
-                    android:paddingBottom="25dp"/>
-
-                <TextView
-                    android:id="@+id/B1R0_main"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="10dp"
-                    android:text="B1 R0"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="@color/button_colors" />
-            </RelativeLayout>
-            <RelativeLayout
-                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                app:srcCompat="@drawable/menu"
+                android:onClick="openDrawer"/>
 
-                <ImageButton
-                    android:id="@+id/B2R0_mini_relative"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="swipeAddHousenumber"
-                    android:paddingBottom="25dp"
-                    android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/house" />
-                <TextView
-                    android:id="@+id/B2R0_main"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="10dp"
-                    android:text="B2 R0"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="@color/button_colors" />
-            </RelativeLayout>
-            <RelativeLayout
+            <ImageButton
+                android:id="@+id/save"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:layout_marginEnd="20dp"
-                >
+                android:backgroundTint="@android:color/darker_gray"
+                android:onClick="saveData"
+                android:scaleType="fitCenter"
+                android:tint="@color/black"
+                app:srcCompat="@drawable/save"
+                tools:srcCompat="@drawable/save" />
 
-                <ImageButton
-                    android:id="@+id/B3R0_mini_relative"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentBottom="true"
-                    android:layout_weight="1"
-                    android:onClick="swipeAddHousenumber"
-                    android:paddingBottom="25dp"
-                    android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/house" />
-                <TextView
-                    android:id="@+id/B3R0_main"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="10dp"
-                    android:text="B3 R0"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="@color/button_colors" />
-            </RelativeLayout>
+            <ImageButton
+                android:id="@+id/add_photo_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/darker_gray"
+                android:onClick="takePhoto"
+                android:scaleType="fitCenter"
+                android:tint="@color/black"
+                app:srcCompat="@drawable/add_photo" />
+
+            <ImageButton
+                android:id="@+id/change_background_imagery_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/darker_gray"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/map" />
+
+            <ImageButton
+                android:id="@+id/undo_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/darker_gray"
+                android:onClick="undo"
+                android:scaleType="fitCenter"
+                android:tint="@color/black"
+                app:srcCompat="@drawable/undo" />
+
+
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/add_address_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/no_roof_linear_layout"
+            android:layout_height="50dp"
+            android:layout_marginBottom="-7dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_editor_absoluteX="204dp">
+
+
+            <ImageButton
+                android:id="@+id/add_address_on_left"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="-5dp"
+                android:layout_marginTop="-6dp"
+                android:layout_marginEnd="-5dp"
+                android:layout_marginBottom="-6dp"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/darker_gray"
+                android:scaleType="fitCenter"
+                android:tint="@color/black"
+                app:srcCompat="@drawable/left_arrow" />
+
+            <ImageButton
+                android:id="@+id/add_address_on_right"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="-5dp"
+                android:layout_marginTop="-6dp"
+                android:layout_marginEnd="-5dp"
+                android:layout_marginBottom="-6dp"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/darker_gray"
+                android:scaleType="fitCenter"
+                android:tint="@color/black"
+                app:srcCompat="@drawable/right_arrow" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_bar_layout">
+
+            <org.osmdroid.views.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:usesCleartextTraffic="true">
+
+            </org.osmdroid.views.MapView>
+
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/north_orientation"
+            style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/rounded_button"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/north_icon"
+            android:tint="@color/black"
+            app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
+            tools:srcCompat="@drawable/north_icon" />
+
+        <ImageButton
+            android:id="@+id/recenter"
+            style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/rounded_button"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/center_focus"
+            android:tint="@color/black"
+            app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
+            tools:srcCompat="@drawable/center_focus" />
+
+        <ImageButton
+            android:id="@+id/zoom_in"
+            style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/rounded_button"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/plus"
+            android:tint="@color/black"
+            app:layout_constraintBottom_toTopOf="@+id/recenter"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:srcCompat="@drawable/plus" />
+
+        <ImageButton
+            android:id="@+id/zoom_out"
+            style="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginTop="10dp"
-            android:id="@+id/one_roof_linear_layout"
-            android:orientation="horizontal">
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_marginStart="20dp"
-                android:layout_weight="1">
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/rounded_button"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/minus"
+            android:tint="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recenter"
+            tools:srcCompat="@drawable/minus" />
 
-                <ImageButton
-                    android:id="@+id/B1R1_mini_relative"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:onClick="swipeAddHousenumber"
-                    android:paddingBottom="25dp"
-                    android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/house" />
-                <TextView
-                    android:id="@+id/B1R1_main"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="10dp"
-                    android:text="B1 R1"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="@color/button_colors" />
-            </RelativeLayout>
+        <ImageView
+            android:id="@+id/crosshair"
+            android:layout_width="19dp"
+            android:layout_height="19dp"
+            app:layout_constraintBottom_toTopOf="@+id/add_address_layout"
+            app:layout_constraintEnd_toEndOf="@+id/frameLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_bar_layout"
+            app:srcCompat="@drawable/crosshair"
+            app:tint="@color/black" />
 
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <ImageButton
-                    android:id="@+id/B2R1_mini_relative"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:onClick="swipeAddHousenumber"
-                    android:paddingBottom="25dp"
-                    android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/house" />
-                <TextView
-                    android:id="@+id/B2R1_main"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="10dp"
-                    android:text="B2 R1"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="@color/button_colors" />
-            </RelativeLayout>
-            <RelativeLayout
-                android:layout_height="match_parent"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="20dp"
-                android:layout_toEndOf="@+id/B2R0_mini_relative">
-
-                <ImageButton
-                    android:id="@+id/B3R1_mini_relative"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:onClick="swipeAddHousenumber"
-                    android:paddingBottom="25dp"
-                    android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/house" />
-
-                <TextView
-                    android:id="@+id/B3R1_main"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="10dp"
-                    android:text="B3 R1"
-                    android:layout_centerHorizontal="true"
-                    android:textColor="@color/button_colors" />
-            </RelativeLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/cancel_move_marker"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/one_roof_linear_layout"
-            android:orientation="horizontal"
-            android:id="@+id/increment_linear_layout">
+            android:backgroundTint="@android:color/darker_gray"
+            android:onClick="closeMiniKeypad"
+            android:scaleType="fitCenter"
+            android:text="@string/cancel"
+            android:textColor="@color/button_colors"
+            android:tint="@color/button_colors"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/move_marker"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginBottom="100dp"
+            android:visibility="gone"/>
 
-            <ImageButton
-                android:id="@+id/imageButton"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="0dp"
+
+        <Button
+            android:id="@+id/move_marker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/darker_gray"
+            android:onClick="closeMiniKeypad"
+            android:scaleType="fitCenter"
+            android:text="@string/move"
+            android:textColor="@color/button_colors"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/cancel_move_marker"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginBottom="100dp"
+            android:visibility="gone"/>
+
+        <RelativeLayout
+            android:id="@+id/basedView"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:background="@color/background_color"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <LinearLayout
+                android:id="@+id/top_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
+                android:orientation="horizontal">
 
-                android:layout_weight="1"
-                android:onClick="decrementMiniHousenumber"
-                android:tint="@color/button_colors"
-                app:srcCompat="@drawable/minus" />
+                <ImageButton
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:onClick="closeMiniKeypad"
+                    android:scaleType="fitCenter"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/clear" />
+
+                <ImageView
+                    android:id="@+id/horizontal_bar"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="10"
+                    android:foreground="@drawable/horizontal_bar"
+                    android:foregroundGravity="fill"
+                    android:foregroundTint="@color/button_colors" />
+
+                <ImageButton
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:onClick="showMiniKeypadPopupMenu"
+                    android:scaleType="fitCenter"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/gear_settings" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/no_roof_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/top_layout"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/B1R0_mini_relative"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:onClick="swipeAddHousenumber"
+                        android:paddingBottom="25dp"
+                        android:scaleType="fitCenter"
+                        android:tint="@color/button_colors"
+                        app:srcCompat="@drawable/house" />
+
+                    <TextView
+                        android:id="@+id/B1R0_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="10dp"
+                        android:text="B1 R0"
+                        android:textColor="@color/button_colors" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/B2R0_mini_relative"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:onClick="swipeAddHousenumber"
+                        android:paddingBottom="25dp"
+                        android:tint="@color/button_colors"
+                        app:srcCompat="@drawable/house" />
+
+                    <TextView
+                        android:id="@+id/B2R0_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="10dp"
+                        android:text="B2 R0"
+                        android:textColor="@color/button_colors" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="20dp"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/B3R0_mini_relative"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentBottom="true"
+                        android:layout_weight="1"
+                        android:onClick="swipeAddHousenumber"
+                        android:paddingBottom="25dp"
+                        android:tint="@color/button_colors"
+                        app:srcCompat="@drawable/house" />
+
+                    <TextView
+                        android:id="@+id/B3R0_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="10dp"
+                        android:text="B3 R0"
+                        android:textColor="@color/button_colors" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/one_roof_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/no_roof_linear_layout"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/B1R1_mini_relative"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:onClick="swipeAddHousenumber"
+                        android:paddingBottom="25dp"
+                        android:tint="@color/button_colors"
+                        app:srcCompat="@drawable/house" />
+
+                    <TextView
+                        android:id="@+id/B1R1_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="10dp"
+                        android:text="B1 R1"
+                        android:textColor="@color/button_colors" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/B2R1_mini_relative"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:onClick="swipeAddHousenumber"
+                        android:paddingBottom="25dp"
+                        android:tint="@color/button_colors"
+                        app:srcCompat="@drawable/house" />
+
+                    <TextView
+                        android:id="@+id/B2R1_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="10dp"
+                        android:text="B2 R1"
+                        android:textColor="@color/button_colors" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="20dp"
+                    android:layout_toEndOf="@+id/B2R0_mini_relative"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:id="@+id/B3R1_mini_relative"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:onClick="swipeAddHousenumber"
+                        android:paddingBottom="25dp"
+                        android:tint="@color/button_colors"
+                        app:srcCompat="@drawable/house" />
+
+                    <TextView
+                        android:id="@+id/B3R1_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="10dp"
+                        android:text="B3 R1"
+                        android:textColor="@color/button_colors" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/increment_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/one_roof_linear_layout"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/imageButton"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+
+                    android:layout_weight="1"
+                    android:onClick="decrementMiniHousenumber"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/minus" />
+
+                <TextView
+                    android:id="@+id/mini_keypad_housenumber"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:textColor="@color/button_colors"
+                    android:textSize="30sp" />
+
+                <ImageButton
+                    android:id="@+id/imageButton2"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="30dp"
+                    android:layout_weight="1"
+                    android:onClick="incrementMiniHousenumber"
+                    android:tint="@color/button_colors"
+                    app:srcCompat="@drawable/plus" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/mini_keypad_housenumber"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_weight="3"
-                android:textColor="@color/button_colors"
-                android:textSize="30sp" />
-
-            <ImageButton
-                android:id="@+id/imageButton2"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="0dp"
+                android:id="@+id/mini_keypad_side"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="30dp"
-                android:layout_weight="1"
-                android:onClick="incrementMiniHousenumber"
-                android:tint="@color/button_colors"
-                app:srcCompat="@drawable/plus" />
-        </LinearLayout>
+                android:layout_below="@id/increment_linear_layout"
+                android:gravity="center"
+                android:textColor="@color/button_colors"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+        
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/increment_linear_layout"
-            android:id="@+id/mini_keypad_side"
-            android:gravity="center"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:textColor="@color/button_colors"/>
-    </RelativeLayout>
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:menu="@menu/nav_header_menu"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        android:id="@+id/nav_menu"
+        />
+</androidx.drawerlayout.widget.DrawerLayout>

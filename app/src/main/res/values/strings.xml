@@ -56,5 +56,15 @@
     <string name="roof_levels_hint">Roof Levels</string>
     <string name="saving_files">Saving Files</string>
     <string name="failed_save">Data failed to save</string>
+    <string name="move">Move</string>
+    <string name="no_markers">You haven\'t added any markers.</string>
+    <string name="recover_data">Recover Data</string>
+    <string name="save_data">Save data</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="no_saved_data">No saved data exists.</string>
+    <string name="recover">Recover</string>
+    <string name="upload_to_osm">Upload to OSM</string>
+    <string name="recover_data_message">Do you want to recover the data that you saved last time? This will add the notes and addresses from before you saved the map. CURRENT DATA WILL BE DELETED. Images will not be recovered. The saved zip file won\'t be deleted.</string>
 
 </resources>

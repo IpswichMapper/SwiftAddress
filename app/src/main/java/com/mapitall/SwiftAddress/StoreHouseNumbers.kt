@@ -174,12 +174,27 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val street = c.getString(c.getColumnIndex(COL_STREET))
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+                val buildingLevels = c.getString(c.getColumnIndex(COL_BUILDINGLEVELS))
 
                 addressFileMiddle.append("<node id=\"$i\" lat=\"$latitude\" lon=\"$longitude\">\n") // opening tag
                 addressFileMiddle.append("<tag k=\"addr:housenumber\" v=\"$housenumber\"/>\n") // housenumber
                 if (street != "") {
                     addressFileMiddle.append("<tag k=\"addr:street\" v=\"$street\"/>\n") // street
                 }
+                if (buildingLevels != "") {
+                    val parts = buildingLevels.split(" ") //
+
+                    var buildingLevelsNum = parts[0]
+                    buildingLevelsNum = buildingLevelsNum.drop(1)
+                    var roofLevelsNum = parts[1]
+                    roofLevelsNum = roofLevelsNum.drop(1)
+
+                    addressFileMiddle.append(
+                            "<tag k=\"building:levels\" v=\"$buildingLevelsNum\"/>\n")
+                    addressFileMiddle.append(
+                            "<tag k=\"roof:levels\" v=\"$roofLevelsNum\"/>\n")
+                }
+                addressFileMiddle.append("<tag k=\"source:addr\" v=\"SwiftAddress\"/>\n")
                 addressFileMiddle.append("</node>\n")
                 i--
             } else if (type == "Note") {

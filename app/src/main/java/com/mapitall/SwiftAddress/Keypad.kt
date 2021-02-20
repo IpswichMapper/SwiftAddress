@@ -2,9 +2,12 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.app.ActionBar
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.*
 import android.view.Gravity.*
@@ -621,6 +624,9 @@ class Keypad : AppCompatActivity(),
         buildingLevelsInput.hint = getString(R.string.building_levels_hint)
         roofLevelsInput.hint = getString(R.string.roof_levels_hint)
 
+        buildingLevelsInput.inputType = InputType.TYPE_CLASS_PHONE
+        roofLevelsInput.inputType = InputType.TYPE_CLASS_PHONE
+
         val container = FrameLayout(this)
         val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             MATCH_PARENT, WRAP_CONTENT
@@ -640,16 +646,24 @@ class Keypad : AppCompatActivity(),
         
         modifyBuildLevelsDialog.setPositiveButton(getString(R.string.save)) { _, _ ->
 
+            Log.i(TAG, "positive button pressed")
             try {
                 buildingLevelsValue = buildingLevelsInput.text.toString()
+                buildingLevelsValue.toInt()
                 try {
                     roofLevelsValue = roofLevelsInput.text.toString()
+                    roofLevelsValue.toInt()
                 } catch (e: Exception) {
                     e.printStackTrace()
 
                     roofLevelsValue = "0"
                 }
-                buildingLevels = "B$buildingLevelsValue R$roofLevelsValue"
+                Log.i(TAG, "about to change building levels")
+
+                val buildingLevelsTextView = findViewById<TextView>(R.id.building_levels_value)
+                buildingLevelsTextView.text = "B$buildingLevelsValue R$roofLevelsValue"
+                buildingLevelsTextView.setTextColor(ContextCompat.getColor(
+                        this, R.color.button_colors))
             } catch (e : Exception) {
                 e.printStackTrace()
                 Toast.makeText(this, "Please enter a number", Toast.LENGTH_SHORT)
@@ -657,7 +671,7 @@ class Keypad : AppCompatActivity(),
             }
 
         }
-        modifyBuildLevelsDialog.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
+        modifyBuildLevelsDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
 
 
 

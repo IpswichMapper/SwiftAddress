@@ -102,8 +102,9 @@ class MainActivity : AppCompatActivity(),
         // set map details
         map = Map(findViewById(R.id.map), this, this)
 
-        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
-        increment = sharedPreferences.getInt("increment", 2)
+        // val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        increment = sp.getInt("increment", 2)
 
 
 
@@ -159,7 +160,7 @@ class MainActivity : AppCompatActivity(),
             if (flingUpDetected) {
 
                 val addressToChange = storeHouseNumbersObject.lastAddressEntry("left")
-                increment = sharedPreferences.getInt("increment", 2)
+                increment = sp.getInt("increment", 2)
 
 
                 if (addressToChange != null) {
@@ -279,7 +280,7 @@ class MainActivity : AppCompatActivity(),
         leftArrow.setOnLongClickListener {
 
             val addressToChange = storeHouseNumbersObject.lastAddressEntry("left")
-            increment = sharedPreferences.getInt("increment", 2)
+            increment = sp.getInt("increment", 2)
 
             if (addressToChange != null) {
                 Log.i(TAG, "longPressDetected & address is not null")
@@ -368,7 +369,7 @@ class MainActivity : AppCompatActivity(),
             if (flingUpDetected) {
 
                 val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
-                increment = sharedPreferences.getInt("increment", 2)
+                increment = sp.getInt("increment", 2)
 
 
                 if (addressToChange != null) {
@@ -497,7 +498,7 @@ class MainActivity : AppCompatActivity(),
         rightArrow.setOnLongClickListener {
             val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
             Log.e(TAG, "increment; $increment")
-            increment = sharedPreferences.getInt("increment", 2)
+            increment = sp.getInt("increment", 2)
             Log.e(TAG, "increment $increment")
             if (addressToChange != null) {
                 Log.i(TAG, "longPressDetected & address is not null")
@@ -1244,9 +1245,9 @@ class MainActivity : AppCompatActivity(),
         val textBoxWidth = 200
         val textBoxTextSize = 40f
 
-        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
 
-        increment = sharedPreferences.getInt("increment", 2)
+        increment = sp.getInt("increment", 2)
 
         Log.i(TAG, "Increment before function: $increment")
         val modifyIncrementDialogue = AlertDialog.Builder(this)
@@ -1344,7 +1345,7 @@ class MainActivity : AppCompatActivity(),
                 Log.i(TAG, "incrementValue in Dialog: $incrementValue")
                 increment = incrementValue.toInt()
 
-                val sharedPreferencesEditor = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE).edit()
+                val sharedPreferencesEditor = PreferenceManager.getDefaultSharedPreferences(this).edit()
                 sharedPreferencesEditor.putInt("increment", increment)
                 sharedPreferencesEditor.apply()
             } catch (e: TypeCastException) {
@@ -1439,8 +1440,9 @@ class MainActivity : AppCompatActivity(),
 
         Log.i(TAG, "flingUpDetected & address is not null")
 
-        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
-        increment = sharedPreferences.getInt("increment", 2)
+        // val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        increment = sp.getInt("increment", 2)
 
         try {
             var numToIncrement = houseNumber.text.toString().toInt()

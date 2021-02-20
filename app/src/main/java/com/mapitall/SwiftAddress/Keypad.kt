@@ -16,6 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
+import androidx.preference.PreferenceManager
 import layout.AddressNodes
 import org.apache.commons.lang3.StringUtils
 import java.lang.Exception
@@ -436,8 +437,9 @@ class Keypad : AppCompatActivity(),
         val textBoxWidth = 200
         val textBoxTextSize = 40f
 
-        val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
-        increment = sharedPreferences.getInt("increment", 2)
+        // val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        increment = sp.getInt("increment", 2)
 
         Log.i(TAG, "Increment before function: $increment")
         val modifyIncrementDialogue  = AlertDialog.Builder(this)

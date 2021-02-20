@@ -653,9 +653,15 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         val drawerLayout = findViewById<DrawerLayout>(R.id.classic_drawer_layout)
         drawerLayout.openDrawer(GravityCompat.START)
     }
-    fun saveData(view: View) {}
-    fun takePhoto(view: View) {}
-    fun undo(view: View) {}
+    fun saveData(view: View) {
+        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show)(
+    }
+    fun takePhoto(view: View) {
+        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+    }
+    fun undo(view: View) {
+        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+    }
 
 
 

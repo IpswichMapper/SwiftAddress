@@ -654,7 +654,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         drawerLayout.openDrawer(GravityCompat.START)
     }
     fun saveData(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show)(
+        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
     }
     fun takePhoto(view: View) {
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()

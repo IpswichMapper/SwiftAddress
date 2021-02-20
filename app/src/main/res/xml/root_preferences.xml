@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/user_interface">
 
@@ -7,7 +8,7 @@
             app:entries="@array/change_UI"
             app:entryValues="@array/change_UI_values"
             app:key="interface"
-            app:title="@string/reply_title"
+            app:title="@string/choose_UI"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

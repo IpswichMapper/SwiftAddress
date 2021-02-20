@@ -88,5 +88,6 @@
     <string name="prevent_screen_timeout">Prevent Screen Timeout</string>
     <string name="user_interface">User Interface</string>
     <string name="compass_unavailable">Compass not available</string>
+    <string name="choose_UI">Choose User Interface</string>
 
 </resources>

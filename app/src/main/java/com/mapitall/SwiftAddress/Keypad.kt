@@ -421,7 +421,9 @@ class Keypad : AppCompatActivity(),
         val cancelButton = findViewById<ImageButton>(R.id.remove)
         cancelButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+
+            setResult(RESULT_CANCELED, intent)
+            finish()
         }
     }
 

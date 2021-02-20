@@ -25,6 +25,7 @@ import java.io.FileOutputStream
 import java.text.DateFormat.getDateTimeInstance
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 // AddressNodes Class which conveniently packages all the information about
 // an address object into one data class that can be shared accross activities.
@@ -332,9 +333,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
 
     // Displays Markers from Database on the map when app is launched.
+
     fun displayMarkers(mapClass: Map, mainActivity: MainActivity) {
         val db: SQLiteDatabase = this.readableDatabase
-        val markerHashMap = mapClass.getMarkerHashMap()
+        val markerHashMap = HashMap<Int, Marker>()
 
         Log.i(TAG, "displayMarkers function started")
 
@@ -373,7 +375,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                         mainActivity)
                 // markerList.last().infoWindow = infoWindow
                 markerHashMap.getValue(id).infoWindow = infoWindow
-                mapClass.mapView.overlays.add(markerHashMap.getValue(id))
                 Log.i(TAG, "Address Marker added")
 
             } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Note") {
@@ -397,7 +398,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 markerHashMap.getValue(id).setAnchor(
                         Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 markerHashMap.getValue(id).title = noteContents
-                mapClass.mapView.overlays.add(markerHashMap.getValue(id))
                 Log.i(TAG, "Note Marker added")
 
             } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Image") {
@@ -421,7 +421,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 markerHashMap.getValue(id).setAnchor(
                         Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 markerHashMap.getValue(id).title = imageName
-                mapClass.mapView.overlays.add(markerHashMap.getValue(id))
                 Log.i(TAG, "Image Marker added")
 
             } else {

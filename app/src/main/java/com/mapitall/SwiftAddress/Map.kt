@@ -40,17 +40,24 @@ class Map(var mapView: MapView,
         // created but haven't been stored to an OSM file yet.
         storeHouseNumbersObject.displayMarkers(this, mainActivity)
 
+    }
+
+    fun setMarkerHashMap(HashMap : HashMap<Int, Marker>) {
+        for (marker: Marker in markerHashMap.values) {
+            mapView.overlays.remove(marker)
+        }
+
+        markerHashMap = HashMap
         for (marker: Marker in markerHashMap.values) {
             mapView.overlays.add(marker)
         }
     }
 
-    fun setMarkerHashMap(HashMap : HashMap<Int, Marker>) {
-        markerHashMap = HashMap
-    }
+    /*
     fun getMarkerHashMap() : HashMap<Int, Marker> {
         return markerHashMap
     }
+     */
 
     fun addHousenumberMarker(address: AddressNodes, houseNumberID : Int) {
         markerHashMap[houseNumberID] = Marker(mapView)
@@ -118,9 +125,17 @@ class Map(var mapView: MapView,
     }
 
     fun removeAllMarkers() {
+        /*
         for (marker: Marker in markerHashMap.values) {
+            Log.i(TAG, "removing marker")
             mapView.overlays.remove(marker)
             mapView.invalidate()
+        }
+         */
+
+        for((ID, marker) in markerHashMap) {
+            Log.i(TAG, "removing marker")
+            mapView.overlays.remove(marker)
         }
         markerHashMap.clear()
         InfoWindow.closeAllInfoWindowsOn(mapView)

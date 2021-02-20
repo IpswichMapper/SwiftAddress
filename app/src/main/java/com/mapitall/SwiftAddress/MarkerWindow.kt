@@ -3,6 +3,7 @@ package com.mapitall.SwiftAddress
 import android.content.Context
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import layout.StoreHouseNumbers
 import org.osmdroid.views.overlay.infowindow.InfoWindow
@@ -18,6 +19,10 @@ class MarkerWindow(pressLayoutId : Int,
     private val storeHouseNumbersObject = StoreHouseNumbers(context)
     override fun onOpen(item: Any?) {
         closeAllInfoWindowsOn(mapView)
+
+        val text = mView.findViewById<TextView>(R.id.marker_text_view)
+        // TODO: Show housenumber and street
+        
         Log.i(TAG, "InfoWindow Opened.")
 
         mView.setOnClickListener {

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/rounded_layout">
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/marker_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20dp"

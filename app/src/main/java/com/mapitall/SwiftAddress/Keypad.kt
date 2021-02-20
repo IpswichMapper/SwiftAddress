@@ -536,7 +536,8 @@ class Keypad : AppCompatActivity(),
                 Log.i(TAG, "incrementValue in Dialog: $incrementValue")
                 increment = incrementValue.toInt()
 
-                val sharedPreferencesEditor = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE).edit()
+                val sharedPreferencesEditor = PreferenceManager.getDefaultSharedPreferences(
+                        this).edit()
                 sharedPreferencesEditor.putInt("increment", increment)
                 sharedPreferencesEditor.apply()
             } catch (e: TypeCastException) {

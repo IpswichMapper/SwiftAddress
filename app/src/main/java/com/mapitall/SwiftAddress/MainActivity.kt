@@ -63,6 +63,7 @@ import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.math.abs
+import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity(),
         MapEventsReceiver,
@@ -79,7 +80,7 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var locationOverlay : MyLocationNewOverlay
     private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
-    private var increment = 2
+    private var increment by Delegates.notNull<Int>()
     private var noOnTouchActions = true
     private var flingUpDetected = false
     private var longPressDetected = false

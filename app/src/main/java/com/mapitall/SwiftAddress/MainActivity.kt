@@ -859,7 +859,10 @@ class MainActivity : AppCompatActivity(),
                 e.printStackTrace()
             }
 
-        } else if (requestCode == 5 && resultCode == RESULT_OK) {
+        }
+
+        // Saves data
+        else if (requestCode == 5 && resultCode == RESULT_OK) {
 
             Log.i(TAG, "attempting to store zip file.")
 
@@ -900,7 +903,9 @@ class MainActivity : AppCompatActivity(),
                     Log.i(TAG, "Dialog dismissed")
                 }
             }.start()
-        } else if (requestCode == 6 && resultCode == RESULT_OK) {
+        }
+        // Opens audio application when user asks to record audio. Currently unused.
+        else if (requestCode == 6 && resultCode == RESULT_OK) {
             try {
                 val exif = ExifInterface(File(currentAudioPath!!))
                 Log.i(TAG, "filePath: $currentAudioPath")

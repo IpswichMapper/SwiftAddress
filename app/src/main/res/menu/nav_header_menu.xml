@@ -2,11 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:title="@string/recover_data"
+        android:icon="@drawable/recover"
         android:id="@+id/recover_data_menu_option" />
     <item
         android:title="@string/save_data"
+        android:icon="@drawable/save"
         android:id="@+id/save_data_menu_option"/>
     <item
         android:title="@string/upload_to_osm"
+        android:icon="@drawable/upload"
         android:id="@+id/upload_data_menu_option" />
+    <item
+        android:title="@string/settings"
+        android:icon="@drawable/gear_settings"
+        android:id="@+id/settings_menu_option" />
 </menu>

@@ -3,16 +3,14 @@
     package="com.mapitall.SwiftAddress">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Requires the user to accept permissions dialog-->
+
+    <!-- Requires the user to accept permissions dialog -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-
-
-
     <uses-feature android:name="android.hardware.camera2" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,27 +18,38 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SwiftAddress">
-        <activity android:name="com.mapitall.SwiftAddress.ChooseBackgroundImagery"
-            android:screenOrientation="portrait" />
-        <activity android:name="com.mapitall.SwiftAddress.Keypad"
-            android:screenOrientation="portrait" />
-        <activity android:name="com.mapitall.SwiftAddress.MainActivity"
-            android:screenOrientation="portrait">
+        <activity android:name=".Parent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ClassicMainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings"
+            android:label="@string/title_activity_settings" />
+        <activity
+            android:name=".ChooseBackgroundImagery"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Keypad"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
+        </activity>
 
         <provider
-            android:authorities="com.mapitall.SwiftAddress.provider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="com.mapitall.SwiftAddress.provider"
             android:exported="false"
-            android:grantUriPermissions="true" >
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/paths"/>
+                android:resource="@xml/paths" />
         </provider>
     </application>
 

@@ -1,0 +1,13 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="change_UI">
+        <item>Default</item>
+        <item>Classic</item>
+        <!-- TODO: Add different UIs for entry. -->
+    </string-array>
+
+    <string-array name="change_UI_values">
+        <item>Default</item>
+        <item>Classic</item>
+    </string-array>
+</resources>

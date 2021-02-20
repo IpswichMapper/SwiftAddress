@@ -17,37 +17,27 @@ import com.mapitall.SwiftAddress.MainActivity
 import com.mapitall.SwiftAddress.Map
 import com.mapitall.SwiftAddress.MarkerWindow
 import com.mapitall.SwiftAddress.R
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import java.io.File
 import java.io.FileOutputStream
+import java.text.DateFormat.getDateTimeInstance
 import java.text.SimpleDateFormat
 import java.util.*
 
-// AddressNodes Class which contains all
+// AddressNodes Class which conveniently packages all the information about
+// an address object into one data class that can be shared accross activities.
 @Parcelize
 data class AddressNodes(
-        private val housenumber_ : String,
-        private val street_ : String = "",
-        private val lat : Double,
-        private val lon : Double,
-        private val side_ : String,
-        private val buildingLevels_ : String) : Parcelable {
+    var housenumber : String,
+    val street : String = "",
+    var latitude : Double,
+    var longitude : Double,
+    val side : String,
+    var buildingLevels : String) : Parcelable
 
-    var housenumber = housenumber_
-    var street = street_
-    var latitude = lat
-    var longitude = lon
-    var side = side_
-    var buildingLevels = buildingLevels_
-
-}
-
-// Static class ("object") that helps storing housenumbers
-// TODO : Make this work with a database
-class StoreHouseNumbers(private val context: Context,
-                        private val mainActivity: MainActivity) : SQLiteOpenHelper(context,
+class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context,
         "address_database",
         null,
         1) {
@@ -85,9 +75,8 @@ class StoreHouseNumbers(private val context: Context,
         Log.w("addressFile", addressTextToWrite)
         Log.w("noteFile", noteTextToWrite)
         if (isExternalStorageAvailable && !isExternalStorageReadOnly) {
-            val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
-            val addressFileName = "housenumbers$current.osm"
-            val noteFileName = "notes$current.osc"
+            val addressFileName = "housenumbers.osm"
+            val noteFileName = "notes.osc"
 
             Log.i("ExtStorageAvailable", "$isExternalStorageAvailable")
 
@@ -248,6 +237,8 @@ class StoreHouseNumbers(private val context: Context,
         onCreate(db)
     }
 
+    // Remove all rows from the main table, and move them to a "temporary table" (so that they
+    // can be recovered later if need be)
     fun clearDatabase() {
         val db: SQLiteDatabase = this.writableDatabase
         var doNotExecuteNext = false
@@ -307,6 +298,7 @@ class StoreHouseNumbers(private val context: Context,
         return result.toInt()
     }
 
+    // Return the item type of the last item that was added.
     fun lastItemType() : String {
         val dbRead : SQLiteDatabase = this.readableDatabase
         val db: SQLiteDatabase = this.writableDatabase
@@ -340,7 +332,7 @@ class StoreHouseNumbers(private val context: Context,
 
 
     // Displays Markers from Database on the map when app is launched.
-    fun displayMarkers(mapClass: Map) {
+    fun displayMarkers(mapClass: Map, mainActivity: MainActivity) {
         val db: SQLiteDatabase = this.readableDatabase
         val markerHashMap = mapClass.getMarkerHashMap()
 
@@ -442,88 +434,6 @@ class StoreHouseNumbers(private val context: Context,
         mapClass.setMarkerHashMap(markerHashMap)
     }
 
-    private fun displayMarkers(mapClass: Map, displayImage: Boolean) {
-        if (!displayImage) {
-            Log.i(TAG, "Displaying Markers without images")
-            val db: SQLiteDatabase = this.readableDatabase
-            val markerHashMap = mapClass.getMarkerHashMap()
-
-            Log.i(TAG, "displayMarkers function started")
-
-            val c: Cursor = db.query(TABLE_NAME, null, null, null,
-                    null, null, "ID ASC")
-
-            while (c.moveToNext()) {
-                if (c.getString(c.getColumnIndex(COL_TYPE)) == "Address") {
-
-                    val housenumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
-                    var street = c.getString(c.getColumnIndex(COL_STREET))
-                    // TODO : Show street in popup
-                    val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
-                    val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
-                    val id = c.getInt(c.getColumnIndex(COL_ID))
-                    /*
-                markerList.add(Marker(map))
-                markerList.last().position = GeoPoint(latitude, longitude)
-                markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.address)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerList.last().title = housenumber
-                */
-
-                    markerHashMap[id] = Marker(mapClass.mapView)
-                    markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
-                    markerHashMap.getValue(id).icon = ContextCompat.getDrawable(context,
-                            R.drawable.address)
-                    markerHashMap.getValue(id).setAnchor(
-                            Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-
-                    val infoWindow = MarkerWindow(
-                            R.layout.address_press_layout_linear,
-                            mapClass,
-                            context,
-                            id,
-                            mainActivity)
-                    // markerList.last().infoWindow = infoWindow
-                    markerHashMap.getValue(id).infoWindow = infoWindow
-                    mapClass.mapView.overlays.add(markerHashMap.getValue(id))
-                    Log.i(TAG, "Address Marker added")
-
-                } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Note") {
-                    val noteContents = c.getString(c.getColumnIndex(COL_NOTE))
-                    val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
-                    val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
-                    val id = c.getInt(c.getColumnIndex(COL_ID))
-                    /*
-                markerList.add(Marker(map))
-                markerList.last().position = GeoPoint(latitude, longitude)
-                markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.note)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerList.last().title = noteContents
-                Log.i(DEBUG_TAG, "Note Marker added")
-                */
-
-                    markerHashMap[id] = Marker(mapClass.mapView)
-                    markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
-                    markerHashMap.getValue(id).icon = ContextCompat.getDrawable(context,
-                            R.drawable.note)
-                    markerHashMap.getValue(id).setAnchor(
-                            Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    markerHashMap.getValue(id).title = noteContents
-                    mapClass.mapView.overlays.add(markerHashMap.getValue(id))
-                    Log.i(TAG, "Note Marker added")
-
-                } else {
-                    Log.w(TAG, "Adding a marker failed: data type wasn't a " +
-                            "\"Note\", \"Address\". It was most likely an image.")
-                }
-            }
-            mapClass.mapView.invalidate()
-            mapClass.setMarkerHashMap(markerHashMap)
-        } else {
-            displayMarkers(mapClass)
-        }
-    }
-
     // Gets last address that was entered
     fun lastAddressEntry(side : String) : AddressNodes?{
         val db: SQLiteDatabase = this.readableDatabase
@@ -554,6 +464,7 @@ class StoreHouseNumbers(private val context: Context,
 
     }
 
+    // Add an row containing information about an image stored in internal storage
     @SuppressLint("Recycle")
     fun addImage(absolutePath : String, lat : Double, lon : Double) : Int {
         val db : SQLiteDatabase = this.writableDatabase
@@ -570,6 +481,7 @@ class StoreHouseNumbers(private val context: Context,
 
     }
 
+    // Remove marker at specific position.
     fun removeAt(housenumberID: Int) {
 
         val dbRead : SQLiteDatabase = this.readableDatabase
@@ -591,6 +503,7 @@ class StoreHouseNumbers(private val context: Context,
         db.close()
     }
 
+    // Change location of marker after it has been moved.
     fun changeLocation(ID : Int, lat : Double, lon : Double) {
         val db = this.writableDatabase
         db.execSQL("UPDATE $TABLE_NAME SET LATITUDE = $lat WHERE ID = $ID")
@@ -598,7 +511,10 @@ class StoreHouseNumbers(private val context: Context,
         db.close()
     }
 
-    fun recoverData(mapClass : Map) {
+    // Gets old data from a "temporary table", and overwrites current table with
+    // rows from "temporary table". The "temporary table" consists of data from
+    // the last time the user saved.
+    fun recoverData(mapClass : Map, mainActivity: MainActivity) {
 
         Log.i(TAG, "Attempting to recover data.")
         val db = this.writableDatabase
@@ -610,7 +526,7 @@ class StoreHouseNumbers(private val context: Context,
                 db.execSQL("INSERT INTO $TABLE_NAME SELECT * FROM $TEMP_TABLE_NAME")
                 val rows = db.delete(TABLE_NAME, "TYPE = 'Image'", null)
                 Log.i(TAG, "$rows rows deleted (image rows)")
-                displayMarkers(mapClass, false)
+                displayMarkers(mapClass, mainActivity)
             } catch (e : SQLiteException) {
                 e.printStackTrace()
 

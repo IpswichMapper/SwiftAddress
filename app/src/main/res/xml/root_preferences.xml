@@ -1,0 +1,24 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/user_interface">
+
+        <ListPreference
+            app:defaultValue="Default"
+            app:entries="@array/change_UI"
+            app:entryValues="@array/change_UI_values"
+            app:key="interface"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/other">
+
+        <SwitchPreferenceCompat
+            app:key="screen_timeout"
+            app:title="@string/prevent_screen_timeout"
+            app:summary="@string/stop_screen_timeout_desc"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

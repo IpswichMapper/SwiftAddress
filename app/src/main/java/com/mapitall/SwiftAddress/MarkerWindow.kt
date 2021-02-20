@@ -15,7 +15,7 @@ class MarkerWindow(pressLayoutId : Int,
         InfoWindow(pressLayoutId, mapClass.mapView) {
 
     private val TAG = "MarkerWindow"
-    private val storeHouseNumbersObject = StoreHouseNumbers(context, mainActivity)
+    private val storeHouseNumbersObject = StoreHouseNumbers(context)
     override fun onOpen(item: Any?) {
         closeAllInfoWindowsOn(mapView)
         Log.i(TAG, "InfoWindow Opened.")

@@ -25,7 +25,7 @@ class Map(var mapView: MapView,
           private val mainActivity: MainActivity) {
 
     private var markerHashMap = HashMap<Int, Marker>()
-    private var storeHouseNumbersObject = StoreHouseNumbers(context, mainActivity)
+    private var storeHouseNumbersObject = StoreHouseNumbers(context)
     private val TAG = "Map"
     init {
         // setting up map
@@ -38,7 +38,7 @@ class Map(var mapView: MapView,
 
         // Displays all the housenumbers that have already been
         // created but haven't been stored to an OSM file yet.
-        storeHouseNumbersObject.displayMarkers(this)
+        storeHouseNumbersObject.displayMarkers(this, mainActivity)
 
         for (marker: Marker in markerHashMap.values) {
             mapView.overlays.add(marker)

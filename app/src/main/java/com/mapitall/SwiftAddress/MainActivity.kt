@@ -39,6 +39,7 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.exifinterface.media.ExifInterface
+import androidx.preference.PreferenceManager
 import com.google.android.material.internal.NavigationMenu
 import com.google.android.material.navigation.NavigationView
 import com.mancj.slideup.SlideUp
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity(),
     private var markerList: MutableList<Marker> = mutableListOf()
 
     private lateinit var locationOverlay : MyLocationNewOverlay
-    private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this, this)
+    private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
     private var increment = 2
     private var noOnTouchActions = true
     private var flingUpDetected = false
@@ -88,6 +89,15 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // set preferences
+        let {
+            val sp = PreferenceManager.getDefaultSharedPreferences(this)
+
+            if (sp.getBoolean("screen_timeout", false)) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
 
         // set map details
         map = Map(findViewById(R.id.map), this, this)
@@ -637,7 +647,7 @@ class MainActivity : AppCompatActivity(),
                 R.id.recover_data_menu_option -> {
 
                     drawerLayout.closeDrawer(GravityCompat.START)
-                    storeHouseNumbersObject.recoverData(map)
+                    storeHouseNumbersObject.recoverData(map, this)
                 }
                 R.id.save_data_menu_option -> {
 
@@ -645,6 +655,12 @@ class MainActivity : AppCompatActivity(),
                     saveData(findViewById(itemID))
                 }
                 R.id.upload_data_menu_option -> uploadData()
+                R.id.settings_menu_option -> {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    val intent = Intent(this, Settings::class.java)
+                    startActivityForResult(intent, 7)
+
+                }
             }
 
             return@setNavigationItemSelectedListener true
@@ -942,6 +958,25 @@ class MainActivity : AppCompatActivity(),
             }
 
         }
+        // After settings have been closed.
+        else if (requestCode == 7 && resultCode == RESULT_OK) {
+            val sp = PreferenceManager.getDefaultSharedPreferences(this)
+
+            if (sp.getBoolean("screen_timeout", false)) {
+                Log.i(TAG, "screen is being kept on")
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                Log.i(TAG, "screen is no longer being kept on")
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+
+            if (sp.getString("interface", "Default") == "Classic") {
+                val intent = Intent(this, ClassicMainActivity::class.java)
+
+                startActivity(intent)
+                finish()
+            }
+        }
 
     }
 
@@ -1210,6 +1245,7 @@ class MainActivity : AppCompatActivity(),
         val textBoxTextSize = 40f
 
         val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+
         increment = sharedPreferences.getInt("increment", 2)
 
         Log.i(TAG, "Increment before function: $increment")

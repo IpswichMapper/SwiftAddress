@@ -15,6 +15,7 @@ import android.location.LocationManager
 import android.media.Image
 import android.net.Uri
 import android.net.sip.SipSession
+import android.nfc.Tag
 import android.os.*
 import android.provider.MediaStore
 import android.util.Log
@@ -184,7 +185,7 @@ class MainActivity : AppCompatActivity(),
                             textToSet = (textToSet.toInt() + increment).toString()
                             addressToChange.housenumber = textToSet
                         }
-                        Log.i("final text", textToSet)
+                        Log.i(TAG, "Final Text: $textToSet")
                     }
                     houseNumber.text = addressToChange.housenumber
                     val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
@@ -314,7 +315,7 @@ class MainActivity : AppCompatActivity(),
                         textToSet = (textToSet.toInt() + increment).toString()
                         addressToChange.housenumber = textToSet
                     }
-                    Log.i("final text", textToSet)
+                    Log.i(TAG, "Final Text: $textToSet")
                 }
                 addressToChange.latitude = map.mapView.mapCenter.latitude
                 addressToChange.longitude = map.mapView.mapCenter.longitude
@@ -393,7 +394,7 @@ class MainActivity : AppCompatActivity(),
                             textToSet = (textToSet.toInt() + increment).toString()
                             addressToChange.housenumber = textToSet
                         }
-                        Log.i("final text", textToSet)
+                        Log.i(TAG,"Final Text: $textToSet")
                     }
                     houseNumber.text = addressToChange.housenumber
                     val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
@@ -532,7 +533,7 @@ class MainActivity : AppCompatActivity(),
                         textToSet = (textToSet.toInt() + increment).toString()
                         addressToChange.housenumber = textToSet
                     }
-                    Log.i("final text", textToSet)
+                    Log.i(TAG, "Final Text: $textToSet")
                 }
                 addressToChange.latitude = map.mapView.mapCenter.latitude
                 addressToChange.longitude = map.mapView.mapCenter.longitude
@@ -1289,7 +1290,7 @@ class MainActivity : AppCompatActivity(),
                     textToSet = (textToSet.toInt() - 1).toString()
                     modifyIncrementInput.setText(textToSet)
 
-                    Log.i(textToSet, "final text")
+                    Log.i(TAG, "Final Text: $textToSet")
                 }
             }
             Log.i(TAG, "modifyIncrementDialog: minusButton pressed")
@@ -1321,7 +1322,7 @@ class MainActivity : AppCompatActivity(),
                     textToSet = (textToSet.toInt() + 1).toString()
                     modifyIncrementInput.setText(textToSet)
 
-                    Log.i(textToSet, "final text")
+                    Log.i(TAG, "Final Text: $textToSet")
                 }
             }
             Log.i(TAG, "modifyIncrementDialog: plusButton pressed")
@@ -1461,7 +1462,7 @@ class MainActivity : AppCompatActivity(),
             textToSet = (textToSet.toInt() + increment).toString()
             houseNumber.text = textToSet
 
-            Log.i("final text", textToSet)
+            Log.i(TAG, "final text: $textToSet")
 
         }
         map.mapView.invalidate()
@@ -1486,7 +1487,7 @@ class MainActivity : AppCompatActivity(),
             textToSet = (textToSet.toInt() - 1).toString()
             houseNumber.text = textToSet
 
-            Log.i("final text", textToSet)
+            Log.i(TAG, "final text $textToSet")
         }
 
 
@@ -1506,13 +1507,13 @@ class MainActivity : AppCompatActivity(),
                 val intOrNot = c.toString().toIntOrNull()
                 if (intOrNot != null) {
                     textToSet += intOrNot.toString()
-                    Log.i(textToSet, "text to set")
+                    Log.i(TAG, "textToSet: $textToSet")
                 }
             }
             textToSet = (textToSet.toInt() + 1).toString()
             houseNumber.text = textToSet
 
-            Log.i("final text", textToSet)
+            Log.i(TAG, "Final Text $textToSet")
 
         }
     }

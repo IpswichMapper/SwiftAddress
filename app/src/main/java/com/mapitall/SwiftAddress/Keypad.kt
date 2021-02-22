@@ -2,9 +2,7 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.app.ActionBar
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.InputType
@@ -22,10 +20,9 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.preference.PreferenceManager
 import layout.AddressNodes
 import org.apache.commons.lang3.StringUtils
-import java.lang.Exception
-import kotlin.math.abs
 import java.net.URL
 import java.util.*
+import kotlin.math.abs
 
 class Keypad : AppCompatActivity(),
         GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {

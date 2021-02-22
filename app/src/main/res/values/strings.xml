@@ -89,5 +89,6 @@
     <string name="user_interface">User Interface</string>
     <string name="compass_unavailable">Compass not available</string>
     <string name="choose_UI">Choose User Interface</string>
+    <string name="no_camera_app">No camera application available</string>
 
 </resources>

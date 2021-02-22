@@ -53,4 +53,11 @@
         </provider>
     </application>
 
+    <!-- Specifying that this app needs camera app to take pictures. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="image/jpeg" />
+        </intent>
+    </queries>
 </manifest>

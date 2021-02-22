@@ -7,15 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
-import android.graphics.Color
+import android.content.res.Resources
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.media.Image
 import android.net.Uri
-import android.net.sip.SipSession
-import android.nfc.Tag
 import android.os.*
 import android.provider.MediaStore
 import android.util.Log
@@ -26,22 +23,19 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.checkSelfPermission
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.os.ConfigurationCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.exifinterface.media.ExifInterface
 import androidx.preference.PreferenceManager
-import com.google.android.material.internal.NavigationMenu
 import com.google.android.material.navigation.NavigationView
 import com.mancj.slideup.SlideUp
 import com.mancj.slideup.SlideUpBuilder
@@ -54,7 +48,6 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
-import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
@@ -991,7 +984,7 @@ class MainActivity : AppCompatActivity(),
     private fun zipFilesAndDelete(zipUri : Uri) {
         val buffer = 2048
 
-        val surveyFolder = File(getExternalFilesDir(null)!!.absolutePath)
+        val surveyFolder = File(getExternalFilesDir("data")!!.absolutePath)
         val surveyFiles: Array<File>? = surveyFolder.listFiles()
 
         if (surveyFiles != null) {
@@ -1530,13 +1523,14 @@ class MainActivity : AppCompatActivity(),
 
     fun takePhoto(view: View) {
 
-        val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss").format(Date())
+        val locale = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)
+        val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss", locale).format(Date())
         val fileName = "image-$current.jpg"
 
-        val imageFile = File(getExternalFilesDir(null), fileName)
+        val imageFile = File(getExternalFilesDir("data"), fileName)
         currentImagePath = imageFile.absolutePath
 
-        Log.i(TAG, "filePath: ${getExternalFilesDir(null)!!.absolutePath + fileName}")
+        Log.i(TAG, "filePath: ${getExternalFilesDir("data")!!.absolutePath + fileName}")
         Log.i(TAG, "filePath: $currentImagePath")
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (cameraIntent.resolveActivity(packageManager) != null) {
@@ -1548,12 +1542,16 @@ class MainActivity : AppCompatActivity(),
             Log.i(TAG, "URI filePath: $imageURI")
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
             startActivityForResult(cameraIntent, 4)
+        } else {
+            Toast.makeText(this, getString(R.string.no_camera_app),
+                    Toast.LENGTH_SHORT).show()
         }
     }
 
     fun captureAudio(view: View) {
 
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT)
+        Toast.makeText(this, getString(R.string.unimplemented),
+                Toast.LENGTH_SHORT).show()
 
     }
 
@@ -1601,8 +1599,8 @@ class MainActivity : AppCompatActivity(),
             leftArrow.visibility = View.VISIBLE
             rightArrow.visibility = View.VISIBLE
 
-            val params = frameLayout.layoutParams as ConstraintLayout.LayoutParams
-            params.bottomToTop = R.id.add_address_layout
+            val constraintParams = frameLayout.layoutParams as ConstraintLayout.LayoutParams
+            constraintParams.bottomToTop = R.id.add_address_layout
             frameLayout.requestLayout()
         }
 

@@ -22,10 +22,6 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import java.io.File
 import java.io.FileOutputStream
-import java.text.DateFormat.getDateTimeInstance
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.HashMap
 
 // AddressNodes Class which conveniently packages all the information about
 // an address object into one data class that can be shared accross activities.
@@ -82,7 +78,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             Log.i("ExtStorageAvailable", "$isExternalStorageAvailable")
 
 
-            val folderPath = context.getExternalFilesDir(null)!!
+            val folderPath = context.getExternalFilesDir("data")!!
                     .absolutePath + File.separator
 
             if (!File(folderPath).exists()) {

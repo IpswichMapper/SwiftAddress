@@ -722,7 +722,6 @@ class Keypad : AppCompatActivity(),
                 var array: Array<String> = StringUtils.substringsBetween(result,
                         "<tag k=\"name\" v=\"", "\"/>")
                 val distinctList = array.distinct()
-                Log.w(TAG, result)
                 Log.e(TAG, distinctList.toString())
 
                 runOnUiThread {
@@ -773,7 +772,7 @@ class Keypad : AppCompatActivity(),
         dialog.show()
         streetNameInput.requestFocus()
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-        
+
     }
 
     // Adds value of number pressed to textbox.

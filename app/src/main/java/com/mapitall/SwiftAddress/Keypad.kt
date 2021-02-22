@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils
 import java.lang.Exception
 import kotlin.math.abs
 import java.net.URL
+import java.util.*
 
 class Keypad : AppCompatActivity(),
         GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
@@ -38,7 +39,7 @@ class Keypad : AppCompatActivity(),
 
     private val TAG = "Keypad"
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_keypad)
@@ -400,6 +401,15 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
 
+        val streetNameTag = findViewById<TextView>(R.id.street_name_tag)
+        val streetNameValue = findViewById<TextView>(R.id.street_name_value)
+        streetNameTag.setOnClickListener {
+            modStreetName()
+        }
+        streetNameValue.setOnClickListener {
+            modStreetName()
+        }
+
         // go back to MainActivity & send address data to MainActivity
         val doneButton = findViewById<ImageButton>(R.id.done)
         doneButton.setOnClickListener {
@@ -691,7 +701,46 @@ class Keypad : AppCompatActivity(),
         changeStreetDialogue.setTitle(getString(R.string.street_name))
 
         var streetNameValue : String
-        val streetNameInput = EditText(this)
+        val streetNameInput = AutoCompleteTextView(this)
+
+        val lat = intent.getDoubleExtra("lat", 0.000)
+        val lon = intent.getDoubleExtra("lon", 0.000)
+        val radius = 100
+
+        Thread {
+            Log.i(TAG, "In thread")
+
+            val queryText = "https://overpass-api.de/api/interpreter?data=" +
+                    "<query type='way'><around lat='$lat' lon='$lon' radius='$radius'/>" +
+                    "<has-kv k='highway' regv='trunk|primary|secondary|tertiary|unclassified" +
+                    "|residential|living_street|pedestrian|road' />" +
+                    "<has-kv k='name' regv='.+'></has-kv></query><print/>"
+
+            val query = URL(queryText)
+            val result = query.readText()
+            try {
+                var array: Array<String> = StringUtils.substringsBetween(result,
+                        "<tag k=\"name\" v=\"", "\"/>")
+                val distinctList = array.distinct()
+                Log.w(TAG, result)
+                Log.e(TAG, distinctList.toString())
+
+                runOnUiThread {
+                    Log.i(TAG, "in runOnUiThread")
+                    streetNameInput.setAdapter(ArrayAdapter(
+                            this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            distinctList))
+                    Log.i(TAG, "Query finished")
+                    Toast.makeText(this, "Query finished", Toast.LENGTH_SHORT).show()
+
+                }
+            } catch (e : NullPointerException) {
+                Log.i(TAG, "Failed to find any street names.")
+                Log.w(TAG, result)
+            }
+
+        }.start()
 
         val container = FrameLayout(this)
         val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
@@ -724,6 +773,41 @@ class Keypad : AppCompatActivity(),
         dialog.show()
         streetNameInput.requestFocus()
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
+/*
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+            MATCH_PARENT, WRAP_CONTENT
+        )
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        streetNameInput.layoutParams = params
+
+        container.addView(streetNameInput)
+
+        changeStreetDialogue.setView(container)
+        changeStreetDialogue.setMessage(getString(R.string.remember_change_street_name))
+
+        changeStreetDialogue.setPositiveButton(getString(R.string.change_street_name_button)) {
+            _, _ -> streetNameValue = streetNameInput.text.toString()
+
+            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+
+            if (streetNameValue.length < 18) {
+                streetNameTextView.text = streetNameValue
+            } else {
+                streetNameTextView.text = "${streetNameValue.subSequence(0, 15)}..."
+            }
+
+            street = streetNameValue
+        }
+        changeStreetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        val dialog = changeStreetDialogue.create()
+        dialog.show()
+        streetNameInput.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
+ */
     }
 
     // Adds value of number pressed to textbox.

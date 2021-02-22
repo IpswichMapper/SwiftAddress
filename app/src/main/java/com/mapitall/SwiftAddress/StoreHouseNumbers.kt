@@ -383,7 +383,9 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                         mapClass,
                         context,
                         id,
-                        mainActivity)
+                        mainActivity,
+                        housenumber,
+                        street)
                 // markerList.last().infoWindow = infoWindow
                 markerHashMap.getValue(id).infoWindow = infoWindow
                 Log.i(TAG, "Address Marker added")

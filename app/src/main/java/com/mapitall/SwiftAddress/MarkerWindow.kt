@@ -1,5 +1,6 @@
 package com.mapitall.SwiftAddress
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Button
@@ -12,16 +13,23 @@ class MarkerWindow(pressLayoutId : Int,
                    private val mapClass: Map,
                    private val context: Context,
                    private val ID : Int,
-                   private val mainActivity: MainActivity) :
+                   private val mainActivity: MainActivity,
+                   private val houseNumber : String = "",
+                   private val street : String = "") :
         InfoWindow(pressLayoutId, mapClass.mapView) {
 
     private val TAG = "MarkerWindow"
     private val storeHouseNumbersObject = StoreHouseNumbers(context)
+    @SuppressLint("SetTextI18n")
     override fun onOpen(item: Any?) {
         closeAllInfoWindowsOn(mapView)
 
-        val text = mView.findViewById<TextView>(R.id.marker_text_view)
+        val textView = mView.findViewById<TextView>(R.id.marker_text_view)
         // TODO: Show housenumber and street
+        if (houseNumber != "") {
+            if (street != "") textView.text = "$houseNumber, $street"
+            else textView.text = houseNumber
+        }
         
         Log.i(TAG, "InfoWindow Opened.")
 

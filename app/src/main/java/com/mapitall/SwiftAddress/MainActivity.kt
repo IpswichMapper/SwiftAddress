@@ -1561,19 +1561,14 @@ class MainActivity : AppCompatActivity(),
         val cancelButton = findViewById<Button>(R.id.cancel_move_marker)
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
         val rightArrow = findViewById<ImageButton>(R.id.add_address_on_right)
-        val frameLayout = findViewById<FrameLayout>(R.id.frameLayout)
-        val params = frameLayout.layoutParams as ConstraintLayout.LayoutParams
+
         var runCondition = true
-        var cancelled = false
-        var done = false
+
         val oldPosition = marker.position
         moveButton.visibility = View.VISIBLE
         cancelButton.visibility = View.VISIBLE
         leftArrow.visibility = View.GONE
         rightArrow.visibility = View.GONE
-
-        params.bottomToBottom = R.id.constraint_layout
-        frameLayout.requestLayout()
 
         moveButton.setOnClickListener {
             runCondition = false
@@ -1582,8 +1577,8 @@ class MainActivity : AppCompatActivity(),
             leftArrow.visibility = View.VISIBLE
             rightArrow.visibility = View.VISIBLE
 
-            params.bottomToTop = R.id.add_address_layout
-            frameLayout.requestLayout()
+            marker.position = map.mapView.mapCenter as GeoPoint
+            map.mapView.invalidate()
 
             storeHouseNumbersObject.changeLocation(ID,
                     map.mapView.mapCenter.latitude,
@@ -1593,28 +1588,23 @@ class MainActivity : AppCompatActivity(),
 
         cancelButton.setOnClickListener {
             runCondition = false
-            cancelled = true
             moveButton.visibility = View.GONE
             cancelButton.visibility = View.GONE
             leftArrow.visibility = View.VISIBLE
             rightArrow.visibility = View.VISIBLE
 
-            val constraintParams = frameLayout.layoutParams as ConstraintLayout.LayoutParams
-            constraintParams.bottomToTop = R.id.add_address_layout
-            frameLayout.requestLayout()
+            marker.position = oldPosition
+            map.mapView.invalidate()
+
         }
 
         map.mapView.setOnTouchListener { _, event ->
             if (runCondition && !done) {
                 marker.position = map.mapView.mapCenter as GeoPoint
+                map.mapView.invalidate()
                 // marker.position = GeoPoint(map.mapView.mapCenter.latitude, map.mapView.mapCenter.longitude)
-            } else {
-                if (cancelled) {
-                    marker.position = oldPosition
-                    map.mapView.invalidate()
-                }
-                done = true
             }
+
             return@setOnTouchListener super.onTouchEvent(event)
         }
     }

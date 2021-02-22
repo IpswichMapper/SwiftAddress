@@ -773,41 +773,7 @@ class Keypad : AppCompatActivity(),
         dialog.show()
         streetNameInput.requestFocus()
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-
-/*
-        val container = FrameLayout(this)
-        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
-            MATCH_PARENT, WRAP_CONTENT
-        )
-        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
-        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
-        streetNameInput.layoutParams = params
-
-        container.addView(streetNameInput)
-
-        changeStreetDialogue.setView(container)
-        changeStreetDialogue.setMessage(getString(R.string.remember_change_street_name))
-
-        changeStreetDialogue.setPositiveButton(getString(R.string.change_street_name_button)) {
-            _, _ -> streetNameValue = streetNameInput.text.toString()
-
-            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
-
-            if (streetNameValue.length < 18) {
-                streetNameTextView.text = streetNameValue
-            } else {
-                streetNameTextView.text = "${streetNameValue.subSequence(0, 15)}..."
-            }
-
-            street = streetNameValue
-        }
-        changeStreetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
-        val dialog = changeStreetDialogue.create()
-        dialog.show()
-        streetNameInput.requestFocus()
-        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
-
- */
+        
     }
 
     // Adds value of number pressed to textbox.

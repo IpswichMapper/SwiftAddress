@@ -1599,7 +1599,7 @@ class MainActivity : AppCompatActivity(),
         }
 
         map.mapView.setOnTouchListener { _, event ->
-            if (runCondition && !done) {
+            if (runCondition) {
                 marker.position = map.mapView.mapCenter as GeoPoint
                 map.mapView.invalidate()
                 // marker.position = GeoPoint(map.mapView.mapCenter.latitude, map.mapView.mapCenter.longitude)

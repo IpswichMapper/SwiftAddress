@@ -90,5 +90,6 @@
     <string name="compass_unavailable">Compass not available</string>
     <string name="choose_UI">Choose User Interface</string>
     <string name="no_camera_app">No camera application available</string>
+    <string name="choose_background_imagery">Choose Background Imagery</string>
 
 </resources>

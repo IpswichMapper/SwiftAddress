@@ -1,35 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChooseBackgroundImagery">
+    android:orientation="vertical"
+    tools:context=".ChooseBackgroundImagery"
+    tools:ignore="ExtraText"
+    android:background="@color/black">
 
-    <Button
-        android:id="@+id/mapnik_imagery"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:onClick="sendImageryChosen"
-        android:tag="mapnik_imagery"
-        android:text="@string/osm_background_imagery"
-        app:layout_constraintBottom_toTopOf="@+id/mapbox_satellite"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:onClick="changeImagery"
+        android:background="@drawable/rounded_layout"
+        android:focusable="true"
+        android:src="@drawable/osm_carto"
+        android:padding="10dp"
+        android:scaleType="centerCrop"/>
+        <!-- app:srcCompat="@drawable/osm_carto" -->
 
-        <Button
-        android:id="@+id/mapbox_satellite"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:onClick="sendImageryChosen"
-        android:tag="public_transport_map"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapnik_imagery"
-        android:text="@string/pt_background_imagery_TEMP" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageButton
+        android:id="@+id/imageButton3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/add_photo" />
+
+</LinearLayout>

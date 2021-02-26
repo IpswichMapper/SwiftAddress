@@ -1,16 +1,23 @@
 package com.mapitall.SwiftAddress
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragment
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
+import org.osmdroid.tileprovider.modules.SqlTileWriter
+import org.osmdroid.views.MapView
 
-class Settings : AppCompatActivity() {
+class Settings : AppCompatActivity(){
 
     private val TAG = "Settings"
-
+    val contextLocal : Context = this
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -22,6 +29,8 @@ class Settings : AppCompatActivity() {
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
+
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.i(TAG, "onOptionsItemSelected")
@@ -36,9 +45,36 @@ class Settings : AppCompatActivity() {
         finish()
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
+
+    class SettingsFragment : PreferenceFragmentCompat(),
+            PreferenceManager.OnPreferenceTreeClickListener {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        }
+
+        override fun onPreferenceTreeClick(preference: Preference): Boolean {
+            Log.i("SettingsFragment", "preference.key : ${preference.key}")
+            if (preference.key == "clear_cache") {
+                val clearCacheDialog = AlertDialog.Builder(requireContext())
+                clearCacheDialog.setTitle(getString(R.string.clear_cache))
+                clearCacheDialog.setMessage(getString(R.string.clear_cache_question))
+
+                clearCacheDialog.setPositiveButton(getString(R.string.clear_cache)) { _, _ ->
+                    /*
+                    val sp = PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
+                    sp.putBoolean("clear_cache", true)
+                    sp.apply()
+                    */
+                    Thread {
+                        val tileWriter = SqlTileWriter()
+                        tileWriter.purgeCache()
+                    }
+                }
+                clearCacheDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+
+                clearCacheDialog.create().show()
+            }
+            return true
         }
     }
 }

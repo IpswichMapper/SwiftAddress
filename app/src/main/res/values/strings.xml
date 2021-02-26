@@ -98,5 +98,8 @@
     <string name="custom_slippy_url">Add a custom Slippy Map URL</string>
     <string name="bing_satellite">Bing Satellite</string>
     <string name="esri_satellite">Esri Satellite</string>
+    <string name="data_preferences">Data</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="clear_cache_question">Are you sure you want to clear map cache? Maps won\'t reload unless you have internet.</string>
 
 </resources>

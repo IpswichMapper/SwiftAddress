@@ -51,8 +51,7 @@ class Map(var mapView: MapView,
             }
 
             override fun onZoom(event: ZoomEvent?): Boolean {
-                Log.i("based", "based")
-                return true
+                return false
             }
         }
         mapView.addMapListener(mapListener)

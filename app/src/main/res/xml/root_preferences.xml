@@ -11,15 +11,20 @@
             app:title="@string/choose_UI"
             app:useSimpleSummaryProvider="true" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/other">
-
         <SwitchPreferenceCompat
             app:key="screen_timeout"
             app:title="@string/prevent_screen_timeout"
             app:summary="@string/stop_screen_timeout_desc"/>
 
     </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/data_preferences">
+        <Preference
+            android:title="Clear Cache"
+            android:summary="Clear all the map cache. This will clear up some space on your device."
+            android:key="clear_cache">
+        </Preference>
+    </PreferenceCategory>
+
 
 </PreferenceScreen>

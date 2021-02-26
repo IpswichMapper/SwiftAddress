@@ -42,6 +42,7 @@ import com.mancj.slideup.SlideUpBuilder
 import layout.AddressNodes
 import layout.StoreHouseNumbers
 import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.tileprovider.modules.SqlTileWriter
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.XYTileSource
@@ -754,6 +755,10 @@ class MainActivity : AppCompatActivity(),
             } else {
                 Log.i(TAG, "screen is no longer being kept on")
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+
+            if (sp.getBoolean("clear_cache", false)) {
+
             }
 
             if (sp.getString("interface", "Default") == "Classic") {

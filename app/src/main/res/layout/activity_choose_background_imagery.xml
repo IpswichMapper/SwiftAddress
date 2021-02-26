@@ -1,32 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ChooseBackgroundImagery"
-    tools:ignore="ExtraText"
-    android:background="@color/black">
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+    xmlns:android="http://schemas.android.com/apk/res/android" />
+    <ScrollView
+        android:layout_height="0dp"
+        android:layout_weight="9"
+        android:layout_width="match_parent">
+        <LinearLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/choose_background_imagery_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context=".ChooseBackgroundImagery"
+            tools:ignore="ExtraText"
+        android:background="@color/background_color">
+            <TextView
+                android:id="@+id/osm_carto_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/osm_carto"
+                android:paddingLeft="30dp"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/button_colors"
+                tools:ignore="RtlHardcoded,RtlSymmetry">
+            </TextView>
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/osm_carto_card_view"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="20dp"
+    >
+                <FrameLayout
+                    android:id="@+id/osm_carto_frame_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:focusable="true"
+                    android:onClick="changeImagery">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/osm_carto"
+                        android:scaleType="centerCrop" />
+                </FrameLayout>
+                <!-- app:srcCompat="@drawable/osm_carto" -->
+            </com.google.android.material.card.MaterialCardView>
 
-    <ImageButton
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mapbox_satellite"
+                android:textSize="20sp"
+                android:paddingLeft="30dp"
+                android:textStyle="bold"
+                android:textColor="@color/button_colors"
+                tools:ignore="RtlHardcoded,RtlSymmetry" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="20dp"
+                android:id="@+id/mapbox_satellite_card_view"
+                >
+
+                <FrameLayout
+                    android:id="@+id/mapbox_satellite_frame_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:focusable="true"
+                    android:onClick="changeImagery">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/mapbox_satellite"
+                        android:scaleType="centerCrop">
+                    </ImageView>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/bing_satellite"
+                android:textSize="20sp"
+                android:paddingLeft="30dp"
+                android:textStyle="bold"
+                android:textColor="@color/button_colors"
+                tools:ignore="RtlHardcoded,RtlSymmetry" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="20dp"
+                android:id="@+id/bing_satellite_card_view"
+                >
+
+                <FrameLayout
+                    android:id="@+id/bing_satellite_frame_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:focusable="true"
+                    android:onClick="changeImagery">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/mapbox_satellite"
+                        android:scaleType="centerCrop">
+                    </ImageView>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/esri_satellite"
+                android:textSize="20sp"
+                android:paddingLeft="30dp"
+                android:textStyle="bold"
+                android:textColor="@color/button_colors"
+                tools:ignore="RtlHardcoded,RtlSymmetry" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="20dp"
+                android:id="@+id/esri_satellite_card_view"
+                >
+
+                <FrameLayout
+                    android:id="@+id/esri_satellite_frame_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:focusable="true"
+                    android:onClick="changeImagery">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/mapbox_satellite"
+                        android:scaleType="centerCrop">
+                    </ImageView>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        android:onClick="changeImagery"
-        android:background="@drawable/rounded_layout"
-        android:focusable="true"
-        android:src="@drawable/osm_carto"
-        android:padding="10dp"
-        android:scaleType="centerCrop"/>
-        <!-- app:srcCompat="@drawable/osm_carto" -->
+        android:layout_height="50dp"
+        android:orientation="horizontal">
 
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/custom_imagery"
+            android:id="@+id/custom_imagery"
+            android:onClick="changeImagery"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp" />
 
-    <ImageButton
-        android:id="@+id/imageButton3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/add_photo" />
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:text="Save" />
 
+    </LinearLayout>
 </LinearLayout>

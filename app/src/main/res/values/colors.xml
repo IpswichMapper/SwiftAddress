@@ -19,4 +19,7 @@
 
     <color name="street_name_previous">#50851e</color>
     <color name="street_name_new">#ff0000</color>
+
+    <color name="border_blue">#0000FF</color>
+    <color name="grey_color">@android:color/darker_gray</color>
 </resources>

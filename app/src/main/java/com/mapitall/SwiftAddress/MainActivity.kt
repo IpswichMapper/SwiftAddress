@@ -22,10 +22,10 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.checkSelfPermission
 import androidx.core.content.ContextCompat
@@ -42,8 +42,11 @@ import com.mancj.slideup.SlideUpBuilder
 import layout.AddressNodes
 import layout.StoreHouseNumbers
 import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
@@ -55,6 +58,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.IndexOutOfBoundsException
 import kotlin.math.abs
 import kotlin.properties.Delegates
 
@@ -64,18 +68,21 @@ class MainActivity : AppCompatActivity(),
         PopupMenu.OnMenuItemClickListener,
         LocationListener {
 
+
     private var currentImagePath: String? = null
     private var currentAudioPath: String? = null
     private var TAG = "MainActivity"
 
     private lateinit var map : Map
     private var markerList: MutableList<Marker> = mutableListOf()
-
+    private lateinit var imagery : String
     private lateinit var locationOverlay : MyLocationNewOverlay
     private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
     private var increment by Delegates.notNull<Int>()
     private var noOnTouchActions = true
     private var flingUpDetected = false
+    private var flingLeftDetected = false
+    private var flingRightDetected = false
     private var longPressDetected = false
     private lateinit var slideUp: SlideUp
 
@@ -85,23 +92,18 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // set preferences
-        let {
-            val sp = PreferenceManager.getDefaultSharedPreferences(this)
-
-            if (sp.getBoolean("screen_timeout", false)) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            }
-        }
 
         // set map details
         map = Map(findViewById(R.id.map), this, this)
 
-        // val sharedPreferences = getSharedPreferences(getString(R.string.preference_string), MODE_PRIVATE)
+        // get preferences
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
+
+        if (sp.getBoolean("screen_timeout", false)) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
         increment = sp.getInt("increment", 2)
-
-
+        backgroundImagery()
 
         // zoom to current location when app starts.
         val mapController = map.mapView.controller
@@ -138,12 +140,14 @@ class MainActivity : AppCompatActivity(),
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
 
 
-        val slideUpView = findViewById<View>(R.id.basedView)
+        val swipeUpRelativeLayout = findViewById<View>(R.id.swipe_up_relative_layout)
         slideUp = SlideUpBuilder(
-                slideUpView
+                swipeUpRelativeLayout
         ).withStartState(SlideUp.State.HIDDEN)
+                .withGesturesEnabled(false)
                 .withStartGravity(Gravity.BOTTOM)
                 .build()
+
 
         leftArrow.setOnTouchListener { _, event ->
             Log.i(TAG, "leftArrow: onTouchListener Called")
@@ -152,121 +156,8 @@ class MainActivity : AppCompatActivity(),
 
             gestureDetector.onTouchEvent(event)
             // IF YOU SWIPE UP ON THE LEFT ARROW
-            if (flingUpDetected) {
-
-                val addressToChange = storeHouseNumbersObject.lastAddressEntry("left")
-                increment = sp.getInt("increment", 2)
-
-
-                if (addressToChange != null) {
-                    Log.i(TAG, "flingUpDetected & address is not null")
-                    val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
-
-                    try {
-                        var numToIncrement = addressToChange.housenumber.toInt()
-                        numToIncrement += increment
-                        addressToChange.housenumber = numToIncrement.toString()
-                    } catch (e: Exception) {
-                        var textToSet = "";
-                        if (addressToChange.housenumber.isNotBlank()) {
-                            for (c in addressToChange.housenumber) {
-                                val intOrNot = c.toString().toIntOrNull()
-                                if (intOrNot != null) {
-                                    textToSet += intOrNot.toString()
-                                    Log.i(textToSet, "text to set")
-                                }
-                            }
-                            textToSet = (textToSet.toInt() + increment).toString()
-                            addressToChange.housenumber = textToSet
-                        }
-                        Log.i(TAG, "Final Text: $textToSet")
-                    }
-                    houseNumber.text = addressToChange.housenumber
-                    val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
-                    miniKeypadSide.text = getString(R.string.left_side)
-
-                    val button1 = findViewById<ImageButton>(R.id.B1R0_mini_relative)
-                    val button2 = findViewById<ImageButton>(R.id.B2R0_mini_relative)
-                    val button3 = findViewById<ImageButton>(R.id.B3R0_mini_relative)
-                    val button4 = findViewById<ImageButton>(R.id.B1R1_mini_relative)
-                    val button5 = findViewById<ImageButton>(R.id.B2R1_mini_relative)
-                    val button6 = findViewById<ImageButton>(R.id.B3R1_mini_relative)
-
-                    button1.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button2.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button3.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button4.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button5.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button6.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-
-                    Log.i(TAG, "buildingLevels, ${addressToChange.buildingLevels}")
-                    when (addressToChange.buildingLevels) {
-                        "B1 R0" -> button1.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B2 R0" -> button2.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B3 R0" -> button3.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B1 R1" -> button4.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B2 R1" -> button5.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B3 R1" -> button6.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                    }
-
-                    button1.tag = "left"; button2.tag = "left"; button3.tag = "left"
-                    button4.tag = "left"; button5.tag = "left"; button6.tag = "left"
-                    slideUp.show()
-                } else {
-                    Toast.makeText(this, getString(R.string.add_address_first),
-                            Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                noOnTouchActions = true
-            }
+            if (flingUpDetected) showSwipeUpKeypad(true)
+            noOnTouchActions = true
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
@@ -279,38 +170,10 @@ class MainActivity : AppCompatActivity(),
 
             if (addressToChange != null) {
                 Log.i(TAG, "longPressDetected & address is not null")
-                val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
+                vibrate(150, VibrationEffect.DEFAULT_AMPLITUDE)
 
-                if (Build.VERSION.SDK_INT >= 26) {
-                    vibrator.vibrate(
-                            VibrationEffect.createOneShot(
-                                    150, VibrationEffect.DEFAULT_AMPLITUDE
-                            )
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(150)
-                }
-                try {
-                    var numToIncrement = addressToChange.housenumber.toInt()
-                    numToIncrement += increment
-                    addressToChange.housenumber = numToIncrement.toString()
-                } catch (e: Exception) {
-                    var textToSet = "";
-                    if (addressToChange.housenumber.isNotBlank()) {
-                        for (c in addressToChange.housenumber) {
-                            val intOrNot = c.toString().toIntOrNull()
-                            if (intOrNot != null) {
-                                textToSet += intOrNot.toString()
-                                Log.i(textToSet, "text to set")
-                            }
-                        }
-                        textToSet = (textToSet.toInt() + increment).toString()
-                        addressToChange.housenumber = textToSet
-                    }
-                    Log.i(TAG, "Final Text: $textToSet")
-                }
+                addressToChange.housenumber = incrementAddress(addressToChange.housenumber)
                 addressToChange.latitude = map.mapView.mapCenter.latitude
                 addressToChange.longitude = map.mapView.mapCenter.longitude
                 addressToChange.buildingLevels = ""
@@ -360,129 +223,8 @@ class MainActivity : AppCompatActivity(),
             gestureDetector.onTouchEvent(event)
 
             // IF YOU SWIPE UP ON THE RIGHT ARROW
-
-            if (flingUpDetected) {
-
-                val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
-                increment = sp.getInt("increment", 2)
-
-
-                if (addressToChange != null) {
-                    Log.i(TAG, "flingUpDetected & address is not null")
-                    val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
-
-                    try {
-                        var numToIncrement = addressToChange.housenumber.toInt()
-                        numToIncrement += increment
-                        addressToChange.housenumber = numToIncrement.toString()
-                    } catch (e: Exception) {
-                        var textToSet = "";
-                        if (addressToChange.housenumber.isNotBlank()) {
-                            for (c in addressToChange.housenumber) {
-                                val intOrNot = c.toString().toIntOrNull()
-                                if (intOrNot != null) {
-                                    textToSet += intOrNot.toString()
-                                    Log.i(textToSet, "text to set")
-                                }
-                            }
-                            textToSet = (textToSet.toInt() + increment).toString()
-                            addressToChange.housenumber = textToSet
-                        }
-                        Log.i(TAG,"Final Text: $textToSet")
-                    }
-                    houseNumber.text = addressToChange.housenumber
-                    val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
-                    miniKeypadSide.text = getString(R.string.right_side)
-                    Log.i(
-                            TAG,
-                            "backgroundTint, ${findViewById<ImageButton>(R.id.B1R0_mini_relative).backgroundTintList}"
-                    )
-
-                    val button1 = findViewById<ImageButton>(R.id.B1R0_mini_relative)
-                    val button2 = findViewById<ImageButton>(R.id.B2R0_mini_relative)
-                    val button3 = findViewById<ImageButton>(R.id.B3R0_mini_relative)
-                    val button4 = findViewById<ImageButton>(R.id.B1R1_mini_relative)
-                    val button5 = findViewById<ImageButton>(R.id.B2R1_mini_relative)
-                    val button6 = findViewById<ImageButton>(R.id.B3R1_mini_relative)
-
-                    button1.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button2.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button3.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button4.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button5.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-                    button6.backgroundTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(this, android.R.color.darker_gray)
-                    )
-
-
-                    Log.i(TAG, "buildingLevels, ${addressToChange.buildingLevels}")
-                    when (addressToChange.buildingLevels) {
-                        "B1 R0" -> button1.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B2 R0" -> button2.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B3 R0" -> button3.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B1 R1" -> button4.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B2 R1" -> button5.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                        "B3 R1" -> button6.backgroundTintList =
-                                ColorStateList.valueOf(
-                                        ContextCompat.getColor(
-                                                this,
-                                                android.R.color.holo_green_dark
-                                        )
-                                )
-                    }
-
-                    button1.tag = "right"; button2.tag = "right"; button3.tag = "right"
-                    button4.tag = "right"; button5.tag = "right"; button6.tag = "right"
-                    slideUp.show()
-
-
-                } else {
-                    Toast.makeText(this, getString(R.string.add_address_first),
-                            Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                noOnTouchActions = true
-            }
+            if (flingUpDetected) showSwipeUpKeypad(false)
+            else noOnTouchActions = true
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
@@ -497,38 +239,10 @@ class MainActivity : AppCompatActivity(),
             Log.e(TAG, "increment $increment")
             if (addressToChange != null) {
                 Log.i(TAG, "longPressDetected & address is not null")
-                val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
-                if (Build.VERSION.SDK_INT >= 26) {
-                    vibrator.vibrate(
-                            VibrationEffect.createOneShot(
-                                    150, VibrationEffect.DEFAULT_AMPLITUDE
-                            )
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(150)
-                }
-                try {
-                    Log.e(TAG, "increment: $increment")
-                    var numToIncrement = addressToChange.housenumber.toInt()
-                    numToIncrement += increment
-                    addressToChange.housenumber = numToIncrement.toString()
-                } catch (e: Exception) {
-                    var textToSet = "";
-                    if (addressToChange.housenumber.isNotBlank()) {
-                        for (c in addressToChange.housenumber) {
-                            val intOrNot = c.toString().toIntOrNull()
-                            if (intOrNot != null) {
-                                textToSet += intOrNot.toString()
-                                Log.i(textToSet, "text to set")
-                            }
-                        }
-                        textToSet = (textToSet.toInt() + increment).toString()
-                        addressToChange.housenumber = textToSet
-                    }
-                    Log.i(TAG, "Final Text: $textToSet")
-                }
+                vibrate(150, VibrationEffect.DEFAULT_AMPLITUDE)
+
+                addressToChange.housenumber = incrementAddress(addressToChange.housenumber)
                 addressToChange.latitude = map.mapView.mapCenter.latitude
                 addressToChange.longitude = map.mapView.mapCenter.longitude
                 addressToChange.buildingLevels = ""
@@ -595,6 +309,38 @@ class MainActivity : AppCompatActivity(),
                 )
                         .show()
             }
+        }
+
+
+        swipeUpRelativeLayout.setOnTouchListener { _, event ->
+            flingLeftDetected = false
+            flingRightDetected = false
+
+            val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
+
+            Log.i(TAG, "swipeUpRelativeLayout OnTouchListener called")
+            gestureDetector.onTouchEvent(event)
+
+            Log.i(TAG, "flingLeftDetected: $flingLeftDetected")
+            Log.i(TAG, "flingRightDetected, $flingRightDetected")
+            Log.i(TAG, "text: ${miniKeypadSide.text}")
+
+            if (flingLeftDetected && findViewById<TextView>(R.id.mini_keypad_side).text ==
+                    getString(R.string.left_side)) {
+
+                Log.i(TAG, "flingLeftDetected")
+                switchSwipeUpKeypadSide(false)
+            }
+            else if (flingRightDetected && findViewById<TextView>(R.id.mini_keypad_side).text ==
+                    getString(R.string.right_side)) {
+
+                Log.i(TAG, "flingRightDetected")
+                switchSwipeUpKeypadSide(true)
+            } else {
+                Log.i(TAG, "onTouch didn't satify conditions")
+            }
+
+            return@setOnTouchListener true
         }
 
         // zoom in and out buttons.
@@ -664,6 +410,48 @@ class MainActivity : AppCompatActivity(),
 
     }
 
+    private fun vibrate(milliSeconds: Int, vibrationEffect: Int) {
+
+        val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            vibrator.vibrate(
+                    VibrationEffect.createOneShot(
+                            milliSeconds.toLong(), vibrationEffect
+                    )
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(milliSeconds.toLong())
+        }
+    }
+
+    private fun incrementAddress(houseNum : String,
+                                 numIncrement : Int = this.increment) : String {
+        var houseNumber = houseNum
+        try {
+            var numToIncrement = houseNumber.toInt()
+            numToIncrement += numIncrement
+            houseNumber = numToIncrement.toString()
+        } catch (e: Exception) {
+            var textToSet = "";
+            if (houseNumber.isNotBlank()) {
+                for (c in houseNumber) {
+                    val intOrNot = c.toString().toIntOrNull()
+                    if (intOrNot != null) {
+                        textToSet += intOrNot.toString()
+                        Log.i(textToSet, "text to set")
+                    }
+                }
+                textToSet = (textToSet.toInt() + numIncrement).toString()
+                houseNumber = textToSet
+            }
+            Log.i(TAG, "Final Text: $textToSet")
+        }
+
+        return houseNumber
+    }
+
     private fun uploadData() {
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
     }
@@ -691,10 +479,7 @@ class MainActivity : AppCompatActivity(),
 
         // Following if statement is for "choosing background imagery" activity
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            val imageryChoice = data!!.getStringExtra("imagery_chosen")
-            Log.i("imagery chosen option: ", imageryChoice.toString())
-
-            backgroundImagery(imageryChoice.toString())
+            backgroundImagery()
         }
 
         // TODO : Have different codes to remember increment number for the following
@@ -1018,8 +803,11 @@ class MainActivity : AppCompatActivity(),
 
     // Function that switches imageries based on what was chosen in
     // "ChooseBackgroundImagery" activity
-    private fun backgroundImagery(imagery: String) {
+    private fun backgroundImagery() {
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        imagery = sp.getString("imagery", "osm-carto").toString()
 
+        Log.i(TAG, "Attempting to change background imagery")
         // All the different tile sources
         val mapnik = TileSourceFactory.MAPNIK
 
@@ -1033,27 +821,150 @@ class MainActivity : AppCompatActivity(),
         // Mapbox imagery disabled because it doesn't work & there are licensing issues
         // This is the error that shows up:
         // java.io.IOException: Cleartext HTTP traffic to a.tiles.mapbox.com not permitted
-        /*
-        val mapbox_satellite = XYTileSource("mapbox",
+
+        val mapboxSatellite = XYTileSource("mapbox",
                 0,
                 17,
                 256,
-                ".png",
-            arrayOf(
-                "http://a.tiles.mapbox.com/v3/openstreetmap.map-4wvf9l0l/",
-                "http://b.tiles.mapbox.com/v3/openstreetmap.map-4wvf9l0l/",
-                "http://c.tiles.mapbox.com/v3/openstreetmap.map-4wvf9l0l/")
+                ".jpg?access_token=pk.eyJ1Ijoib3BlbnN0cmVldG1hcCIsImEiOiJja2w5YWt5bnYwNjZmMnFwZjhtbHk1MnA1In0.eq2aumBK6JuRoIuBMm6Gew",
+                arrayOf(
+                        "https://a.tiles.mapbox.com/v4/mapbox.satellite/",
+                        "https://b.tiles.mapbox.com/v4/mapbox.satellite/",
+                        "https://c.tiles.mapbox.com/v4/mapbox.satellite/",
+                        "https://d.tiles.mapbox.com/v4/mapbox.satellite/"),
+                "based pog"
         )
-        */
+
+        val bingSatellite = XYTileSource("bing",
+                0,
+                17,
+                256,
+                "",
+                arrayOf("https://bing.com/maps/")
+        )
+
+        val esriSatellite = object:OnlineTileSourceBase("esri",
+                0,
+                17,
+                256,
+                "",
+                arrayOf(
+                        "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/",
+                        "https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/",
+                )) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return (baseUrl + MapTileIndex.getZoom(pMapTileIndex)
+                        + "/" + MapTileIndex.getY(pMapTileIndex)
+                        + "/" + MapTileIndex.getX(pMapTileIndex))
+            }
+        }
+
 
         // Switch statement to set tile source based on what string was given.
         when (imagery) {
-            "mapnik_imagery" -> map.mapView.setTileSource(mapnik)
-            //"mapbox_satellite" -> map.setTileSource(mapbox_satellite)
+            "osm-carto" -> map.mapView.setTileSource(mapnik)
+            "mapbox-satellite" -> map.mapView.setTileSource(mapboxSatellite)
+            "bing-satellite" -> map.mapView.setTileSource(bingSatellite)
+            "esri-satellite" -> map.mapView.setTileSource(esriSatellite)
             "public_transport_map" -> map.mapView.setTileSource(publicTransportMap)
         }
 
     }
+
+    fun tmsToSlippy(tmsUrl : String) : OnlineTileSourceBase? {
+        val xValsRegex = Regex("\\{x\\}")
+        val xValsIndexes : List<Int> = xValsRegex.findAll(tmsUrl).map { it.range.first }.toList()
+        val yValsRegex = Regex("\\{y\\}")
+        val yValsIndexes : List<Int> = yValsRegex.findAll(tmsUrl).map { it.range.first }.toList()
+        val switchValsRegex = Regex("\\{switch:")
+        val switchValsIndexes : List<Int> = switchValsRegex.findAll(tmsUrl).map {
+            it.range.first }.toList()
+        
+        var runCondition = true
+
+        if (switchValsIndexes.size > 1) {
+            runCondition = false
+        }
+
+        var startString = ""
+        var endString = ""
+
+        var midStartIndex = 0
+        var midEndIndex = tmsUrl.length - 1
+
+        val mutableList = mutableListOf<String>()
+        if (xValsIndexes.isNotEmpty() && yValsIndexes.isNotEmpty()) {
+
+            for (switchValIndex in switchValsIndexes) {
+                for (xValIndex in xValsIndexes) {
+                    if (switchValIndex > xValIndex) {
+                        runCondition = false
+                    }
+                }
+                for (yValIndex in yValsIndexes) {
+                    if (switchValIndex > yValIndex) {
+                        runCondition = false
+                    }
+                }
+            }
+
+            if (xValsIndexes.minOrNull()!! > yValsIndexes.minOrNull()!!) {
+                startString = tmsUrl.substring(0, yValsIndexes.minOrNull()!!)
+                midStartIndex = yValsIndexes.minOrNull()!!
+            } else {
+                startString = tmsUrl.substring(0, xValsIndexes.minOrNull()!!)
+                midStartIndex = xValsIndexes.minOrNull()!!
+            }
+
+            if (xValsIndexes.maxOrNull()!! < yValsIndexes.maxOrNull()!!) {
+                endString = tmsUrl.substring(yValsIndexes.maxOrNull()!! + 3)
+                midEndIndex = yValsIndexes.maxOrNull()!! + 3
+            } else {
+                endString = tmsUrl.substring(xValsIndexes.maxOrNull()!! + 3)
+                midEndIndex = yValsIndexes.maxOrNull()!! + 3
+            }
+
+            val switchValsRegex2 = Regex("\\{switch:.+\\}")
+            val switchVals = switchValsRegex.findAll(startString).map { it.value }.toList()
+            try {
+                val switchVal = switchVals[0]
+                val switchValOptions = switchVal.substring(8, switchVal.length - 1)
+                val switchValOptionsList = switchValOptions.split(",")
+                for(option in switchValOptionsList) {
+                    val formattedString = startString.replace("\\{switch.+\\}", option)
+                    mutableList.add(formattedString)
+                }
+            } catch (e : IndexOutOfBoundsException) {
+                Log.i(TAG, "no Switch Clause")
+                mutableList.add(startString)
+            }
+        } else {
+            runCondition = false
+        }
+        if (runCondition) {
+            val tileSource = object : OnlineTileSourceBase("custom",
+                    0,
+                    17,
+                    256,
+                    endString,
+                    mutableList.toTypedArray()
+            ) {
+                override fun getTileURLString(pMapTileIndex: Long): String {
+                    var midString = tmsUrl.substring(midStartIndex, midEndIndex)
+                    midString = midString.replace("{x}", MapTileIndex.getX(pMapTileIndex).toString())
+                    midString = midString.replace("{y}", MapTileIndex.getY(pMapTileIndex).toString())
+                    midString = midString.replace("{zoom}", MapTileIndex.getZoom(pMapTileIndex).toString())
+                    return baseUrl + midString + mImageFilenameEnding
+                }
+            }
+            return tileSource
+        } else {
+            Log.w(TAG, "startString: ${startString} endString: ${endString}")
+            return null
+        }
+    }
+
+
 
     // If undo button is pressed
     fun undo(view: View) {
@@ -1083,16 +994,7 @@ class MainActivity : AppCompatActivity(),
         Log.i(TAG, "addNote() method started")
         val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
-        if (Build.VERSION.SDK_INT >= 26) {
-            vibrator.vibrate(
-                    VibrationEffect.createOneShot(
-                            80, VibrationEffect.DEFAULT_AMPLITUDE
-                    )
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(80)
-        }
+        vibrate(80, VibrationEffect.DEFAULT_AMPLITUDE)
 
         val addNoteBuilder = AlertDialog.Builder(this)
         addNoteBuilder.setTitle(getString(R.string.add_note))
@@ -1102,7 +1004,7 @@ class MainActivity : AppCompatActivity(),
         note.minLines = 5
         val container = FrameLayout(this)
         val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                MATCH_PARENT, WRAP_CONTENT
         )
         params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
         params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
@@ -1214,12 +1116,186 @@ class MainActivity : AppCompatActivity(),
             // This is an up swipe
             flingUpDetected = true
         }
+
+        if (abs(differenceInX) > abs(differenceInY)) {
+            Log.i(TAG, "true")
+            if (abs(differenceInX) > swipeValue && differenceInX > 0) {
+                flingRightDetected = true
+            } else if (abs(differenceInX) > swipeValue && differenceInX < 0) {
+                flingLeftDetected = true
+            } else {
+                Log.w(TAG, "Swipe Distance was too small")
+            }
+        }
         // TODO : Mini menu shows up when you swipe up
         return true
     }
 
+    // changes the "side" of the swipe up keypad. For example, swiping from right
+    // when on the "left side" swipe up keypad would move you to the
+    // "right side" swipe up keypad.
+    @SuppressLint("SetTextI18n")
+    private fun switchSwipeUpKeypadSide(isOnLeft : Boolean) {
 
-    fun showMiniKeypadPopupMenu(view: View) {
+        Log.w(TAG, "switching swipe up keypad side")
+        val houseNumberTextView = findViewById<TextView>(R.id.mini_keypad_housenumber)
+        try {
+            val address =
+                if (isOnLeft) storeHouseNumbersObject.lastAddressEntry("left")
+                else storeHouseNumbersObject.lastAddressEntry("right")
+
+            houseNumberTextView.text = incrementAddress(address!!.housenumber)
+
+            val swipeUpRelativeLayout = findViewById<RelativeLayout>(R.id.swipe_up_relative_layout)
+            swipeUpRelativeLayout.background =
+                if (isOnLeft) ContextCompat.getDrawable(this, R.drawable.left_gradient)
+                else ContextCompat.getDrawable(this, R.drawable.right_gradient)
+
+            val sideTextView = findViewById<TextView>(R.id.mini_keypad_side)
+            sideTextView.text =
+                    if (isOnLeft) getString(R.string.left_side)
+                    else getString(R.string.right_side)
+
+            val button1 = findViewById<ImageButton>(R.id.B1R0_mini_relative)
+            val button2 = findViewById<ImageButton>(R.id.B2R0_mini_relative)
+            val button3 = findViewById<ImageButton>(R.id.B3R0_mini_relative)
+            val button4 = findViewById<ImageButton>(R.id.B1R1_mini_relative)
+            val button5 = findViewById<ImageButton>(R.id.B2R1_mini_relative)
+            val button6 = findViewById<ImageButton>(R.id.B3R1_mini_relative)
+
+            if (isOnLeft) {
+                button1.tag = "left"
+                button2.tag = "left"
+                button3.tag = "left"
+                button4.tag = "left"
+                button5.tag = "left"
+                button6.tag = "left"
+            } else {
+                button1.tag = "right"
+                button2.tag = "right"
+                button3.tag = "right"
+                button4.tag = "right"
+                button5.tag = "right"
+                button6.tag = "right"
+            }
+        } catch (e : NullPointerException) {
+            e.printStackTrace()
+            Toast.makeText(this, R.string.add_address_first, Toast.LENGTH_SHORT).show()
+        }
+
+
+    }
+
+    // shows the swipe up keypad
+    private fun showSwipeUpKeypad(isOnLeft : Boolean) {
+        val addressToChange : AddressNodes? =
+                if (isOnLeft) storeHouseNumbersObject.lastAddressEntry("left")
+                else storeHouseNumbersObject.lastAddressEntry("right")
+
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        increment = sp.getInt("increment", 2)
+
+        if (addressToChange != null) {
+            Log.i(TAG, "flingUpDetected & address is not null")
+            val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
+
+            addressToChange.housenumber = incrementAddress(addressToChange.housenumber)
+            houseNumber.text = addressToChange.housenumber
+
+            val miniKeypadSide = findViewById<TextView>(R.id.mini_keypad_side)
+            miniKeypadSide.text =
+                    if (isOnLeft) getString(R.string.left_side)
+                    else getString(R.string.right_side)
+
+            val swipeUpRelativeLayout =
+                    findViewById<RelativeLayout>(R.id.swipe_up_relative_layout)
+            swipeUpRelativeLayout.background =
+                    if(isOnLeft) ContextCompat.getDrawable(this,
+                            R.drawable.left_gradient)
+                    else ContextCompat.getDrawable(this, R.drawable.right_gradient)
+
+            val button1 = findViewById<ImageButton>(R.id.B1R0_mini_relative)
+            val button2 = findViewById<ImageButton>(R.id.B2R0_mini_relative)
+            val button3 = findViewById<ImageButton>(R.id.B3R0_mini_relative)
+            val button4 = findViewById<ImageButton>(R.id.B1R1_mini_relative)
+            val button5 = findViewById<ImageButton>(R.id.B2R1_mini_relative)
+            val button6 = findViewById<ImageButton>(R.id.B3R1_mini_relative)
+
+            button1.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+            button2.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+            button3.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+            button4.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+            button5.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+            button6.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(this, android.R.color.darker_gray)
+            )
+
+            Log.i(TAG, "buildingLevels, ${addressToChange.buildingLevels}")
+            when (addressToChange.buildingLevels) {
+                "B1 R0" -> button1.backgroundTintList =
+                        ColorStateList.valueOf(
+                                ContextCompat.getColor(
+                                        this,
+                                        android.R.color.holo_green_dark
+                                )
+                        )
+                "B2 R0" -> button2.backgroundTintList =
+                        ColorStateList.valueOf(
+                                ContextCompat.getColor(
+                                        this,
+                                        android.R.color.holo_green_dark
+                                )
+                        )
+                "B3 R0" -> button3.backgroundTintList =
+                        ColorStateList.valueOf(
+                                ContextCompat.getColor(
+                                        this,
+                                        android.R.color.holo_green_dark
+                                )
+                        )
+                "B1 R1" -> button4.backgroundTintList =
+                        ColorStateList.valueOf(
+                                ContextCompat.getColor(
+                                        this,
+                                        android.R.color.holo_green_dark
+                                )
+                        )
+                "B2 R1" -> button5.backgroundTintList =
+                        ColorStateList.valueOf(
+                                ContextCompat.getColor(
+                                        this,
+                                        android.R.color.holo_green_dark
+                                )
+                        )
+                "B3 R1" -> button6.backgroundTintList =
+                        ColorStateList.valueOf(
+                                ContextCompat.getColor(
+                                        this,
+                                        android.R.color.holo_green_dark
+                                )
+                        )
+            }
+
+            button1.tag = "left"; button2.tag = "left"; button3.tag = "left"
+            button4.tag = "left"; button5.tag = "left"; button6.tag = "left"
+            slideUp.show()
+        } else {
+            Toast.makeText(this, getString(R.string.add_address_first),
+                    Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun showSwipeUpKeypadPopupMenu(view: View) {
         val popupMenu = PopupMenu(this, view)
         popupMenu.setOnMenuItemClickListener(this)
         popupMenu.inflate(R.menu.mini_keypad_menu)
@@ -1272,25 +1348,7 @@ class MainActivity : AppCompatActivity(),
         minusButton.setOnClickListener {
             val text = modifyIncrementInput.text.toString()
             if (text != "") {
-                try {
-                    var textToInt = text.toInt()
-                    textToInt -= 1
-                    modifyIncrementInput.setText(textToInt.toString())
-                } catch (e: NumberFormatException) {
-                    var textToSet = "";
-
-                    for (c in text) {
-                        val intOrNot = c.toString().toIntOrNull()
-                        if (intOrNot != null) {
-                            textToSet += intOrNot.toString()
-                            Log.i(textToSet, "text to set")
-                        }
-                    }
-                    textToSet = (textToSet.toInt() - 1).toString()
-                    modifyIncrementInput.setText(textToSet)
-
-                    Log.i(TAG, "Final Text: $textToSet")
-                }
+                modifyIncrementInput.setText(incrementAddress(text, -1))
             }
             Log.i(TAG, "modifyIncrementDialog: minusButton pressed")
         }
@@ -1304,25 +1362,7 @@ class MainActivity : AppCompatActivity(),
         plusButton.setOnClickListener {
             val text = modifyIncrementInput.text.toString()
             if (text != "") {
-                try {
-                    var textToInt = text.toInt()
-                    textToInt += 1
-                    modifyIncrementInput.setText(textToInt.toString())
-                } catch (e: NumberFormatException) {
-                    var textToSet = "";
-
-                    for (c in text) {
-                        val intOrNot = c.toString().toIntOrNull()
-                        if (intOrNot != null) {
-                            textToSet += intOrNot.toString()
-                            Log.i(textToSet, "text to set")
-                        }
-                    }
-                    textToSet = (textToSet.toInt() + 1).toString()
-                    modifyIncrementInput.setText(textToSet)
-
-                    Log.i(TAG, "Final Text: $textToSet")
-                }
+                modifyIncrementInput.setText(incrementAddress(text, 1))
             }
             Log.i(TAG, "modifyIncrementDialog: plusButton pressed")
         }
@@ -1361,32 +1401,16 @@ class MainActivity : AppCompatActivity(),
         modifyIncrementDialogue.create().show()
     }
 
+
     fun swipeAddHousenumber(view: View) {
         val buildingLevelsButton = findViewById<ImageButton>(view.id)
         val relativeLayout = buildingLevelsButton.parent as RelativeLayout
         val buildingLevelsTextView = relativeLayout.getChildAt(1) as TextView
         val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
 
-        val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         Thread {
-            if (Build.VERSION.SDK_INT >= 26) {
-                vibrator.vibrate(
-                        VibrationEffect.createOneShot(
-                                80, VibrationEffect.DEFAULT_AMPLITUDE
-                        )
-                )
-                Thread.sleep(100)
-                vibrator.vibrate(
-                        VibrationEffect.createOneShot(
-                                80, VibrationEffect.DEFAULT_AMPLITUDE
-                        )
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(80)
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(80)
-            }
+            vibrate(80, VibrationEffect.DEFAULT_AMPLITUDE)
+            vibrate(80, VibrationEffect.DEFAULT_AMPLITUDE)
         }.start()
 
         Log.i(TAG, "buildingLevels: ${buildingLevelsTextView.text}")
@@ -1444,50 +1468,13 @@ class MainActivity : AppCompatActivity(),
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
         increment = sp.getInt("increment", 2)
 
-        try {
-            var numToIncrement = houseNumber.text.toString().toInt()
-            numToIncrement += increment
-            houseNumber.text = numToIncrement.toString()
-        } catch (e: Exception) {
-            var textToSet = "";
-
-            for (c in houseNumber.text) {
-                val intOrNot = c.toString().toIntOrNull()
-                if (intOrNot != null) {
-                    textToSet += intOrNot.toString()
-                    Log.i(textToSet, "text to set")
-                }
-            }
-            textToSet = (textToSet.toInt() + increment).toString()
-            houseNumber.text = textToSet
-
-            Log.i(TAG, "final text: $textToSet")
-
-        }
+        houseNumber.text = incrementAddress(houseNumber.text.toString())
         map.mapView.invalidate()
     }
 
     fun decrementMiniHousenumber(view: View) {
         val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
-        try {
-            var numToIncrement = houseNumber.text.toString().toInt()
-            numToIncrement -= 1
-            houseNumber.text = numToIncrement.toString()
-        } catch (e: Exception) {
-            var textToSet = "";
-
-            for (c in houseNumber.text) {
-                val intOrNot = c.toString().toIntOrNull()
-                if (intOrNot != null) {
-                    textToSet += intOrNot.toString()
-                    Log.i(textToSet, "text to set")
-                }
-            }
-            textToSet = (textToSet.toInt() - 1).toString()
-            houseNumber.text = textToSet
-
-            Log.i(TAG, "final text $textToSet")
-        }
+        houseNumber.text = incrementAddress(houseNumber.text.toString(), -1)
 
 
     }
@@ -1495,26 +1482,7 @@ class MainActivity : AppCompatActivity(),
     fun incrementMiniHousenumber(view: View) {
 
         val houseNumber = findViewById<TextView>(R.id.mini_keypad_housenumber)
-        try {
-            var numToIncrement = houseNumber.text.toString().toInt()
-            numToIncrement += 1
-            houseNumber.text = numToIncrement.toString()
-        } catch (e: Exception) {
-            var textToSet = "";
-
-            for (c in houseNumber.text) {
-                val intOrNot = c.toString().toIntOrNull()
-                if (intOrNot != null) {
-                    textToSet += intOrNot.toString()
-                    Log.i(TAG, "textToSet: $textToSet")
-                }
-            }
-            textToSet = (textToSet.toInt() + 1).toString()
-            houseNumber.text = textToSet
-
-            Log.i(TAG, "Final Text $textToSet")
-
-        }
+        houseNumber.text = incrementAddress(houseNumber.text.toString(), 1)
     }
 
     fun closeMiniKeypad(view: View) {

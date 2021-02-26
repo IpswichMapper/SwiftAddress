@@ -139,6 +139,7 @@ class Map(var mapView: MapView,
             Log.i(TAG, "removing marker")
             mapView.overlays.remove(marker)
         }
+        mapView.invalidate()
         markerHashMap.clear()
         InfoWindow.closeAllInfoWindowsOn(mapView)
         Log.i(TAG, "Database cleared and markers have been removed.")

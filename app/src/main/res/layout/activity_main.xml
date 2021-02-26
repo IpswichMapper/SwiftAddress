@@ -256,7 +256,7 @@
             android:visibility="gone"/>
 
         <RelativeLayout
-            android:id="@+id/basedView"
+            android:id="@+id/swipe_up_relative_layout"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:background="@color/background_color"
@@ -292,7 +292,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1.5"
-                    android:onClick="showMiniKeypadPopupMenu"
+                    android:onClick="showSwipeUpKeypadPopupMenu"
                     android:scaleType="fitCenter"
                     android:tint="@color/button_colors"
                     app:srcCompat="@drawable/gear_settings" />
@@ -342,7 +342,6 @@
                         android:id="@+id/B2R0_mini_relative"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
                         android:onClick="swipeAddHousenumber"
                         android:paddingBottom="25dp"
                         android:tint="@color/button_colors"

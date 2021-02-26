@@ -91,5 +91,12 @@
     <string name="choose_UI">Choose User Interface</string>
     <string name="no_camera_app">No camera application available</string>
     <string name="choose_background_imagery">Choose Background Imagery</string>
+    <string name="mapbox_satellite">Mapbox Satellite</string>
+    <string name="osm_carto">Default - OSM Carto</string>
+    <string name="change_imagery">Change Imagery</string>
+    <string name="custom_imagery">Custom Imagery</string>
+    <string name="custom_slippy_url">Add a custom Slippy Map URL</string>
+    <string name="bing_satellite">Bing Satellite</string>
+    <string name="esri_satellite">Esri Satellite</string>
 
 </resources>

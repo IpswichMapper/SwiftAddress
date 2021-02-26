@@ -10,8 +10,9 @@ import androidx.preference.PreferenceManager
 import layout.AddressNodes
 import layout.StoreHouseNumbers
 import org.osmdroid.config.Configuration.*
-import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.events.*
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.Delay
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -27,6 +28,9 @@ class Map(var mapView: MapView,
     private var markerHashMap = HashMap<Int, Marker>()
     private var storeHouseNumbersObject = StoreHouseNumbers(context)
     private val TAG = "Map"
+    private var mapListener: MapListener
+    var moveMarkerCondition = false
+    lateinit var markerToMove : Marker
     init {
         // setting up map
         getInstance().load(
@@ -40,6 +44,18 @@ class Map(var mapView: MapView,
         // created but haven't been stored to an OSM file yet.
         storeHouseNumbersObject.displayMarkers(this, mainActivity)
 
+        mapListener = object:MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean {
+                moveMarker()
+                return true
+            }
+
+            override fun onZoom(event: ZoomEvent?): Boolean {
+                Log.i("based", "based")
+                return true
+            }
+        }
+        mapView.addMapListener(mapListener)
     }
 
     fun setMarkerHashMap(HashMap : HashMap<Int, Marker>) {
@@ -147,5 +163,10 @@ class Map(var mapView: MapView,
         Log.i(TAG, "Dialog dismissed")
     }
 
-
+    fun moveMarker() {
+        if (moveMarkerCondition) {
+            markerToMove.position = mapView.mapCenter as GeoPoint
+            mapView.invalidate()
+        }
+    }
 }

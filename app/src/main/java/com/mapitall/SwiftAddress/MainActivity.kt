@@ -1530,7 +1530,8 @@ class MainActivity : AppCompatActivity(),
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
         val rightArrow = findViewById<ImageButton>(R.id.add_address_on_right)
 
-        var runCondition = true
+        map.markerToMove = marker
+        map.moveMarkerCondition = true
 
         val oldPosition = marker.position
         moveButton.visibility = View.VISIBLE
@@ -1539,7 +1540,7 @@ class MainActivity : AppCompatActivity(),
         rightArrow.visibility = View.GONE
 
         moveButton.setOnClickListener {
-            runCondition = false
+            map.moveMarkerCondition = false
             moveButton.visibility = View.GONE
             cancelButton.visibility = View.GONE
             leftArrow.visibility = View.VISIBLE
@@ -1551,11 +1552,10 @@ class MainActivity : AppCompatActivity(),
             storeHouseNumbersObject.changeLocation(ID,
                     map.mapView.mapCenter.latitude,
                     map.mapView.mapCenter.longitude)
-
         }
 
         cancelButton.setOnClickListener {
-            runCondition = false
+            map.moveMarkerCondition = false
             moveButton.visibility = View.GONE
             cancelButton.visibility = View.GONE
             leftArrow.visibility = View.VISIBLE
@@ -1565,23 +1565,11 @@ class MainActivity : AppCompatActivity(),
             map.mapView.invalidate()
 
         }
-
-        map.mapView.setOnTouchListener { _, event ->
-            if (runCondition) {
-                marker.position = map.mapView.mapCenter as GeoPoint
-                map.mapView.invalidate()
-                // marker.position = GeoPoint(map.mapView.mapCenter.latitude, map.mapView.mapCenter.longitude)
-            }
-
-            return@setOnTouchListener super.onTouchEvent(event)
-        }
     }
 
     fun openDrawer(view: View) {
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawerLayout.openDrawer(GravityCompat.START)
-
-
     }
 
 }

@@ -19,6 +19,7 @@
   <androidx.browser/>
   <androidx.camera/>
   <androidx.car/>
+  <androidx.car.app/>
   <androidx.cardview/>
   <androidx.collection/>
   <androidx.compose/>
@@ -135,6 +136,7 @@
   <com.android.tools.metalava/>
   <com.android.tools.pixelprobe/>
   <com.android.tools.utp/>
+  <com.android.volley/>
   <com.crashlytics.sdk.android/>
   <com.google.ads.afsn/>
   <com.google.ads.interactivemedia.v3/>

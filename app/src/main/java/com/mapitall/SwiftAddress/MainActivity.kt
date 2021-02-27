@@ -22,7 +22,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.inputmethod.EditorInfo
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -42,7 +41,6 @@ import com.mancj.slideup.SlideUpBuilder
 import layout.AddressNodes
 import layout.StoreHouseNumbers
 import org.osmdroid.events.MapEventsReceiver
-import org.osmdroid.tileprovider.modules.SqlTileWriter
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.XYTileSource
@@ -59,7 +57,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import kotlin.IndexOutOfBoundsException
 import kotlin.math.abs
 import kotlin.properties.Delegates
 
@@ -858,9 +855,10 @@ class MainActivity : AppCompatActivity(),
                         "https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/",
                 )) {
             override fun getTileURLString(pMapTileIndex: Long): String {
-                return (baseUrl + MapTileIndex.getZoom(pMapTileIndex)
-                        + "/" + MapTileIndex.getY(pMapTileIndex)
-                        + "/" + MapTileIndex.getX(pMapTileIndex))
+                val url = baseUrl + MapTileIndex.getZoom(pMapTileIndex) +
+                        "/" + MapTileIndex.getY(pMapTileIndex) +
+                        "/" + MapTileIndex.getX(pMapTileIndex)
+                return url
             }
         }
 
@@ -872,11 +870,112 @@ class MainActivity : AppCompatActivity(),
             "bing-satellite" -> map.mapView.setTileSource(bingSatellite)
             "esri-satellite" -> map.mapView.setTileSource(esriSatellite)
             "public_transport_map" -> map.mapView.setTileSource(publicTransportMap)
+            "custom" -> {
+                try {
+                    map.mapView.setTileSource(tmsToSlippy(
+                            sp.getString("custom-imagery", "")!!
+                    ))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this, getString(R.string.invalid_imagery),
+                            Toast.LENGTH_SHORT).show()
+                    map.mapView.setTileSource(mapnik)
+                    sp.edit().putString("imagery", "osm-carto").apply()
+                }
+            }
         }
 
     }
 
     fun tmsToSlippy(tmsUrl : String) : OnlineTileSourceBase? {
+
+        var runCondition = true
+
+        try {
+            val xIndex = tmsUrl.indexOf("{x}")
+            val yIndex = tmsUrl.indexOf("{y}")
+            var zoomIndex = tmsUrl.indexOf("{zoom}")
+
+            if (zoomIndex == -1) {
+                zoomIndex = tmsUrl.indexOf("{z}")
+            }
+
+            if (xIndex == -1 || yIndex == -1 || zoomIndex == -1) {
+                throw NullPointerException("x, y or zoom clause not found")
+            }
+
+            Log.i(TAG, "xIndex : $xIndex")
+            Log.i(TAG, "yIndex : $yIndex")
+
+        } catch (e : NullPointerException) {
+            e.printStackTrace()
+            Log.w(TAG, e.message.toString())
+            Log.w(TAG, e.cause.toString())
+            runCondition = false
+        }
+        val switchRegex = Regex("\\{switch:.+\\}")
+        var switchIndex = -1
+        var switchValue : String? = null
+        var startString : String? = null
+        var startStringList = mutableListOf<String>()
+        try {
+            switchIndex = switchRegex.find(tmsUrl)!!.range.last
+            switchValue = switchRegex.find(tmsUrl)!!.value
+            Log.i(TAG, "switchValue : $switchValue")
+            Log.i(TAG, "switchIndex : $switchIndex")
+
+            startString = tmsUrl.substring(0, switchIndex)
+
+            switchValue = switchValue.removePrefix("{switch:")
+            switchValue = switchValue.removeSuffix("}")
+            val valuesList = switchValue.split(",")
+
+            for (value in valuesList) {
+                val stringToAdd = startString.replace("\\{switch:.+\\}", value)
+                Regex("tms\\[.+\\]").find(stringToAdd)?.range?.let { stringToAdd.removeRange(it) }
+                Log.i(TAG, "stringToAdd: $stringToAdd")
+                startStringList.add(stringToAdd)
+            }
+        } catch (e : Exception) {
+            e.printStackTrace()
+            Log.w(TAG, "No switch clause")
+
+            switchIndex = -1
+            switchValue = null
+            startString = null
+        }
+
+
+
+        if (runCondition) {
+            val tileSource = object : OnlineTileSourceBase("custom",
+                    0,
+                    17,
+                    256,
+                    "",
+                    startStringList.toTypedArray()
+            ) {
+                override fun getTileURLString(pMapTileIndex: Long): String {
+                    var string =
+                            if (switchIndex != -1) tmsUrl.substring(switchIndex + 1)
+                            else tmsUrl
+
+                    Log.i(TAG, "TileURLString: $string")
+                    string = string.replace("{x}", MapTileIndex.getX(pMapTileIndex).toString())
+                    string = string.replace("{y}", MapTileIndex.getY(pMapTileIndex).toString())
+                    string = string.replace("{zoom}", MapTileIndex.getZoom(pMapTileIndex).toString())
+                    return baseUrl + string + mImageFilenameEnding
+                }
+            }
+            return tileSource
+        } else {
+            Log.w(TAG, "startString: ${startString}")
+            return null
+
+        }
+
+
+        /*
         val xValsRegex = Regex("\\{x\\}")
         val xValsIndexes : List<Int> = xValsRegex.findAll(tmsUrl).map { it.range.first }.toList()
         val yValsRegex = Regex("\\{y\\}")
@@ -967,6 +1066,8 @@ class MainActivity : AppCompatActivity(),
             Log.w(TAG, "startString: ${startString} endString: ${endString}")
             return null
         }
+
+         */
     }
 
 

@@ -68,20 +68,13 @@
     <string name="recover_data_message">Do you want to recover the data that you saved last time? This will add the notes and addresses from before you saved the map. CURRENT DATA WILL BE DELETED. Images will not be recovered. The saved zip file won\'t be deleted.</string>
     <string name="settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
-
-    <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
-
-    <!-- Messages Preferences -->
     <string name="signature_title">Your signature</string>
     <string name="reply_title">Default reply action</string>
-
-    <!-- Sync Preferences -->
     <string name="sync_title">Sync email periodically</string>
     <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="other">Other</string>
     <string name="stop_screen_timeout_desc">Stop the screen from turning off when SwiftAddress is open.</string>
@@ -101,5 +94,7 @@
     <string name="data_preferences">Data</string>
     <string name="clear_cache">Clear Cache</string>
     <string name="clear_cache_question">Are you sure you want to clear map cache? Maps won\'t reload unless you have internet.</string>
+    <string name="no_copyrighted_material">WARNING! Do not use copyrighted imagery! Only use imagery that is available to OSM!</string>
+    <string name="invalid_imagery">Invalid Custom Imagery</string>
 
 </resources>

@@ -135,9 +135,7 @@
             <org.osmdroid.views.MapView
                 android:id="@+id/map"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:usesCleartextTraffic="true">
-
+                android:layout_height="match_parent">
             </org.osmdroid.views.MapView>
 
         </FrameLayout>
@@ -535,5 +533,6 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         android:id="@+id/nav_menu"
+        app:headerLayout="@layout/nav_header"
         />
 </androidx.drawerlayout.widget.DrawerLayout>

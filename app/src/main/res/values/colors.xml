@@ -22,4 +22,5 @@
 
     <color name="border_blue">#0000FF</color>
     <color name="grey_color">@android:color/darker_gray</color>
+    <color name="purple_background">#B1A2FF</color>
 </resources>

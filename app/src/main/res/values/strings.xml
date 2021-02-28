@@ -96,5 +96,7 @@
     <string name="clear_cache_question">Are you sure you want to clear map cache? Maps won\'t reload unless you have internet.</string>
     <string name="no_copyrighted_material">WARNING! Do not use copyrighted imagery! Only use imagery that is available to OSM!</string>
     <string name="invalid_imagery">Invalid Custom Imagery</string>
+    <string name="SwiftAddress">SwiftAddress</string>
+    <string name="version_string">Version 0.2.0</string>
 
 </resources>

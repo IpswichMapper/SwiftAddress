@@ -15,4 +15,5 @@
 
     <color name="border_blue">#00ffff</color>
     <color name="grey_color">#d3d3d3</color>
+    <color name="purple_background">@color/purple_500</color>
 </resources>

@@ -8,6 +8,9 @@ import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
 import android.content.res.Resources
+import android.graphics.Color
+import android.graphics.Color.WHITE
+import android.graphics.ColorFilter
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
@@ -359,6 +362,8 @@ class MainActivity : AppCompatActivity(),
             val intent = Intent(this, ChooseBackgroundImagery::class.java)
             startActivityForResult(intent, 1)
         }
+
+        val moveMarkerButton = findViewById<Button>(R.id.bubble_title)
 
         // Hide action bar (maybe this isn't a good idea since menu icon (three vertical bars)
         // works well with action bar.
@@ -865,22 +870,40 @@ class MainActivity : AppCompatActivity(),
 
         // Switch statement to set tile source based on what string was given.
         when (imagery) {
-            "osm-carto" -> map.mapView.setTileSource(mapnik)
-            "mapbox-satellite" -> map.mapView.setTileSource(mapboxSatellite)
-            "bing-satellite" -> map.mapView.setTileSource(bingSatellite)
-            "esri-satellite" -> map.mapView.setTileSource(esriSatellite)
-            "public_transport_map" -> map.mapView.setTileSource(publicTransportMap)
+            "osm-carto" -> {
+                map.mapView.setTileSource(mapnik)
+                findViewById<ImageView>(R.id.crosshair).imageTintList =
+                    ColorStateList.valueOf(Color.BLACK)
+            }
+            "mapbox-satellite" -> {
+                map.mapView.setTileSource(mapboxSatellite)
+                findViewById<ImageView>(R.id.crosshair).imageTintList =
+                    ColorStateList.valueOf(Color.RED)
+            }
+            "bing-satellite" -> {
+                map.mapView.setTileSource(bingSatellite)
+                findViewById<ImageView>(R.id.crosshair).imageTintList =
+                    ColorStateList.valueOf(Color.RED)
+            }
+            "esri-satellite" -> {
+                map.mapView.setTileSource(esriSatellite)
+                findViewById<ImageView>(R.id.crosshair).imageTintList =
+                    ColorStateList.valueOf(Color.RED)
+            }
             "custom" -> {
                 try {
                     map.mapView.setTileSource(tmsToSlippy(
                             sp.getString("custom-imagery", "")!!
                     ))
+                    findViewById<ImageView>(R.id.crosshair).imageTintList =
+                    ColorStateList.valueOf(Color.RED)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Toast.makeText(this, getString(R.string.invalid_imagery),
                             Toast.LENGTH_SHORT).show()
                     map.mapView.setTileSource(mapnik)
                     sp.edit().putString("imagery", "osm-carto").apply()
+
                 }
             }
         }

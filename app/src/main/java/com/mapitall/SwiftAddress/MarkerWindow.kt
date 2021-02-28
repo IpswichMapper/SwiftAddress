@@ -2,6 +2,7 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -30,6 +31,7 @@ class MarkerWindow(pressLayoutId : Int,
             if (street != "") textView.text = "$houseNumber, $street"
             else textView.text = houseNumber
         }
+        textView.setTextColor(Color.BLACK)
         
         Log.i(TAG, "InfoWindow Opened.")
 
@@ -56,6 +58,9 @@ class MarkerWindow(pressLayoutId : Int,
             mapClass.removeAt(ID)
             close()
         }
+        moveButton.setTextColor(Color.BLACK)
+        interpolateButton.setTextColor(Color.BLACK)
+        deleteButton.setTextColor(Color.BLACK)
     }
 
     override fun onClose() {

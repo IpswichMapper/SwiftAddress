@@ -19,6 +19,12 @@ This application is designed to be able to efficiently collect housenumbers for 
 
 And probably a few more features I haven't listed here
 
+## Information
+
+Minimum android version is Android 5.0 (Lolipop).
+
+To find areas with missing housenumbers, use [OSM Inspector](https://tools.geofabrik.de/osmi/?view=geometry&lon=-12.00000&lat=25.00000&zoom=3) or [qa.poole.ch](http://qa.poole.ch/) (check "has addresses" to see all the areas that you should avoid).
+
 ## Images
 
 Most icons are provided by Google Material Icons, which are under Apache License.

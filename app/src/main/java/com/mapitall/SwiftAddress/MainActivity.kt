@@ -8,9 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
 import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.Color.WHITE
-import android.graphics.ColorFilter
+import android.graphics.*
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
@@ -52,7 +50,9 @@ import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
+import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
@@ -68,7 +68,6 @@ class MainActivity : AppCompatActivity(),
         GestureDetector.OnGestureListener,
         PopupMenu.OnMenuItemClickListener,
         LocationListener {
-
 
     private var currentImagePath: String? = null
     private var currentAudioPath: String? = null
@@ -86,6 +85,11 @@ class MainActivity : AppCompatActivity(),
     private var flingRightDetected = false
     private var longPressDetected = false
     private lateinit var slideUp: SlideUp
+    var creatingInterpolationWay = false
+
+    var polyline : Polyline? = null
+    var geoPoints : ArrayList<GeoPoint>? = null
+    var startMarkerID : Int? = null
 
     @SuppressLint("ClickableViewAccessibility")
 
@@ -93,25 +97,24 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         // set map details
         map = Map(findViewById(R.id.map), this, this)
 
         // get preferences
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
-
         if (sp.getBoolean("screen_timeout", false)) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         increment = sp.getInt("increment", 2)
         backgroundImagery()
 
+
         // zoom to current location when app starts.
         val mapController = map.mapView.controller
         mapController.setZoom(3.0)
-
         val eventsOverlay = MapEventsOverlay(this)
         map.mapView.overlays.add(0, eventsOverlay)
+
         try {
             val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
             val criteria = Criteria()
@@ -379,7 +382,7 @@ class MainActivity : AppCompatActivity(),
         rotationGestureOverlay.isEnabled
         map.mapView.setMultiTouchControls(true)
         map.mapView.overlays.add(rotationGestureOverlay)
-
+        map.mapView.tileRequestCompleteHandler
         // Turns off automatic zoom buttons
         map.mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
@@ -473,6 +476,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+        InfoWindow.closeAllInfoWindowsOn(map.mapView)
         return true
     }
 
@@ -674,6 +678,7 @@ class MainActivity : AppCompatActivity(),
                         // clear markers
                         map.removeAllMarkers()
                         dialog.dismiss()
+                        Log.i(TAG, "Database cleared, markers removed & dialog dismissed.")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -896,14 +901,15 @@ class MainActivity : AppCompatActivity(),
                             sp.getString("custom-imagery", "")!!
                     ))
                     findViewById<ImageView>(R.id.crosshair).imageTintList =
-                    ColorStateList.valueOf(Color.RED)
+                        ColorStateList.valueOf(Color.RED)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Toast.makeText(this, getString(R.string.invalid_imagery),
                             Toast.LENGTH_SHORT).show()
                     map.mapView.setTileSource(mapnik)
                     sp.edit().putString("imagery", "osm-carto").apply()
-
+                    findViewById<ImageView>(R.id.crosshair).imageTintList =
+                        ColorStateList.valueOf(Color.BLACK)
                 }
             }
         }
@@ -1256,7 +1262,6 @@ class MainActivity : AppCompatActivity(),
                 Log.w(TAG, "Swipe Distance was too small")
             }
         }
-        // TODO : Mini menu shows up when you swipe up
         return true
     }
 
@@ -1696,9 +1701,62 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    fun createNewInterpolationWay(
+                                  polyline_: Polyline,
+                                  geoPoints_: ArrayList<GeoPoint>,
+                                  startMarkerID_: Int) {
+        val addPointButton = findViewById<Button>(R.id.add_interpolation_way_point)
+        val cancelButton = findViewById<Button>(R.id.cancel_interpolation_way)
+        val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
+        val rightArrow = findViewById<ImageButton>(R.id.add_address_on_right)
+
+        polyline = polyline_
+        geoPoints = geoPoints_
+        startMarkerID = startMarkerID_
+        creatingInterpolationWay = true
+
+        addPointButton.visibility = View.VISIBLE
+        cancelButton.visibility = View.VISIBLE
+        leftArrow.visibility = View.GONE
+        rightArrow.visibility = View.GONE
+
+        addPointButton.setOnClickListener {
+            map.makeLineFollowCenter(false)
+            geoPoints!!.add(map.mapView.mapCenter as GeoPoint)
+            polyline!!.setPoints(geoPoints!!)
+            map.makeLineFollowCenter(true)
+
+        }
+        cancelButton.setOnClickListener {
+            map.makeLineFollowCenter(false)
+            map.mapView.overlays.remove(polyline)
+            map.mapView.invalidate()
+            creatingInterpolationWay = false
+
+            addPointButton.visibility = View.GONE
+            cancelButton.visibility = View.GONE
+            leftArrow.visibility = View.VISIBLE
+            rightArrow.visibility = View.VISIBLE
+        }
+    }
+    fun finishCreatingInterpolationWay() {
+        val addPointButton = findViewById<Button>(R.id.add_interpolation_way_point)
+        val cancelButton = findViewById<Button>(R.id.cancel_interpolation_way)
+        val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
+        val rightArrow = findViewById<ImageButton>(R.id.add_address_on_right)
+
+        addPointButton.visibility = View.GONE
+        cancelButton.visibility = View.GONE
+        leftArrow.visibility = View.VISIBLE
+        rightArrow.visibility = View.VISIBLE
+    }
+
     fun openDrawer(view: View) {
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawerLayout.openDrawer(GravityCompat.START)
     }
 
+
+
 }
+

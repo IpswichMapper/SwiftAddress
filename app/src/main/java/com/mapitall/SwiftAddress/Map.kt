@@ -1,38 +1,38 @@
 package com.mapitall.SwiftAddress
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Configuration
+import android.graphics.DashPathEffect
+import android.graphics.Paint
 import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.core.content.contentValuesOf
 import androidx.preference.PreferenceManager
 import layout.AddressNodes
 import layout.StoreHouseNumbers
 import org.osmdroid.config.Configuration.*
 import org.osmdroid.events.*
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.Delay
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.infowindow.InfoWindow
-import java.net.IDN
-import kotlin.math.max
+import org.osmdroid.views.overlay.Polyline
 
 class Map(var mapView: MapView,
           private val context: Context,
           private val mainActivity: MainActivity) {
 
     private var markerHashMap = HashMap<Int, Marker>()
+    private var polyLineID : Int
+    private val polyLineHashMap = HashMap<Int, Polyline>()
     private var storeHouseNumbersObject = StoreHouseNumbers(context)
     private val TAG = "Map"
-    private var mapListener: MapListener
+    private var moveMarkerMapListener: MapListener
+    lateinit var makeInterpolationWayFollowCenterMapListener: MapListener
     var moveMarkerCondition = false
     lateinit var markerToMove : Marker
+
     init {
         // setting up map
+
         getInstance().load(
                 context,
                 PreferenceManager.getDefaultSharedPreferences(context)
@@ -44,7 +44,13 @@ class Map(var mapView: MapView,
         // created but haven't been stored to an OSM file yet.
         storeHouseNumbersObject.displayMarkers(this, mainActivity)
 
-        mapListener = object:MapListener {
+        // Get ID of last added polyline
+        val lastID = storeHouseNumbersObject.lastPolyLineID()
+        polyLineID =
+                if (lastID != -1) lastID + 1
+                else 1
+
+        moveMarkerMapListener = object:MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean {
                 moveMarker()
                 return true
@@ -54,7 +60,9 @@ class Map(var mapView: MapView,
                 return false
             }
         }
-        mapView.addMapListener(mapListener)
+        mapView.addMapListener(moveMarkerMapListener)
+
+
     }
 
     fun setMarkerHashMap(HashMap : HashMap<Int, Marker>) {
@@ -74,6 +82,7 @@ class Map(var mapView: MapView,
     }
      */
 
+    // adds a housenumber marker to the map
     fun addHousenumberMarker(address: AddressNodes, houseNumberID : Int) {
         markerHashMap[houseNumberID] = Marker(mapView)
         markerHashMap.getValue(houseNumberID).position = GeoPoint(
@@ -97,6 +106,7 @@ class Map(var mapView: MapView,
         Log.i(TAG, "Housenumber Marker Added")
     }
 
+    // adds an image marker to the map
     fun addImageMarker(imageID : Int, lat : Double, lon : Double) {
         markerHashMap[imageID] = Marker(mapView)
 
@@ -109,6 +119,7 @@ class Map(var mapView: MapView,
         mapView.overlays.add(markerHashMap.getValue(imageID))
     }
 
+    // adds a note marker to the map
     fun addNoteMarker(noteID : Int, lat : Double, lon : Double, noteContents : String) {
         markerHashMap[noteID] = Marker(mapView)
 
@@ -120,6 +131,7 @@ class Map(var mapView: MapView,
         mapView.overlays.add(markerHashMap.getValue(noteID))
     }
 
+    // removes the last added marker from the map
     fun undo() : Boolean {
         val maxID = (markerHashMap.keys).maxOrNull()
         if (maxID != null) {
@@ -132,40 +144,135 @@ class Map(var mapView: MapView,
         }
     }
 
-    fun removeAt(housenumberID : Int) {
-        mapView.overlays.remove(markerHashMap.getValue(housenumberID))
-        markerHashMap.remove(housenumberID)
+    // removes a marker at a specific ID.
+    fun removeAt(ID : Int) {
+        mapView.overlays.remove(markerHashMap.getValue(ID))
+        markerHashMap.remove(ID)
     }
 
+    // Returns a marker after being given the marker ID.
     fun getMarker(id: Int): Marker {
         return markerHashMap.getValue(id)
     }
 
-    fun removeAllMarkers() {
-        /*
-        for (marker: Marker in markerHashMap.values) {
-            Log.i(TAG, "removing marker")
-            mapView.overlays.remove(marker)
-            mapView.invalidate()
+    // Returns a marker after being given the exact co-ordinates of the marker
+    fun getMarker(geoPoint: GeoPoint): Marker? {
+        for (marker in markerHashMap.values) {
+            if (marker.position as GeoPoint == geoPoint) {
+                return marker
+            }
         }
-         */
-
-        for((ID, marker) in markerHashMap) {
-            Log.i(TAG, "removing marker")
-            mapView.overlays.remove(marker)
-        }
-        mapView.invalidate()
-        markerHashMap.clear()
-        InfoWindow.closeAllInfoWindowsOn(mapView)
-        Log.i(TAG, "Database cleared and markers have been removed.")
-
-        Log.i(TAG, "Dialog dismissed")
+        return null
     }
 
+    // removes all markers from the map
+    fun removeAllMarkers() {
+        mapView.overlays.removeAll(mapView.overlays)
+        mapView.invalidate()
+    }
+
+    // fixes a marker into a new position after the "move" button in the mainActivity is pressed.
     fun moveMarker() {
         if (moveMarkerCondition) {
             markerToMove.position = mapView.mapCenter as GeoPoint
             mapView.invalidate()
         }
     }
+
+    // Creates a new "interpolation" way, this effectively allows you to guess the addresses
+    // between two existing addresses.
+    fun createNewInterpolationWay(startMarkerID: Int) {
+        val marker = getMarker(startMarkerID)
+        val geoPoints = arrayListOf(marker.position as GeoPoint)
+        polyLineHashMap[polyLineID] =
+                Polyline(null, true)
+
+        polyLineHashMap.getValue(polyLineID).setPoints(geoPoints)
+        polyLineHashMap.getValue(polyLineID).outlinePaint.color = ContextCompat.getColor(
+                context, R.color.interpolation_way_color)
+        polyLineHashMap.getValue(polyLineID).outlinePaint.style = Paint.Style.STROKE
+        polyLineHashMap.getValue(polyLineID).outlinePaint.pathEffect = (
+                DashPathEffect(floatArrayOf(50f, 10f), 100f))
+
+        // polyLineHashMap.getValue(polyLineID).addPoint(marker.position)
+
+        mapView.overlays.add(polyLineHashMap.getValue(polyLineID))
+        makeLineFollowCenter(true)
+
+        mainActivity.createNewInterpolationWay(
+                polyLineHashMap.getValue(polyLineID), geoPoints, startMarkerID)
+
+
+
+    }
+    fun finishInterpolationWay(endMarkerID: Int) {
+
+        makeLineFollowCenter(false)
+        polyLineHashMap.getValue(polyLineID).addPoint(getMarker(endMarkerID).position)
+        polyLineID += 1
+    }
+
+    // makes the interpolation line follow the map center
+    fun makeLineFollowCenter(follow : Boolean, geoPoints: ArrayList<GeoPoint>) {
+
+        val line = polyLineHashMap.getValue(polyLineID)
+        if (follow) {
+            makeInterpolationWayFollowCenterMapListener = object:MapListener {
+                override fun onZoom(event: ZoomEvent?): Boolean {
+                    return false
+                }
+
+                override fun onScroll(event: ScrollEvent?): Boolean {
+                    geoPoints.removeLast()
+                    geoPoints.add(mapView.mapCenter as GeoPoint)
+                    line.setPoints(geoPoints)
+                    return true
+                }
+            }
+            geoPoints.add(mapView.mapCenter as GeoPoint)
+            mapView.addMapListener(makeInterpolationWayFollowCenterMapListener)
+        } else {
+            mapView.removeMapListener(makeInterpolationWayFollowCenterMapListener)
+        }
+    }
+    fun makeLineFollowCenter(follow : Boolean) {
+
+        val line = polyLineHashMap.getValue(polyLineID)
+        val geoPoints = polyLineHashMap.getValue(polyLineID).actualPoints.toMutableList()
+        if (follow) {
+            makeInterpolationWayFollowCenterMapListener = object:MapListener {
+                override fun onZoom(event: ZoomEvent?): Boolean {
+                    return false
+                }
+
+                override fun onScroll(event: ScrollEvent?): Boolean {
+                    geoPoints.removeLast()
+                    geoPoints.add(mapView.mapCenter as GeoPoint)
+                    line.setPoints(geoPoints)
+                    return true
+                }
+            }
+            geoPoints.add(mapView.mapCenter as GeoPoint)
+            mapView.addMapListener(makeInterpolationWayFollowCenterMapListener)
+        } else {
+            mapView.removeMapListener(makeInterpolationWayFollowCenterMapListener)
+        }
+    }
+
+    fun getPolyLineHashMap() : HashMap<Int, Polyline> {
+        return polyLineHashMap
+    }
+    // Gets a specific polyline when given ID.
+    private fun getPolyLineHashMapValue(ID: Int) : Polyline {
+        return  polyLineHashMap.getValue(ID)
+    }
+    // get a list of points for a specific Polyline
+    fun getPolyLineHashMapValue(ID: Int, getPoints: Boolean) : MutableList<GeoPoint> {
+        return polyLineHashMap.getValue(ID).actualPoints.toMutableList()
+    }
+    fun getPolyLineID() : Int {
+        return polyLineID
+    }
+
+
 }

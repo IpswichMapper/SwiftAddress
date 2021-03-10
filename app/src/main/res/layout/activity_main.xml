@@ -253,6 +253,43 @@
             android:layout_marginBottom="100dp"
             android:visibility="gone"/>
 
+        <Button
+            android:id="@+id/cancel_interpolation_way"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/darker_gray"
+            android:onClick="closeMiniKeypad"
+            android:scaleType="fitCenter"
+            android:text="@string/cancel"
+            android:textColor="@color/black"
+            android:tint="@color/button_colors"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/add_interpolation_way_point"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginBottom="100dp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/add_interpolation_way_point"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/darker_gray"
+            android:onClick="closeMiniKeypad"
+            android:scaleType="fitCenter"
+            android:text="@string/add_point"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/cancel_interpolation_way"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginBottom="100dp"
+            android:visibility="gone"/>
+
         <RelativeLayout
             android:id="@+id/swipe_up_relative_layout"
             android:layout_width="match_parent"

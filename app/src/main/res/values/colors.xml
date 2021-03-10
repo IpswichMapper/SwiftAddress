@@ -23,4 +23,6 @@
     <color name="border_blue">#0000FF</color>
     <color name="grey_color">@android:color/darker_gray</color>
     <color name="purple_background">#B1A2FF</color>
+
+    <color name="interpolation_way_color">#FF0000</color>
 </resources>

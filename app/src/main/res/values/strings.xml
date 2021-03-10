@@ -98,5 +98,12 @@
     <string name="invalid_imagery">Invalid Custom Imagery</string>
     <string name="SwiftAddress">SwiftAddress</string>
     <string name="version_string">Version 0.2.0</string>
+    <string name="add_point">Add Point</string>
+    <string name="interpolate">Inter-
+        polate</string>
+    <string name="finish_interpolation">Finish Interpolation</string>
+    <string name="housenumber">Housenumber:</string>
+    <string name="addr_interpolation">addr:interpolation</string>
+    <string name="addr_inclusion">addr:inclusion</string>
 
 </resources>

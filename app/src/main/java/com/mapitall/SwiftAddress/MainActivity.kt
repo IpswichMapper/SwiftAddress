@@ -39,8 +39,6 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.navigation.NavigationView
 import com.mancj.slideup.SlideUp
 import com.mancj.slideup.SlideUpBuilder
-import layout.AddressNodes
-import layout.StoreHouseNumbers
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory

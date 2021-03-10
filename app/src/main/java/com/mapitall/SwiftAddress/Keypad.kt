@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.preference.PreferenceManager
-import layout.AddressNodes
 import org.apache.commons.lang3.StringUtils
 import java.net.URL
 import java.util.*

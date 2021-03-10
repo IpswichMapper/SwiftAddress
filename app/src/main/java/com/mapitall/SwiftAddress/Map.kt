@@ -6,8 +6,6 @@ import android.graphics.Paint
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
-import layout.AddressNodes
-import layout.StoreHouseNumbers
 import org.osmdroid.config.Configuration.*
 import org.osmdroid.events.*
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory

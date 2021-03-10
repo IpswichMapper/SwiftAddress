@@ -3,9 +3,7 @@ package com.mapitall.SwiftAddress
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import android.util.Log
-import android.view.OrientationEventListener
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -13,7 +11,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import layout.StoreHouseNumbers
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 class MarkerWindow(pressLayoutId : Int,

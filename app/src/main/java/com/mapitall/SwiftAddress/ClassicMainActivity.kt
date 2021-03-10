@@ -2,15 +2,8 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.location.Criteria
-import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
@@ -26,9 +19,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceManager
 import com.google.android.material.navigation.NavigationView
-import layout.AddressNodes
-import layout.StoreHouseNumbers
-import org.osmdroid.views.MapView
 import kotlin.math.abs
 import kotlin.math.cos
 

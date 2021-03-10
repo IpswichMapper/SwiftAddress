@@ -1,4 +1,4 @@
-package layout
+package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -14,10 +14,6 @@ import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import com.mapitall.SwiftAddress.MainActivity
-import com.mapitall.SwiftAddress.Map
-import com.mapitall.SwiftAddress.MarkerWindow
-import com.mapitall.SwiftAddress.R
 import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker

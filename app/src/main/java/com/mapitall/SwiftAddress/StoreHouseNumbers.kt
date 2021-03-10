@@ -654,6 +654,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val wayRow = db.insert(WAYS_TABLE_NAME, null, wayContentValues)
         geoPoints.removeFirst()
         geoPoints.removeLast()
+        val testList = arrayListOf<Int>()
         for(geoPoint in geoPoints) {
 
             val contentValues = ContentValues()

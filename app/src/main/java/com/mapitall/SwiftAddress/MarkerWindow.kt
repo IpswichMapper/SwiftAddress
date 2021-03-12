@@ -6,10 +6,7 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
@@ -82,10 +79,17 @@ class MarkerWindow(pressLayoutId : Int,
                 interpolationTextView.text = context.getString(R.string.addr_interpolation)
                 interpolateButton.setTextColor(ContextCompat.getColor(
                         context, R.color.button_colors))
-                val interpolationEditText = EditText(context)
+                val interpolationEditText = AutoCompleteTextView(context)
+                // TODO : Check all possible options
+                val interpolationOptionsList = listOf("even", "odd", "alphabetic", "all")
+                interpolationEditText.setAdapter(ArrayAdapter(
+                        context,
+                        android.R.layout.simple_dropdown_item_1line,
+                        interpolationOptionsList))
 
                 val inclusionTextView = TextView(context)
                 inclusionTextView.text = context.getString(R.string.addr_inclusion)
+                // TODO: See how to create a dropdown
                 val inclusionEditText = EditText(context)
                 inclusionEditText.setTextColor(ContextCompat.getColor(
                         context, R.color.button_colors))

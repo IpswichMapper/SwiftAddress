@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
 import java.io.File
 import java.io.FileOutputStream
 
@@ -234,7 +235,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
         c.close()
 
-        c = db.rawQuery("SELECT * FROM $WAYS_TABLE_NAME", null)
+        c = db.rawQuery("SELECT * FROM $WAYS_TABLE_NAME;", null)
         while (c.moveToNext()) {
             val interpolation = c.getString(c.getColumnIndex(WAY_COL_INTERPOLATION))
             val inclusion = c.getString(c.getColumnIndex(WAY_COL_INCLUSION))
@@ -249,10 +250,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             }
             addressFileMiddle.append("<nd ref=\"${addressIDHashMap[endMarkerID]}\" />\n")
             if (interpolation != "")
-                addressFileMiddle.append("<tag k=\"addr:interpolation\" v=\"$interpolation\" />")
+                addressFileMiddle.append("<tag k=\"addr:interpolation\" v=\"$interpolation\" />\n")
             if (inclusion != "")
-                addressFileMiddle.append("<tag k=\"addr:inclusion\" v=\"$inclusion\" />")
-            addressFileMiddle.append("</way>")
+                addressFileMiddle.append("<tag k=\"addr:inclusion\" v=\"$inclusion\" />\n")
+            addressFileMiddle.append("</way>\n")
         }
         c.close()
 
@@ -425,7 +426,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             if (c.getString(c.getColumnIndex(COL_TYPE)) == "Address") {
 
                 val housenumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
-                var street = c.getString(c.getColumnIndex(COL_STREET))
+                val street = c.getString(c.getColumnIndex(COL_STREET))
                 // TODO : Show street in popup
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
@@ -509,8 +510,55 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             }
         }
         c.close()
+        val c2 = db.query(WAYS_TABLE_NAME, null, null, null,
+                null, null, "ID ASC")
+
+        val polyLineHashMap = HashMap<Int, Polyline>()
+
+        while(c2.moveToNext()) {
+            val iD = c2.getInt(0)
+            val startMarkerID = c2.getInt(c2.getColumnIndex(WAY_COL_START_MARKER_ID))
+            val endMarkerID = c2.getInt(c2.getColumnIndex(WAY_COL_END_MARKER_ID))
+
+            val startMarkerRow = db.rawQuery(
+                    "SELECT * FROM $TABLE_NAME WHERE ID = $startMarkerID", null)
+            val endMarkerRow = db.rawQuery(
+                    "SELECT * FROM $TABLE_NAME WHERE ID = $endMarkerID", null)
+            startMarkerRow.moveToFirst()
+            endMarkerRow.moveToFirst()
+            val startMarkerGeoPoint = GeoPoint(
+                    startMarkerRow.getDouble(startMarkerRow.getColumnIndex(COL_LATITUDE)),
+                    startMarkerRow.getDouble(startMarkerRow.getColumnIndex(COL_LONGITUDE)))
+            val endMarkerGeoPoint = GeoPoint(
+                    endMarkerRow.getDouble(endMarkerRow.getColumnIndex(COL_LATITUDE)),
+                    endMarkerRow.getDouble(endMarkerRow.getColumnIndex(COL_LONGITUDE)))
+
+            startMarkerRow.close()
+            endMarkerRow.close()
+
+            polyLineHashMap[iD] = Polyline()
+
+            polyLineHashMap.getValue(iD).addPoint(startMarkerGeoPoint)
+
+            val c3 = db.query(TABLE_NAME, null, null, null,
+                    null, null, "ID ASC")
+
+            while (c3.moveToNext()) {
+                if (c3.getInt(c3.getColumnIndex(COL_REF)) == iD) {
+                    val lat = c3.getDouble(c3.getColumnIndex(COL_LATITUDE))
+                    val lon = c3.getDouble(c3.getColumnIndex(COL_LONGITUDE))
+                    polyLineHashMap.getValue(iD).addPoint(GeoPoint(lat, lon))
+
+                }
+            }
+            polyLineHashMap.getValue(iD).addPoint(endMarkerGeoPoint)
+            c3.close()
+        }
+        c2.close()
         mapClass.mapView.invalidate()
         mapClass.setMarkerHashMap(markerHashMap)
+        mapClass.setPolylineHashMap(polyLineHashMap)
+        db.close()
     }
 
     // Gets last address that was entered
@@ -524,8 +572,15 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         var runCondition = true
         while (c.moveToNext() && runCondition) {
+            Log.i(TAG,"${c.getString(c.getColumnIndex(COL_TYPE))}, ${
+                c.getString(c.getColumnIndex(COL_TYPE)) == "Address"
+            }")
+            Log.i(TAG, "${c.getString(c.getColumnIndex(COL_SIDE))}, ${
+                c.getString(c.getColumnIndex(COL_SIDE)) == side
+            }, $side")
             if (c.getString(c.getColumnIndex(COL_TYPE)) == "Address" &&
                     c.getString(c.getColumnIndex(COL_SIDE)) == side) {
+                Log.i(TAG, "in if statemant.")
                 lastAddress = AddressNodes(
                         c.getString(c.getColumnIndex(COL_HOUSENUMBER)),
                         c.getString(c.getColumnIndex(COL_STREET)),
@@ -537,6 +592,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 runCondition = false
             }
         }
+
+        Log.i(TAG, "lastAddress: ${lastAddress.toString()}")
 
         c.close()
         return lastAddress
@@ -568,7 +625,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val c : Cursor = dbRead.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
         c.moveToNext()
-        val itemType = c.getString(1)
+        val itemType = c.getString(c.getColumnIndex(COL_TYPE))
         Log.i(TAG, "Item Type: $itemType")
 
         // TODO : Check this works when you add image deletion functionality.
@@ -629,7 +686,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
 
         val db : SQLiteDatabase = this.writableDatabase
-        val query = "SELECT * FROM $TABLE_NAME WHERE ID = $ID"
 
         val contentValues = ContentValues()
         contentValues.put(COL_HOUSENUMBER, housenumber)
@@ -639,12 +695,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     // This adds an "interpolation way" to the database
     fun addInterpolationWay(startMarkerID: Int,
-                            geoPoints_: MutableList<GeoPoint>,
+                            geoPoints: MutableList<GeoPoint>,
                             endMarkerID: Int,
                             interpolation: String,
                             inclusion: String) {
         val db = this.writableDatabase
-        var geoPoints = geoPoints_
         val wayContentValues = ContentValues()
         wayContentValues.put(WAY_COL_INCLUSION, inclusion)
         wayContentValues.put(WAY_COL_INTERPOLATION, interpolation)
@@ -654,12 +709,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val wayRow = db.insert(WAYS_TABLE_NAME, null, wayContentValues)
         geoPoints.removeFirst()
         geoPoints.removeLast()
-        val testList = arrayListOf<Int>()
         for(geoPoint in geoPoints) {
-
             val contentValues = ContentValues()
-            contentValues.put(COL_LATITUDE, geoPoint.longitude)
-            contentValues.put(COL_LONGITUDE, geoPoint.latitude)
+            contentValues.put(COL_LATITUDE, geoPoint.latitude)
+            contentValues.put(COL_LONGITUDE, geoPoint.longitude)
             contentValues.put(COL_TYPE, "Node")
             contentValues.put(COL_REF, wayRow)
 

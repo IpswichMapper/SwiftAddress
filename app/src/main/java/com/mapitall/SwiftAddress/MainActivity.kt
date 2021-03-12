@@ -1418,8 +1418,13 @@ class MainActivity : AppCompatActivity(),
                         )
             }
 
-            button1.tag = "left"; button2.tag = "left"; button3.tag = "left"
-            button4.tag = "left"; button5.tag = "left"; button6.tag = "left"
+            if (isOnLeft) {
+                button1.tag = "left"; button2.tag = "left"; button3.tag = "left"
+                button4.tag = "left"; button5.tag = "left"; button6.tag = "left"
+            } else {
+                button1.tag = "right"; button2.tag = "right"; button3.tag = "right"
+                button4.tag = "right"; button5.tag = "right"; button6.tag = "right"
+            }
             slideUp.show()
         } else {
             Toast.makeText(this, getString(R.string.add_address_first),
@@ -1533,8 +1538,8 @@ class MainActivity : AppCompatActivity(),
         modifyIncrementDialogue.create().show()
     }
 
-
-    fun swipeAddHousenumber(view: View) {
+    @SuppressLint("InlinedApi")
+    fun swipeAddHouseNumber(view: View) {
         val buildingLevelsButton = findViewById<ImageButton>(view.id)
         val relativeLayout = buildingLevelsButton.parent as RelativeLayout
         val buildingLevelsTextView = relativeLayout.getChildAt(1) as TextView

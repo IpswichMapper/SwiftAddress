@@ -13,6 +13,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import java.net.IDN
 
 class Map(var mapView: MapView,
           private val context: Context,
@@ -20,7 +21,7 @@ class Map(var mapView: MapView,
 
     private var markerHashMap = HashMap<Int, Marker>()
     private var polyLineID : Int
-    private val polyLineHashMap = HashMap<Int, Polyline>()
+    private var polyLineHashMap = HashMap<Int, Polyline>()
     private var storeHouseNumbersObject = StoreHouseNumbers(context)
     private val TAG = "Map"
     private var moveMarkerMapListener: MapListener
@@ -203,6 +204,16 @@ class Map(var mapView: MapView,
 
 
     }
+
+    fun addPolyLineToHashMap(polyline: Polyline, polyLineID : Int) {
+        polyLineHashMap[polyLineID] = polyline
+
+        polyLineHashMap.getValue(polyLineID).outlinePaint.color = ContextCompat.getColor(
+                context, R.color.interpolation_way_color)
+        polyLineHashMap.getValue(polyLineID).outlinePaint.style = Paint.Style.STROKE
+        polyLineHashMap.getValue(polyLineID).outlinePaint.pathEffect = (
+                DashPathEffect(floatArrayOf(50f, 10f), 100f))
+    }
     fun finishInterpolationWay(endMarkerID: Int) {
 
         makeLineFollowCenter(false)
@@ -260,6 +271,20 @@ class Map(var mapView: MapView,
     fun getPolyLineHashMap() : HashMap<Int, Polyline> {
         return polyLineHashMap
     }
+    fun setPolylineHashMap(polyLineHashMap_: HashMap<Int, Polyline>) {
+        for (polyline in polyLineHashMap.values) {
+            mapView.overlays.remove(polyline)
+        }
+        for (polyline in polyLineHashMap_) {
+            for(point in polyline.value.actualPoints) {
+                Log.i(TAG, "point: $point")
+            }
+            addPolyLineToHashMap(polyline.value, polyline.key)
+        }
+        for (polyline in polyLineHashMap.values) {
+            mapView.overlays.add(polyline)
+        }
+    }
     // Gets a specific polyline when given ID.
     private fun getPolyLineHashMapValue(ID: Int) : Polyline {
         return  polyLineHashMap.getValue(ID)
@@ -271,6 +296,7 @@ class Map(var mapView: MapView,
     fun getPolyLineID() : Int {
         return polyLineID
     }
+
 
 
 }

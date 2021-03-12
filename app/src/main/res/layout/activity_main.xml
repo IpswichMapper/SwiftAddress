@@ -351,7 +351,7 @@
                         android:id="@+id/B1R0_mini_relative"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:onClick="swipeAddHousenumber"
+                        android:onClick="swipeAddHouseNumber"
                         android:paddingBottom="25dp"
                         android:scaleType="fitCenter"
                         android:tint="@color/button_colors"
@@ -377,7 +377,7 @@
                         android:id="@+id/B2R0_mini_relative"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:onClick="swipeAddHousenumber"
+                        android:onClick="swipeAddHouseNumber"
                         android:paddingBottom="25dp"
                         android:tint="@color/button_colors"
                         app:srcCompat="@drawable/house" />
@@ -405,7 +405,7 @@
                         android:layout_height="match_parent"
                         android:layout_alignParentBottom="true"
                         android:layout_weight="1"
-                        android:onClick="swipeAddHousenumber"
+                        android:onClick="swipeAddHouseNumber"
                         android:paddingBottom="25dp"
                         android:tint="@color/button_colors"
                         app:srcCompat="@drawable/house" />
@@ -440,7 +440,7 @@
                         android:id="@+id/B1R1_mini_relative"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:onClick="swipeAddHousenumber"
+                        android:onClick="swipeAddHouseNumber"
                         android:paddingBottom="25dp"
                         android:tint="@color/button_colors"
                         app:srcCompat="@drawable/house" />
@@ -465,7 +465,7 @@
                         android:id="@+id/B2R1_mini_relative"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:onClick="swipeAddHousenumber"
+                        android:onClick="swipeAddHouseNumber"
                         android:paddingBottom="25dp"
                         android:tint="@color/button_colors"
                         app:srcCompat="@drawable/house" />
@@ -492,7 +492,7 @@
                         android:id="@+id/B3R1_mini_relative"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:onClick="swipeAddHousenumber"
+                        android:onClick="swipeAddHouseNumber"
                         android:paddingBottom="25dp"
                         android:tint="@color/button_colors"
                         app:srcCompat="@drawable/house" />

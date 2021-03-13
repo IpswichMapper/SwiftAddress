@@ -25,12 +25,12 @@ import java.io.FileOutputStream
 // an address object into one data class that can be shared accross activities.
 @Parcelize
 data class AddressNodes(
-    var housenumber : String,
-    val street : String = "",
-    var latitude : Double,
-    var longitude : Double,
-    val side : String,
-    var buildingLevels : String) : Parcelable
+        var housenumber: String,
+        val street: String = "",
+        var latitude: Double,
+        var longitude: Double,
+        val side: String,
+        var buildingLevels: String) : Parcelable
 
 class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context,
         "address_database",
@@ -219,7 +219,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 noteFileMiddle.append("<comment text=\"$contents\" />\n")
                 noteFileMiddle.append("</note>\n")
                 j--
-            } else if (type == "Node"){
+            } else if (type == "Node") {
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
 
@@ -314,14 +314,14 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         var doNotExecuteNextWays = false
         try {
             db.delete(TEMP_TABLE_NAME, null, null)
-        } catch (e : SQLiteException) {
+        } catch (e: SQLiteException) {
             e.printStackTrace()
             db.execSQL("CREATE TABLE $TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
             doNotExecuteNext = true
         }
         try {
             db.delete(WAYS_TEMP_TABLE_NAME, null, null)
-        } catch (e : SQLiteException) {
+        } catch (e: SQLiteException) {
             e.printStackTrace()
             db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
             doNotExecuteNextWays = true
@@ -344,10 +344,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     */
 
     // Adds housenumber to database once it is created.
-    fun addHouseNumber(address: AddressNodes) : Int {
+    fun addHouseNumber(address: AddressNodes): Int {
 
         val db: SQLiteDatabase = this.writableDatabase
-        val dbRead : SQLiteDatabase = this.readableDatabase
+        val dbRead: SQLiteDatabase = this.readableDatabase
         val contentValues = ContentValues()
 
         contentValues.put(COL_HOUSENUMBER, address.housenumber)
@@ -365,7 +365,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // Adds notes to database once it is created.
-    fun addNote(noteContents: String, lat: Double, lon: Double) : Int {
+    fun addNote(noteContents: String, lat: Double, lon: Double): Int {
 
         val db: SQLiteDatabase = this.writableDatabase
         val contentValues = ContentValues()
@@ -380,9 +380,9 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // Return the item type of the last item that was added.
-    fun lastItemType() : String {
-        val db : SQLiteDatabase = this.readableDatabase
-        val c : Cursor = db.query(TABLE_NAME, null, null, null,
+    fun lastItemType(): String {
+        val db: SQLiteDatabase = this.readableDatabase
+        val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
         c.moveToNext()
         Log.i(TAG, "Item Type: ${c.getString(1)}")
@@ -391,11 +391,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // removes the last object from database.
-    fun undo(isAnImage : Boolean){
+    fun undo(isAnImage: Boolean) {
         val db: SQLiteDatabase = this.writableDatabase
 
         if (isAnImage) {
-            val dbRead : SQLiteDatabase = this.readableDatabase
+            val dbRead: SQLiteDatabase = this.readableDatabase
             val c: Cursor = dbRead.query(TABLE_NAME, null, null, null,
                     null, null, "ID DESC")
             c.moveToNext()
@@ -406,7 +406,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
 
         db.execSQL("DELETE FROM $TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $TABLE_NAME);")
-
 
 
     }
@@ -516,7 +515,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         val polyLineHashMap = HashMap<Int, Polyline>()
 
-        while(c2.moveToNext()) {
+        while (c2.moveToNext()) {
             val iD = c2.getInt(0)
             val startMarkerID = c2.getInt(c2.getColumnIndex(WAY_COL_START_MARKER_ID))
             val endMarkerID = c2.getInt(c2.getColumnIndex(WAY_COL_END_MARKER_ID))
@@ -563,17 +562,16 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // Gets last address that was entered
-    fun lastAddressEntry(side : String) : AddressNodes?{
+    fun lastAddressEntry(side: String): AddressNodes? {
         val db: SQLiteDatabase = this.readableDatabase
         var lastAddress: AddressNodes? = null
         var c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
 
 
-
         var runCondition = true
         while (c.moveToNext() && runCondition) {
-            Log.i(TAG,"${c.getString(c.getColumnIndex(COL_TYPE))}, ${
+            Log.i(TAG, "${c.getString(c.getColumnIndex(COL_TYPE))}, ${
                 c.getString(c.getColumnIndex(COL_TYPE)) == "Address"
             }")
             Log.i(TAG, "${c.getString(c.getColumnIndex(COL_SIDE))}, ${
@@ -603,9 +601,9 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     // Add an row containing information about an image stored in internal storage
     @SuppressLint("Recycle")
-    fun addImage(absolutePath : String, lat : Double, lon : Double) : Int {
-        val db : SQLiteDatabase = this.writableDatabase
-        val dbRead : SQLiteDatabase = this.readableDatabase
+    fun addImage(absolutePath: String, lat: Double, lon: Double): Int {
+        val db: SQLiteDatabase = this.writableDatabase
+        val dbRead: SQLiteDatabase = this.readableDatabase
         val contentValues = ContentValues()
 
         contentValues.put(COL_NOTE, absolutePath)
@@ -622,8 +620,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     // TODO : Fix this function
     fun removeAt(housenumberID: Int) {
 
-        val dbRead : SQLiteDatabase = this.readableDatabase
-        val c : Cursor = dbRead.query(TABLE_NAME, null, null, null,
+        val dbRead: SQLiteDatabase = this.readableDatabase
+        val c: Cursor = dbRead.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
         c.moveToNext()
         val itemType = c.getString(c.getColumnIndex(COL_TYPE))
@@ -642,7 +640,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // Change location of marker after it has been moved.
-    fun changeLocation(ID : Int, lat : Double, lon : Double) {
+    fun changeLocation(ID: Int, lat: Double, lon: Double) {
         val db = this.writableDatabase
         db.execSQL("UPDATE $TABLE_NAME SET LATITUDE = $lat WHERE ID = $ID")
         db.execSQL("UPDATE $TABLE_NAME SET LONGITUDE = $lon WHERE ID = $ID")
@@ -652,7 +650,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     // Gets old data from a "temporary table", and overwrites current table with
     // rows from "temporary table". The "temporary table" consists of data from
     // the last time the user saved.
-    fun recoverData(mapClass : Map, mainActivity: MainActivity) {
+    fun recoverData(mapClass: Map, mainActivity: MainActivity) {
 
         Log.i(TAG, "Attempting to recover data.")
         val db = this.writableDatabase
@@ -665,7 +663,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val rows = db.delete(TABLE_NAME, "TYPE = 'Image'", null)
                 Log.i(TAG, "$rows rows deleted (image rows)")
                 displayMarkers(mapClass, mainActivity)
-            } catch (e : SQLiteException) {
+            } catch (e: SQLiteException) {
                 e.printStackTrace()
 
                 Toast.makeText(context, context.getString(R.string.no_saved_data),
@@ -683,10 +681,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     // Changes address in the database when it has been modified using an "InfoWindow"
     // that pops up when you click on the marker.
-    fun changeAddress (ID : Int, housenumber: String, street: String) {
+    fun changeAddress(ID: Int, housenumber: String, street: String) {
 
 
-        val db : SQLiteDatabase = this.writableDatabase
+        val db: SQLiteDatabase = this.writableDatabase
 
         val contentValues = ContentValues()
         contentValues.put(COL_HOUSENUMBER, housenumber)
@@ -710,7 +708,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val wayRow = db.insert(WAYS_TABLE_NAME, null, wayContentValues)
         geoPoints.removeFirst()
         geoPoints.removeLast()
-        for(geoPoint in geoPoints) {
+        for (geoPoint in geoPoints) {
             val contentValues = ContentValues()
             contentValues.put(COL_LATITUDE, geoPoint.latitude)
             contentValues.put(COL_LONGITUDE, geoPoint.longitude)
@@ -721,7 +719,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
     }
 
-    fun lastPolyLineID() : Int {
+    fun lastPolyLineID(): Int {
         val db = this.readableDatabase
         try {
             val c: Cursor = db.rawQuery(
@@ -730,10 +728,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             val id = c.getInt(c.getColumnIndex(COL_ID))
             c.close()
             return id
-        } catch (e : SQLiteException) {
+        } catch (e: SQLiteException) {
             e.printStackTrace()
             return -1
-        } catch (e : CursorIndexOutOfBoundsException) {
+        } catch (e: CursorIndexOutOfBoundsException) {
             Log.w(TAG, "Cursor Index out of range, list is empty")
             return -1
         }

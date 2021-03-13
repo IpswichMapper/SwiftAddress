@@ -320,7 +320,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
-        numButton0.setOnClickListener() {
+        numButton0.setOnClickListener {
             Log.i("key0", "onclicklistener called.")
             if (!touchEvent) {
                 addNum(numButton0)

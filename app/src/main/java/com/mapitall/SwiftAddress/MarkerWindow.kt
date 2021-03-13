@@ -11,8 +11,6 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import org.osmdroid.views.overlay.infowindow.InfoWindow
-import java.lang.Exception
-import java.lang.NumberFormatException
 
 class MarkerWindow(pressLayoutId : Int,
                    private val mapClass: Map,

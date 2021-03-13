@@ -374,7 +374,7 @@ class Keypad : AppCompatActivity(),
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
-        numButton0.setOnClickListener() {
+        numButton0.setOnClickListener {
             Log.i("key0", "onclicklistener called.")
             if (!touchEvent) {
                 addNum(numButton0)
@@ -476,7 +476,7 @@ class Keypad : AppCompatActivity(),
                     textToInt -= 1
                     modifyIncrementInput.setText(textToInt.toString())
                 } catch (e: NumberFormatException) {
-                    var textToSet = "";
+                    var textToSet = ""
 
                     for (c in text) {
                         val intOrNot = c.toString().toIntOrNull()
@@ -506,7 +506,7 @@ class Keypad : AppCompatActivity(),
                     textToInt += 1
                     modifyIncrementInput.setText(textToInt.toString())
                 } catch (e: NumberFormatException) {
-                    var textToSet = "";
+                    var textToSet = ""
 
                     for (c in text) {
                         val intOrNot = c.toString().toIntOrNull()
@@ -788,7 +788,6 @@ class Keypad : AppCompatActivity(),
         } else if (onFlingDetected == "down") {
             Log.w("swipeDownText:", swipeDownText)
             if (swipeDownText == "") {
-                // TODO : Implement
                 Log.w("onFling", "There is no action for \"swipe down\"")
             } else {
                 val buildingLevelsValue = findViewById<TextView>(R.id.building_levels_value)
@@ -854,7 +853,7 @@ class Keypad : AppCompatActivity(),
                 numToIncrement += 1
                 addressTextbox.setText(numToIncrement.toString())
             } catch (e: NumberFormatException) {
-                var textToSet = "";
+                var textToSet = ""
 
                 for (c in addressTextboxText) {
                     val intOrNot = c.toString().toIntOrNull()
@@ -874,7 +873,7 @@ class Keypad : AppCompatActivity(),
                 numToIncrement += 1
                 addressTextbox.setText(numToIncrement.toString())
             } catch (e: NumberFormatException) {
-                var textToSet = "";
+                var textToSet = ""
 
                 for (c in addressTextboxHint) {
                     val intOrNot = c.toString().toIntOrNull()
@@ -909,7 +908,7 @@ class Keypad : AppCompatActivity(),
                 num_to_decrement -= 1
                 addressTextbox.setText(num_to_decrement.toString())
             } catch (e: NumberFormatException) {
-                var textToSet = "";
+                var textToSet = ""
                 if (addressTextboxText.isNotBlank()) {
                     for (c in addressTextboxText) {
                         val intOrNot = c.toString().toIntOrNull()
@@ -929,7 +928,7 @@ class Keypad : AppCompatActivity(),
                 numToDecrement -= 1
                 addressTextbox.setText(numToDecrement.toString())
             } catch (e: NumberFormatException) {
-                var textToSet = "";
+                var textToSet = ""
 
                 for (c in addressTextboxHint) {
                     val intOrNot = c.toString().toIntOrNull()

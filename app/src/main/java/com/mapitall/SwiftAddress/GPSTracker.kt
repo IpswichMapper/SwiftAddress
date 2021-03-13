@@ -80,18 +80,18 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
     var azimuth : Float? = null
 
     override fun onSensorChanged(event: SensorEvent) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            gravity = event.values;
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            geomagnetic = event.values;
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER)
+            gravity = event.values
+        if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD)
+            geomagnetic = event.values
         if (gravity != null && geomagnetic != null) {
             var R = FloatArray(9)
             var I = FloatArray(9)
-            val success : Boolean = SensorManager.getRotationMatrix(R, I, gravity, geomagnetic);
+            val success : Boolean = SensorManager.getRotationMatrix(R, I, gravity, geomagnetic)
             if (success) {
                 val orientation = FloatArray(3)
-                SensorManager.getOrientation(R, orientation);
-                azimuth = orientation[0]; // orientation contains: azimuth, pitch and roll
+                SensorManager.getOrientation(R, orientation)
+                azimuth = orientation[0] // orientation contains: azimuth, pitch and roll
             }
         }
     }

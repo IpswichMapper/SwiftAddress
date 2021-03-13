@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.preference.PreferenceManager
 import com.google.android.material.card.MaterialCardView
-import kotlin.math.log
 
 class ChooseBackgroundImagery : AppCompatActivity() {
 

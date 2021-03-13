@@ -299,7 +299,7 @@ class MainActivity : AppCompatActivity(),
                 if (map.mapView.zoomLevelDouble < 17) {
                     map.mapView.controller.zoomTo(17.0)
                 }
-                map.mapView.controller.animateTo(GeoPoint(location!!.latitude, location.longitude))
+                map.mapView.controller.animateTo(GeoPoint(location.latitude, location.longitude))
 
                 Log.i(TAG, "zoomLevel: ${map.mapView.zoomLevelDouble}")
             } catch (e: Exception) {
@@ -438,7 +438,7 @@ class MainActivity : AppCompatActivity(),
             numToIncrement += numIncrement
             houseNumber = numToIncrement.toString()
         } catch (e: Exception) {
-            var textToSet = "";
+            var textToSet = ""
             if (houseNumber.isNotBlank()) {
                 for (c in houseNumber) {
                     val intOrNot = c.toString().toIntOrNull()
@@ -486,9 +486,6 @@ class MainActivity : AppCompatActivity(),
         if (requestCode == 1 && resultCode == RESULT_OK) {
             backgroundImagery()
         }
-
-        // TODO : Have different codes to remember increment number for the following
-        //  two if statements.
 
         // Following if statement is for "keypad" activity if left arrow was pressed.
         else if (requestCode == 2 && resultCode == RESULT_OK) {

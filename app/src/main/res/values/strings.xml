@@ -103,7 +103,7 @@
         polate</string>
     <string name="finish_interpolation">Finish Interpolation</string>
     <string name="housenumber">Housenumber:</string>
-    <string name="addr_interpolation">addr:interpolation</string>
-    <string name="addr_inclusion">addr:inclusion</string>
+    <string name="addr_interpolation">addr:interpolation (Required)</string>
+    <string name="addr_inclusion">addr:inclusion (Optional)</string>
 
 </resources>

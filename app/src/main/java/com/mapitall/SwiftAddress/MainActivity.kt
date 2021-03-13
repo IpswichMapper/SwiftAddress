@@ -1735,6 +1735,7 @@ class MainActivity : AppCompatActivity(),
             map.mapView.overlays.remove(polyline)
             map.mapView.invalidate()
             creatingInterpolationWay = false
+            InfoWindow.closeAllInfoWindowsOn(map.mapView)
 
             addPointButton.visibility = View.GONE
             cancelButton.visibility = View.GONE

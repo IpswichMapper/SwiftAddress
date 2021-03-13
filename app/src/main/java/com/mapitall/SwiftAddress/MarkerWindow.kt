@@ -100,7 +100,7 @@ class MarkerWindow(pressLayoutId : Int,
                 inclusionDropDown.adapter = ArrayAdapter(
                         context,
                         android.R.layout.simple_spinner_dropdown_item,
-                        listOf("actual", "estimate", "potential"))
+                        listOf("", "actual", "estimate", "potential"))
 
                 val linearLayout = LinearLayout(context)
 

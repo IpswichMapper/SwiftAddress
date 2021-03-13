@@ -254,6 +254,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             if (inclusion != "")
                 addressFileMiddle.append("<tag k=\"addr:inclusion\" v=\"$inclusion\" />\n")
             addressFileMiddle.append("</way>\n")
+            i--
         }
         c.close()
 

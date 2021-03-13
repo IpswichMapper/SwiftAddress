@@ -6,14 +6,15 @@ import android.graphics.Paint
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
-import org.osmdroid.config.Configuration.*
-import org.osmdroid.events.*
+import org.osmdroid.config.Configuration.getInstance
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import java.net.IDN
 
 class Map(var mapView: MapView,
           private val context: Context,

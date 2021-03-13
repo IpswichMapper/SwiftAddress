@@ -1,9 +1,9 @@
 package com.mapitall.SwiftAddress
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 
 class Parent : AppCompatActivity() {

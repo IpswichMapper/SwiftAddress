@@ -1,18 +1,15 @@
 package com.mapitall.SwiftAddress
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragment
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import org.osmdroid.tileprovider.modules.SqlTileWriter
-import org.osmdroid.views.MapView
 
 class Settings : AppCompatActivity(){
 

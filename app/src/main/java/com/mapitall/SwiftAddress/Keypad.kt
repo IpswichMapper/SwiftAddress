@@ -42,13 +42,8 @@ class Keypad : AppCompatActivity(),
 
         supportActionBar?.hide()
 
-        // clear address textbox when backspace is long pressed
-        findViewById<ImageButton>(R.id.backspace).setOnLongClickListener(View.OnLongClickListener {
-            clearTextbox()
-            return@OnLongClickListener true
-        })
 
-        var lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
+        val lastAddress = intent.getParcelableExtra<AddressNodes?>("last_address")
 
         gestureDetector = GestureDetectorCompat(this, this)
 
@@ -97,6 +92,9 @@ class Keypad : AppCompatActivity(),
                     ContextCompat.getColor(this, R.color.button_colors))
             }
         }
+
+        val addressTextBox = findViewById<EditText>(R.id.address_textbox)
+        addressTextBox.requestFocus()
 
         Log.i("street outside", street)
 
@@ -383,6 +381,7 @@ class Keypad : AppCompatActivity(),
 
 
         val backspaceButton = findViewById<ImageButton>(R.id.backspace)
+        // Modify increment dialogue shows if you swipe up on backspace button
         backspaceButton.setOnTouchListener { _, event ->
             Log.i(TAG, "backspaceButton pressed")
             touchEvent = false
@@ -396,6 +395,11 @@ class Keypad : AppCompatActivity(),
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
+        // clear address textbox when backspace is long pressed
+        backspaceButton.setOnLongClickListener(View.OnLongClickListener {
+            clearTextbox()
+            return@OnLongClickListener true
+        })
 
         val streetNameTag = findViewById<TextView>(R.id.street_name_tag)
         val streetNameValue = findViewById<TextView>(R.id.street_name_value)
@@ -779,9 +783,10 @@ class Keypad : AppCompatActivity(),
 
         if (onFlingDetected == "up") {
             if (swipeUpText != "") {
+                
+                textbox.append(swipeUpText)
 
-                textbox.setText("${textbox.text}${swipeUpText}")
-                Log.i("addNum()", "$swipeUpText set")
+                Log.i("addNum()", "$swipeUpText set, appended")
             } else {
                 Log.w("onFling", "There is no action for \"swipe up\"")
             }
@@ -816,7 +821,8 @@ class Keypad : AppCompatActivity(),
     private fun addNum(numButton: Button) {
         val textbox = findViewById<EditText>(R.id.address_textbox)
 
-        textbox.setText("${textbox.text}${numButton.text}")
+        // textbox.setText("${textbox.text}${numButton.text}")
+        textbox.append(numButton.text.toString())
     }
 
     // Clears the textbox
@@ -832,7 +838,8 @@ class Keypad : AppCompatActivity(),
         var string = addressTextbox.text.toString()
 
         string = string.dropLast(1)
-        addressTextbox.setText(string)
+        addressTextbox.text.clear()
+        addressTextbox.append(string)
     }
 
     // Increments the number in the textbox by one
@@ -851,7 +858,8 @@ class Keypad : AppCompatActivity(),
             try {
                 var numToIncrement = addressTextboxText.toInt()
                 numToIncrement += 1
-                addressTextbox.setText(numToIncrement.toString())
+                addressTextbox.text.clear()
+                addressTextbox.append(numToIncrement.toString())
             } catch (e: NumberFormatException) {
                 var textToSet = ""
 
@@ -863,7 +871,8 @@ class Keypad : AppCompatActivity(),
                     }
                 }
                 textToSet = (textToSet.toInt() + 1).toString()
-                addressTextbox.setText(textToSet)
+                addressTextbox.text.clear()
+                addressTextbox.append(textToSet)
 
                 Log.i(textToSet, "final text")
             }
@@ -871,7 +880,8 @@ class Keypad : AppCompatActivity(),
             try {
                 var numToIncrement = addressTextboxHint.toInt()
                 numToIncrement += 1
-                addressTextbox.setText(numToIncrement.toString())
+                addressTextbox.text.clear()
+                addressTextbox.append(numToIncrement.toString())
             } catch (e: NumberFormatException) {
                 var textToSet = ""
 
@@ -883,7 +893,8 @@ class Keypad : AppCompatActivity(),
                     }
                 }
                 textToSet = (textToSet.toInt() + 1).toString()
-                addressTextbox.setText(textToSet)
+                addressTextbox.text.clear()
+                addressTextbox.append(textToSet)
 
                 Log.i(textToSet, "final text")
             }
@@ -906,7 +917,8 @@ class Keypad : AppCompatActivity(),
             try {
                 var num_to_decrement = addressTextboxText.toInt()
                 num_to_decrement -= 1
-                addressTextbox.setText(num_to_decrement.toString())
+                addressTextbox.text.clear()
+                addressTextbox.append(num_to_decrement.toString())
             } catch (e: NumberFormatException) {
                 var textToSet = ""
                 if (addressTextboxText.isNotBlank()) {
@@ -918,7 +930,8 @@ class Keypad : AppCompatActivity(),
                         }
                     }
                     textToSet = (textToSet.toInt() - 1).toString()
-                    addressTextbox.setText(textToSet)
+                    addressTextbox.text.clear()
+                    addressTextbox.append(textToSet)
                 }
                 Log.i(textToSet, "final text")
             }
@@ -926,7 +939,8 @@ class Keypad : AppCompatActivity(),
             try {
                 var numToDecrement = addressTextboxHint.toInt()
                 numToDecrement -= 1
-                addressTextbox.setText(numToDecrement.toString())
+                addressTextbox.text.clear()
+                addressTextbox.append(numToDecrement.toString())
             } catch (e: NumberFormatException) {
                 var textToSet = ""
 
@@ -938,7 +952,8 @@ class Keypad : AppCompatActivity(),
                     }
                 }
                 textToSet = (textToSet.toInt() - 1).toString()
-                addressTextbox.setText(textToSet)
+                addressTextbox.text.clear()
+                addressTextbox.append(textToSet)
 
                 Log.i(textToSet, "final text")
             }

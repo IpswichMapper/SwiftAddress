@@ -390,8 +390,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
         if (onFlingDetected == "up") {
             if (swipeUpText != "") {
-
-                textbox.setText("${textbox.text}${swipeUpText}")
+                // textbox.setText("${textbox.text}${swipeUpText}")
+                textbox.append(swipeUpText)
                 Log.i("addNum()", "$swipeUpText set")
             } else {
                 Log.w("onFling", "There is no action for \"swipe up\"")
@@ -428,7 +428,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private fun addNum(numButton: Button) {
         val textbox = findViewById<EditText>(R.id.classic_address_textbox)
 
-        textbox.setText("${textbox.text}${numButton.text}")
+        textbox.text.clear()
+        textbox.append("${textbox.text}${numButton.text}")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -547,7 +548,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         var string = addressTextbox.text.toString()
 
         string = string.dropLast(1)
-        addressTextbox.setText(string)
+        addressTextbox.text.clear()
+        addressTextbox.append(string)
     }
 
     fun openDrawer(view: View) {

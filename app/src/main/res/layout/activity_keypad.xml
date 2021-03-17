@@ -37,7 +37,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num1"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/lettera"
@@ -70,7 +71,8 @@
             android:layout_height="match_parent"
             android:text="@string/num2"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/letterb"
@@ -103,7 +105,8 @@
             android:layout_height="match_parent"
             android:text="@string/num3"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/letterc"
@@ -135,7 +138,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num4"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/comma"
@@ -178,7 +182,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num5"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
             android:id="@+id/hypen"
@@ -221,7 +226,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num6"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/semicolon"
@@ -264,7 +270,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num7"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/B1R1"
@@ -295,7 +302,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num8"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/B2R1"
@@ -326,7 +334,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num9"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
 
         <TextView
@@ -359,7 +368,8 @@
             android:padding="30dp"
             android:scaleType="fitCenter"
             android:tint="@color/button_colors"
-            app:srcCompat="@drawable/clear" />
+            app:srcCompat="@drawable/clear"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
     </RelativeLayout>
 
 
@@ -381,7 +391,8 @@
             android:backgroundTint="#FFFFFF"
             android:text="@string/num0"
             android:textColor="@color/button_colors"
-            android:textSize="50sp" />
+            android:textSize="50sp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
             android:id="@+id/modify_street_name"
@@ -420,11 +431,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:backgroundTint="@android:color/transparent"
-            android:onClick="textboxRemoveLastChar"
             android:padding="30dp"
+            android:onClick="textboxRemoveLastChar"
             android:scaleType="fitCenter"
             android:tint="@color/button_colors"
-            app:srcCompat="@drawable/backspace" />
+            app:srcCompat="@drawable/backspace"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
             android:id="@+id/modify_increment"
@@ -457,7 +469,8 @@
             android:padding="30dp"
             android:scaleType="fitCenter"
             android:tint="@color/button_colors"
-            app:srcCompat="@drawable/minus" />
+            app:srcCompat="@drawable/minus"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -479,7 +492,8 @@
             android:padding="30dp"
             android:scaleType="fitCenter"
             android:tint="@color/button_colors"
-            app:srcCompat="@drawable/check" />
+            app:srcCompat="@drawable/check"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -502,7 +516,8 @@
             android:padding="30dp"
             android:scaleType="fitCenter"
             android:tint="@color/button_colors"
-            app:srcCompat="@drawable/plus" />
+            app:srcCompat="@drawable/plus"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
     </RelativeLayout>
 
     <TextView

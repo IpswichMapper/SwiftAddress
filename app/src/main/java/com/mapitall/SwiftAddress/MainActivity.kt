@@ -658,12 +658,13 @@ class MainActivity : AppCompatActivity(),
 
             Thread {
 
+
                 try {
                     runOnUiThread {
                         dialog.show()
                     }
                     // create zip file, delete app internal storage, store zip file to chosen location.
-                    zipFilesAndDelete(data?.data!!)
+                    storeHouseNumbersObject.zipFilesAndDelete(data?.data!!)
                     Log.i(TAG, "Data has been zipped and stored")
                     // clear database
                     storeHouseNumbersObject.clearDatabase()
@@ -773,40 +774,6 @@ class MainActivity : AppCompatActivity(),
 
     }
 
-    private fun zipFilesAndDelete(zipUri : Uri) {
-        val buffer = 2048
-
-        val surveyFolder = File(getExternalFilesDir("data")!!.absolutePath)
-        val surveyFiles: Array<File>? = surveyFolder.listFiles()
-
-        if (surveyFiles != null) {
-            val zipOutputStream = ZipOutputStream(
-                    contentResolver.openOutputStream(zipUri)
-            )
-
-            for (file in surveyFiles) {
-
-                val bufferByteArray = ByteArray(buffer)
-                val fileInputStream = FileInputStream(file)
-                zipOutputStream.putNextEntry(ZipEntry(file.name))
-
-                var length: Int = fileInputStream.read(bufferByteArray)
-                while (length > 0) {
-                    zipOutputStream.write(bufferByteArray, 0, length)
-                    length = fileInputStream.read(bufferByteArray)
-                }
-                zipOutputStream.closeEntry()
-                fileInputStream.close()
-            }
-            zipOutputStream.close()
-            Log.i(TAG, "zipFilesAndDelete: files zipped")
-            for (file in surveyFiles) {
-                file.delete()
-            }
-            Log.i(TAG, "zipFilesAndDelete: files deleted")
-
-        }
-    }
 
     // Function that switches imageries based on what was chosen in
     // "ChooseBackgroundImagery" activity
@@ -1181,7 +1148,7 @@ class MainActivity : AppCompatActivity(),
     fun saveData(view: View) {
 
         val saveDataDialogue  = AlertDialog.Builder(this)
-        saveDataDialogue.setTitle(getString(R.string.change_increment))
+        saveDataDialogue.setTitle(getString(R.string.save_data))
         saveDataDialogue.setMessage(getString(R.string.save_data_question))
 
         saveDataDialogue.setNeutralButton("Cancel") { _, _ -> }

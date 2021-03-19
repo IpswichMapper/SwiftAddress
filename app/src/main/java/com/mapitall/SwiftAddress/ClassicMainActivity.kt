@@ -1,17 +1,17 @@
 package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.location.Criteria
-import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
@@ -19,13 +19,15 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceManager
 import com.google.android.material.navigation.NavigationView
+import org.apache.commons.lang3.StringUtils
+import java.lang.NullPointerException
+import java.net.URL
 import kotlin.math.abs
 import kotlin.math.cos
 
 class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
 
-    private val storeHousenumbersObject = StoreHouseNumbers(this)
-    private val sensorTracker = GPSTracker(this)
+    private val storeHouseNumbersObject = StoreHouseNumbers(this)
 
     private val TAG = "ClassicMainActivity"
 
@@ -35,6 +37,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private var street = ""
     private var buildingLevels = ""
     private var increment  = 2
+    private lateinit var gpsTracker : GPSTracker
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,9 +45,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         setContentView(R.layout.activity_classic_main)
         supportActionBar?.hide()
 
+        gpsTracker = GPSTracker(this)
+
         val navMenu = findViewById<NavigationView>(R.id.classic_nav_menu)
 
         gestureDetector = GestureDetectorCompat(this, this)
+
+        val addressTextBox = findViewById<EditText>(R.id.classic_address_textbox)
+        addressTextBox.requestFocus()
 
         // Onclick listeners and ontouch listeners for the keypad buttons
         // "Ontouch" is activated when you do any action on the buttons, for example touch or swipe
@@ -342,6 +350,10 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
+        backspaceButton.setOnLongClickListener {
+            addressTextBox.text.clear()
+            return@setOnLongClickListener true
+        }
         
         navMenu.setNavigationItemSelectedListener { menuItem ->
             val drawerLayout = findViewById<DrawerLayout>(R.id.classic_drawer_layout)
@@ -352,8 +364,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                             Toast.LENGTH_SHORT).show()
                 }
                 R.id.save_data_menu_option -> {
-                    Toast.makeText(this, getString(R.string.unimplemented),
-                            Toast.LENGTH_SHORT).show()
+                    saveData(navMenu)
                 }
                 R.id.upload_data_menu_option -> {
                     Toast.makeText(this, getString(R.string.unimplemented),
@@ -370,6 +381,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setNavigationItemSelectedListener true
         }
 
+        val streetNameTag = findViewById<TextView>(R.id.classic_street_name_tag)
+        val streetNameValue = findViewById<TextView>(R.id.classic_street_name_value)
+        streetNameTag.setOnClickListener {
+            modStreetName()
+        }
+        streetNameValue.setOnClickListener {
+            modStreetName()
+        }
     }
 
     private fun modBuildLevels() {
@@ -381,7 +400,82 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     }
 
     private fun modStreetName() {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+        val changeStreetDialogue  = AlertDialog.Builder(this)
+        changeStreetDialogue.setTitle(getString(R.string.street_name))
+
+        var streetNameValue : String
+        val streetNameInput = AutoCompleteTextView(this)
+
+        val lat = intent.getDoubleExtra("lat", 0.000)
+        val lon = intent.getDoubleExtra("lon", 0.000)
+        val radius = 100
+
+        Thread {
+            Log.i(TAG, "In thread")
+
+            val queryText = "https://overpass-api.de/api/interpreter?data=" +
+                    "<query type='way'><around lat='$lat' lon='$lon' radius='$radius'/>" +
+                    "<has-kv k='highway' regv='trunk|primary|secondary|tertiary|unclassified" +
+                    "|residential|living_street|pedestrian|road' />" +
+                    "<has-kv k='name' regv='.+'></has-kv></query><print/>"
+
+            val query = URL(queryText)
+            val result = query.readText()
+            try {
+                var array: Array<String> = StringUtils.substringsBetween(result,
+                        "<tag k=\"name\" v=\"", "\"/>")
+                val distinctList = array.distinct()
+                Log.e(TAG, distinctList.toString())
+
+                runOnUiThread {
+                    Log.i(TAG, "in runOnUiThread")
+                    streetNameInput.setAdapter(ArrayAdapter(
+                            this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            distinctList))
+                    Log.i(TAG, "Query finished")
+                    Toast.makeText(this, "Query finished", Toast.LENGTH_SHORT).show()
+
+                }
+            } catch (e : NullPointerException) {
+                Log.i(TAG, "Failed to find any street names.")
+                Log.w(TAG, result)
+            }
+
+        }.start()
+
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+                MATCH_PARENT, WRAP_CONTENT
+        )
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        streetNameInput.layoutParams = params
+
+        container.addView(streetNameInput)
+
+        changeStreetDialogue.setView(container)
+        changeStreetDialogue.setMessage(getString(R.string.remember_change_street_name))
+
+        changeStreetDialogue.setPositiveButton(getString(R.string.change_street_name_button)) {
+            _, _ -> streetNameValue = streetNameInput.text.toString()
+
+            val streetNameTextView = findViewById<TextView>(R.id.classic_street_name_value)
+
+            if (streetNameValue.length < 18) {
+                streetNameTextView.text = streetNameValue
+            } else {
+                streetNameTextView.text = "${streetNameValue.subSequence(0, 15)}..."
+            }
+
+            street = streetNameValue
+        }
+        changeStreetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        val dialog = changeStreetDialogue.create()
+        dialog.show()
+        streetNameInput.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
     }
 
     private fun addNum(numButton : Button, swipeUpText : String, swipeDownText : String) {
@@ -428,16 +522,57 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private fun addNum(numButton: Button) {
         val textbox = findViewById<EditText>(R.id.classic_address_textbox)
 
-        textbox.text.clear()
-        textbox.append("${textbox.text}${numButton.text}")
+        textbox.append(numButton.text)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.i(TAG, "onActivityResult")
 
+        // Saves data
+        if (requestCode == 5 && resultCode == RESULT_OK) {
+
+            Log.i(TAG, "attempting to store zip file.")
+
+            storeHouseNumbersObject.writeToOsmFile()
+
+            Log.i(TAG, "Addresses and Notes written to XML file in internal storage.")
+            val savingFilesDialog = AlertDialog.Builder(this)
+            savingFilesDialog.setTitle(getString(R.string.saving_files))
+            savingFilesDialog.setMessage(getString(R.string.please_wait))
+            savingFilesDialog.setCancelable(false)
+            val dialog = savingFilesDialog.create()
+
+            Thread {
+
+                try {
+                    runOnUiThread {
+                        dialog.show()
+                    }
+                    // create zip file, delete app internal storage, store zip file to chosen location.
+                    storeHouseNumbersObject.zipFilesAndDelete(data?.data!!)
+                    Log.i(TAG, "Data has been zipped and stored")
+                    // clear database
+                    storeHouseNumbersObject.clearDatabase()
+                    Log.i(TAG, "Database cleared.")
+
+                    runOnUiThread {
+                        dialog.dismiss()
+                        Log.i(TAG, "Dialog dismissed.")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread {
+                        Toast.makeText(this,
+                                getString(R.string.failed_save), Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                    Log.i(TAG, "Dialog dismissed")
+                }
+            }.start()
+        }
+
         if (requestCode == 7 && resultCode == RESULT_OK) {
-            Log.i(TAG, "requestCode == 7 && resultCode == RESULT_OK")
             val sp = PreferenceManager.getDefaultSharedPreferences(this)
 
             if (sp.getBoolean("screen_timeout", false)) {
@@ -472,15 +607,13 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         val length = 10 // housenumber will be placed with 10 metres offset from current location
 
         try {
-            val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val criteria = Criteria()
-            val provider = locationManager.getBestProvider(criteria, false)!!
-            val location = locationManager.getLastKnownLocation(provider)!!
-            val oldLat = location.latitude
-            val oldLon = location.longitude
+
+            val location = gpsTracker.getLocation()!!
+            val lat = location.latitude
+            val lon = location.longitude
 
             try {
-                var azimuth = sensorTracker.azimuth!!.toDouble()
+                var azimuth = gpsTracker.getAzimuth()!!.toDouble()
                 if (azimuth < 0) azimuth += (2 * Math.PI)
                 val bearing = Math.toRadians(azimuth)
                 val angle : Double
@@ -494,27 +627,53 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
                 // Length times cos of angle gives offset in North (will give negative value if
                 // bearing is nearer to south
-                val trueLon = cos(angle) * length
+                var latOffset = cos(angle) * length
 
                 // Length times cos of (angle - 90 degrees) gives offset in East
                 // If bearing is nearer to west, it will give negative value
                 // (Math.PI / 2) is 90 degrees in radians.
-                val trueLat = cos(angle - (Math.PI / 2)) * length
+                var lonOffset = cos(angle - (Math.PI / 2)) * length
+
+                // Dividing offsets by 111.111km to turn them from metres to LatLon co-ordinates
+                // TODO: Make this more accurate.
+                //  Number to divide by changes at different locations around the world.
+                latOffset /= 111111
+                lonOffset /= 111111
+                val trueLat = lat + latOffset
+                val trueLon = lon + lonOffset
 
                 val houseNumber = findViewById<EditText>(R.id.classic_address_textbox)
                     .text.toString()
-                val address = AddressNodes(houseNumber, "", trueLat, trueLon, "left", "")
-                storeHousenumbersObject.addHouseNumber(address)
+                val buildingLevels = findViewById<TextView>(R.id.classic_building_levels_value)
+                    .text.toString()
+                val sideString : String =
+                    if(side == Side.LEFT) "left"
+                    else if(side == Side.RIGHT) "right"
+                    else "forward"
+                val address = AddressNodes(houseNumber,
+                    street,
+                    trueLat,
+                    trueLon,
+                    sideString,
+                    buildingLevels)
+                storeHouseNumbersObject.addHouseNumber(address)
+
+                Log.i(TAG, "Housenumber Added")
+                Log.i(TAG, "azimuth : $azimuth")
+                Log.i(TAG, "trueLat : $trueLat")
+                Log.i(TAG, "trueLon : $trueLon")
+                Log.i(TAG, "sideString : $sideString")
+
+                findViewById<EditText>(R.id.classic_address_textbox).text.clear()
 
 
-
-            } catch (e : Exception) {
+            } catch (e : NullPointerException) {
                 e.printStackTrace()
                 Toast.makeText(this, getString(R.string.compass_unavailable),
                     Toast.LENGTH_SHORT).show()
             }
 
-        } catch (e: Exception) {
+        } catch (e: NullPointerException) {
             e.printStackTrace()
             Toast.makeText(this, R.string.location_not_found, Toast.LENGTH_SHORT).show()
         }
@@ -523,21 +682,234 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     // These two functions increment or decrement the from the previous address that was added
     // on the left. It increments / decrements textbox if the textbox contains anything
     fun incrementLeftAddress(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+        val address = storeHouseNumbersObject.lastAddressEntry("left")
+        if (address != null) {
+
+            val addressTextbox = findViewById<EditText>(R.id.classic_address_textbox)
+            val addressTextboxText = addressTextbox.text.toString()
+            var addressTextboxHint: String
+            try {
+                addressTextboxHint = addressTextbox.hint.toString()
+            } catch (e : NullPointerException) {
+                addressTextboxHint = ""
+            }
+            if (addressTextboxText != "") {
+                try {
+                    var numToIncrement = addressTextboxText.toInt()
+                    numToIncrement += 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(numToIncrement.toString())
+                } catch (e: NumberFormatException) {
+
+                    var textToSet = ""
+                    if (addressTextboxText.isNotBlank()) {
+                        for (c in addressTextboxText) {
+                            val intOrNot = c.toString().toIntOrNull()
+                            if (intOrNot != null) {
+                                textToSet += intOrNot.toString()
+                                Log.i(textToSet, "text to set")
+                            }
+                        }
+                        textToSet = (textToSet.toInt() + 1).toString()
+                        addressTextbox.text.clear()
+                        addressTextbox.append(textToSet)
+                    }
+                    Log.i(textToSet, "final text")
+                }
+            } else  {
+                try {
+                    var numToIncrement = address.housenumber.toInt()
+                    numToIncrement += 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(numToIncrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+
+                    for (c in address.housenumber) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() + 1).toString()
+                    addressTextbox.text.clear()
+                    addressTextbox.append(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+        }
     }
 
     fun decrementLeftAddress(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+        val address = storeHouseNumbersObject.lastAddressEntry("left")
+
+        if (address != null) {
+            val addressTextbox = findViewById<EditText>(R.id.address_textbox)
+            val addressTextboxText = addressTextbox.text.toString()
+
+            if (addressTextboxText != "") {
+                try {
+                    var num_to_decrement = addressTextboxText.toInt()
+                    num_to_decrement -= 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(num_to_decrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+                    if (addressTextboxText.isNotBlank()) {
+                        for (c in addressTextboxText) {
+                            val intOrNot = c.toString().toIntOrNull()
+                            if (intOrNot != null) {
+                                textToSet += intOrNot.toString()
+                                Log.i(textToSet, "text to set")
+                            }
+                        }
+                        textToSet = (textToSet.toInt() - 1).toString()
+                        addressTextbox.text.clear()
+                        addressTextbox.append(textToSet)
+                    }
+                    Log.i(textToSet, "final text")
+                }
+            } else if (address.housenumber != "") {
+                try {
+                    var numToDecrement = address.housenumber.toInt()
+                    numToDecrement -= 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(numToDecrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+
+                    for (c in address.housenumber) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() - 1).toString()
+                    addressTextbox.text.clear()
+                    addressTextbox.append(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+        }
     }
 
     // These two functions increment or decrement the from the previous address that was added
     // on the right. It increments / decrements textbox if the textbox contains anything
     fun incrementRightAddress(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+        val address = storeHouseNumbersObject.lastAddressEntry("right")
+
+        if (address != null) {
+            val addressTextbox = findViewById<EditText>(R.id.address_textbox)
+            val addressTextboxText = addressTextbox.text.toString()
+
+            if (addressTextboxText != "") {
+                try {
+                    var numToIncrement = addressTextboxText.toInt()
+                    numToIncrement += 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(numToIncrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+                    if (addressTextboxText.isNotBlank()) {
+                        for (c in addressTextboxText) {
+                            val intOrNot = c.toString().toIntOrNull()
+                            if (intOrNot != null) {
+                                textToSet += intOrNot.toString()
+                                Log.i(textToSet, "text to set")
+                            }
+                        }
+                        textToSet = (textToSet.toInt() + 1).toString()
+                        addressTextbox.text.clear()
+                        addressTextbox.append(textToSet)
+                    }
+                    Log.i(textToSet, "final text")
+                }
+            } else if (address.housenumber != "") {
+                try {
+                    var numToIncrement = address.housenumber.toInt()
+                    numToIncrement += 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(numToIncrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+
+                    for (c in address.housenumber) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() + 1).toString()
+                    addressTextbox.text.clear()
+                    addressTextbox.append(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+        }
     }
 
     fun decrementRightAddress(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+        val address = storeHouseNumbersObject.lastAddressEntry("right")
+
+        if (address != null) {
+            val addressTextbox = findViewById<EditText>(R.id.address_textbox)
+            val addressTextboxText = addressTextbox.text.toString()
+
+            if (addressTextboxText != "") {
+                try {
+                    var num_to_decrement = addressTextboxText.toInt()
+                    num_to_decrement -= 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(num_to_decrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+                    if (addressTextboxText.isNotBlank()) {
+                        for (c in addressTextboxText) {
+                            val intOrNot = c.toString().toIntOrNull()
+                            if (intOrNot != null) {
+                                textToSet += intOrNot.toString()
+                                Log.i(textToSet, "text to set")
+                            }
+                        }
+                        textToSet = (textToSet.toInt() - 1).toString()
+                        addressTextbox.text.clear()
+                        addressTextbox.append(textToSet)
+                    }
+                    Log.i(textToSet, "final text")
+                }
+            } else if (address.housenumber != "") {
+                try {
+                    var numToDecrement = address.housenumber.toInt()
+                    numToDecrement -= 1
+                    addressTextbox.text.clear()
+                    addressTextbox.append(numToDecrement.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+
+                    for (c in address.housenumber) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() - 1).toString()
+                    addressTextbox.text.clear()
+                    addressTextbox.append(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+        }
     }
 
 
@@ -557,7 +929,26 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         drawerLayout.openDrawer(GravityCompat.START)
     }
     fun saveData(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+        val saveDataDialogue  = AlertDialog.Builder(this)
+        saveDataDialogue.setTitle(getString(R.string.save_data))
+        saveDataDialogue.setMessage(getString(R.string.save_data_question))
+
+        saveDataDialogue.setNeutralButton("Cancel") { _, _ -> }
+
+        saveDataDialogue.setPositiveButton(getString(R.string.save)) { _, _ ->
+
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "application/zip"
+            intent.putExtra(Intent.EXTRA_TITLE, "survey.zip")
+
+            startActivityForResult(intent, 1)
+        }
+
+        saveDataDialogue.create().show()
+        // storeHouseNumbersObject.writeToOsmFile()
+
     }
     fun takePhoto(view: View) {
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
@@ -565,8 +956,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     fun undo(view: View) {
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
     }
-
-
 
     // GestureDetector Methods
     override fun onDown(e: MotionEvent?): Boolean {

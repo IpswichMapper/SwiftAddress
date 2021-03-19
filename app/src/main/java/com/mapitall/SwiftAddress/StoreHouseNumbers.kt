@@ -9,6 +9,7 @@ import android.database.CursorIndexOutOfBoundsException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import android.net.Uri
 import android.os.Environment
 import android.os.Parcelable
 import android.util.Log
@@ -19,7 +20,10 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 // AddressNodes Class which conveniently packages all the information about
 // an address object into one data class that can be shared accross activities.
@@ -278,6 +282,42 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
     }
 
+
+    fun zipFilesAndDelete(zipUri : Uri) {
+        val buffer = 2048
+
+        val surveyFolder = File(context.getExternalFilesDir("data")!!.absolutePath)
+        val surveyFiles: Array<File>? = surveyFolder.listFiles()
+
+        if (surveyFiles != null) {
+            val zipOutputStream = ZipOutputStream(
+                    context.contentResolver.openOutputStream(zipUri)
+            )
+
+            for (file in surveyFiles) {
+
+                val bufferByteArray = ByteArray(buffer)
+                val fileInputStream = FileInputStream(file)
+                zipOutputStream.putNextEntry(ZipEntry(file.name))
+
+                var length: Int = fileInputStream.read(bufferByteArray)
+                while (length > 0) {
+                    zipOutputStream.write(bufferByteArray, 0, length)
+                    length = fileInputStream.read(bufferByteArray)
+                }
+                zipOutputStream.closeEntry()
+                fileInputStream.close()
+            }
+            zipOutputStream.close()
+            Log.i(TAG, "zipFilesAndDelete: files zipped")
+            for (file in surveyFiles) {
+                file.delete()
+            }
+            Log.i(TAG, "zipFilesAndDelete: files deleted")
+
+        }
+    }
+
     // Creates database to store the Addresses and Notes
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""CREATE TABLE $TABLE_NAME(ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -347,7 +387,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun addHouseNumber(address: AddressNodes): Int {
 
         val db: SQLiteDatabase = this.writableDatabase
-        val dbRead: SQLiteDatabase = this.readableDatabase
         val contentValues = ContentValues()
 
         contentValues.put(COL_HOUSENUMBER, address.housenumber)
@@ -359,7 +398,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         contentValues.put(COL_BUILDING_LEVELS, address.buildingLevels)
 
         val result: Long = db.insert(TABLE_NAME, null, contentValues)
-
+        db.close()
+        Log.i(TAG, "result: $result")
         return result.toInt()
 
     }
@@ -735,6 +775,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             Log.w(TAG, "Cursor Index out of range, list is empty")
             return -1
         }
+    }
+
+    fun addAddressOnLeft() {
+
     }
 }
 

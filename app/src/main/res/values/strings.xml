@@ -105,5 +105,6 @@
     <string name="housenumber">Housenumber:</string>
     <string name="addr_interpolation">addr:interpolation (Required)</string>
     <string name="addr_inclusion">addr:inclusion (Optional)</string>
+    <string name="please_wait">Please wait...</string>
 
 </resources>

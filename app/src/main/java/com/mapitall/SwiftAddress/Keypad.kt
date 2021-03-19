@@ -783,7 +783,7 @@ class Keypad : AppCompatActivity(),
 
         if (onFlingDetected == "up") {
             if (swipeUpText != "") {
-                
+
                 textbox.append(swipeUpText)
 
                 Log.i("addNum()", "$swipeUpText set, appended")

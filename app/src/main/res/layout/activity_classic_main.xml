@@ -93,14 +93,15 @@
             app:layout_constraintTop_toBottomOf="@id/classic_street_name_building_levels_layout">
 
             <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 android:id="@+id/classic_left_arrow_button"
                 style="@style/Widget.AppCompat.Button.Borderless"
-                app:srcCompat="@drawable/left_arrow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="addAddress"
                 android:scaleType="fitCenter"
                 android:tint="@color/button_colors"
-                android:onClick="addAddress"/>
+                app:srcCompat="@drawable/left_arrow" />
 
         </RelativeLayout>
 
@@ -120,6 +121,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:onClick="addAddress"
                 android:scaleType="fitCenter"
                 android:tint="@color/button_colors"
@@ -139,14 +141,15 @@
             app:layout_constraintTop_toBottomOf="@id/classic_street_name_building_levels_layout">
 
             <ImageButton
+                android:id="@+id/classic_right_arrow_button"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/classic_right_arrow_button"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:onClick="addAddress"
                 android:scaleType="fitCenter"
                 android:tint="@color/button_colors"
-                app:srcCompat="@drawable/right_arrow"
-                android:onClick="addAddress" />
+                app:srcCompat="@drawable/right_arrow" />
 
         </RelativeLayout>
 
@@ -165,6 +168,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num1"
                 android:textColor="@color/button_colors"
@@ -199,6 +203,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:text="@string/num2"
                 android:textColor="@color/button_colors"
                 android:textSize="50sp" />
@@ -230,6 +235,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:text="@string/num3"
                 android:textColor="@color/button_colors"
                 android:textSize="50sp" />
@@ -261,6 +267,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num4"
                 android:textColor="@color/button_colors"
@@ -304,6 +311,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num5"
                 android:textColor="@color/button_colors"
@@ -347,6 +355,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num6"
                 android:textColor="@color/button_colors"
@@ -390,6 +399,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num7"
                 android:textColor="@color/button_colors"
@@ -424,7 +434,8 @@
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num8"
                 android:textColor="@color/button_colors"
-                android:textSize="50sp" />
+                android:textSize="50sp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
 
             <TextView
                 android:id="@+id/classic_B2R1"
@@ -452,6 +463,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num9"
                 android:textColor="@color/button_colors"
@@ -485,6 +497,7 @@
                 android:id="@+id/classic_add_left"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:onClick="incrementLeftAddress"
                 android:padding="30dp"
@@ -509,6 +522,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:text="@string/num0"
                 android:textColor="@color/button_colors"
@@ -550,6 +564,7 @@
                 android:id="@+id/classic_add_right"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:onClick="incrementRightAddress"
                 android:padding="30dp"
@@ -583,6 +598,7 @@
                 android:id="@+id/classic_minus_left"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:onClick="decrementLeftAddress"
                 android:padding="30dp"
@@ -606,6 +622,7 @@
                 android:id="@+id/classic_backspace"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:onClick="textboxRemoveLastChar"
                 android:padding="30dp"
@@ -629,6 +646,7 @@
                 android:id="@+id/classic_minus_right"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
                 android:onClick="decrementRightAddress"
                 android:padding="30dp"

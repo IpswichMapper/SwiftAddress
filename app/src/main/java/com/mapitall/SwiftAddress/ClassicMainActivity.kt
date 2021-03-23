@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
+import android.view.Gravity.CENTER
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -112,8 +112,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 Log.i(TAG, "numButton2: clicked.")
                 Log.i(TAG, "numButton2: addNum(numButton4) called")
                 addNum(numButton2)
-            } else {
-                touchEvent = false
             }
         }
 
@@ -335,21 +333,27 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             }
         }
 
-
-        val backspaceButton = findViewById<ImageButton>(R.id.classic_backspace)
-        backspaceButton.setOnTouchListener { _, event ->
-            Log.i(TAG, "backspaceButton pressed")
+        val rightPlusButton = findViewById<ImageButton>(R.id.classic_add_right)
+        rightPlusButton.setOnTouchListener { _, event ->
             touchEvent = false
             onFlingDetected = "no"
 
             gestureDetector.onTouchEvent(event)
-
-            if (onFlingDetected == "up"){
-                modifyIncrement()
+            if (onFlingDetected == "up") {
+                modifyOffset()
+                touchEvent = true
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
+        rightPlusButton.setOnClickListener {
+            if (!touchEvent) {
+                incrementRightAddress(it)
+            }
+        }
+
+
+        val backspaceButton = findViewById<ImageButton>(R.id.classic_backspace)
         backspaceButton.setOnLongClickListener {
             addressTextBox.text.clear()
             return@setOnLongClickListener true
@@ -395,8 +399,124 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
     }
 
-    private fun modifyIncrement() {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+    // Modify the distance that a housenumber is offset from your current location.
+    private fun modifyOffset() {
+        val offsetButtonsDimensions = 200
+        val textBoxWidth = 200
+        val textBoxTextSize = 40f
+        val modifyOffsetAlertDialog = AlertDialog.Builder(this)
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        var offset = sp.getInt("offset", 10)
+
+        offset = sp.getInt("offset", 2)
+
+        Log.i(TAG, "offset before function: $offset")
+        val modifyoffsetDialogue  = AlertDialog.Builder(this)
+        modifyoffsetDialogue.setTitle(getString(R.string.change_offset))
+
+        var offsetValue : String
+
+        val modifyoffsetInput = EditText(this)
+        modifyoffsetInput.inputType = EditorInfo.TYPE_CLASS_PHONE
+        modifyoffsetInput.setText(offset.toString())
+        modifyoffsetInput.textSize = textBoxTextSize
+
+        modifyoffsetInput.layoutParams = ViewGroup.LayoutParams(textBoxWidth, MATCH_PARENT)
+        modifyoffsetInput.gravity =CENTER
+
+        val minusButton = ImageButton(this)
+        minusButton.setImageResource(R.drawable.minus)
+
+        minusButton.layoutParams = ViewGroup.LayoutParams(offsetButtonsDimensions,
+                offsetButtonsDimensions)
+        minusButton.setOnClickListener {
+            val text = modifyoffsetInput.text.toString()
+            if (text != "") {
+                try {
+                    var textToInt = text.toInt()
+                    textToInt -= 1
+                    modifyoffsetInput.setText(textToInt.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+
+                    for (c in text) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() - 1).toString()
+                    modifyoffsetInput.setText(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+            Log.i(TAG, "modifyoffsetDialog: minusButton pressed")
+        }
+
+        val plusButton = ImageButton(this)
+        plusButton.setImageResource(R.drawable.plus)
+        plusButton.layoutParams = ViewGroup.LayoutParams(offsetButtonsDimensions,
+                offsetButtonsDimensions)
+        plusButton.setOnClickListener {
+            val text = modifyoffsetInput.text.toString()
+            if (text != "") {
+                try {
+                    var textToInt = text.toInt()
+                    textToInt += 1
+                    modifyoffsetInput.setText(textToInt.toString())
+                } catch (e: NumberFormatException) {
+                    var textToSet = ""
+
+                    for (c in text) {
+                        val intOrNot = c.toString().toIntOrNull()
+                        if (intOrNot != null) {
+                            textToSet += intOrNot.toString()
+                            Log.i(textToSet, "text to set")
+                        }
+                    }
+                    textToSet = (textToSet.toInt() + 1).toString()
+                    modifyoffsetInput.setText(textToSet)
+
+                    Log.i(textToSet, "final text")
+                }
+            }
+            Log.i(TAG, "modifyOffsetDialog: plusButton pressed")
+        }
+
+        val linearLayout = LinearLayout(this)
+
+        linearLayout.layoutParams = ActionBar.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        linearLayout.orientation = LinearLayout.HORIZONTAL
+        linearLayout.gravity = CENTER
+        linearLayout.addView(minusButton)
+        linearLayout.addView(modifyoffsetInput)
+        linearLayout.addView(plusButton)
+
+        modifyoffsetDialogue.setView(linearLayout)
+        modifyoffsetDialogue.setMessage(getString(R.string.offset_message))
+
+        modifyoffsetDialogue.setPositiveButton(getString(R.string.save_offset)) {
+            _, _ ->
+            offsetValue = modifyoffsetInput.text.toString()
+            try {
+                Log.i(TAG, "offsetValue in Dialog: $offsetValue")
+                offset = offsetValue.toInt()
+
+                val sharedPreferencesEditor = PreferenceManager.getDefaultSharedPreferences(
+                        this).edit()
+                sharedPreferencesEditor.putInt("offset", offset)
+                sharedPreferencesEditor.apply()
+            } catch (e: TypeCastException) {
+                e.printStackTrace()
+                Log.e(TAG, getString(R.string.offset_not_integer))
+                Toast.makeText(this, getString(R.string.offset_not_integer),
+                        Toast.LENGTH_SHORT).show()
+            }
+        }
+        modifyoffsetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        modifyoffsetDialogue.create().show()
     }
 
     private fun modStreetName() {
@@ -493,7 +613,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         } else if (onFlingDetected == "down") {
             Log.w("swipeDownText:", swipeDownText)
             if (swipeDownText == "") {
-                // TODO : Implement
                 Log.w("onFling", "There is no action for \"swipe down\"")
             } else {
                 val buildingLevelsValue = findViewById<TextView>(R.id.classic_building_levels_value)
@@ -638,7 +757,24 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 // TODO: Make this more accurate.
                 //  Number to divide by changes at different locations around the world.
                 latOffset /= 111111
-                lonOffset /= 111111
+
+                Log.i(TAG, "lat: $lat, lon: $lon")
+                if (abs(lat) < 23) {
+                    lonOffset /= 111320
+                    Log.i(TAG, "latOffset when absolute of longitude is less than 23")
+                }
+                else if (abs(lat) >= 23 && abs(lat) < 45) {
+                    lonOffset /= 102470
+                    Log.i(TAG, "latOffset when absolute of longitude is less than 45")
+                }
+                else if (abs(lat) >= 45 && abs(lat) < 67) {
+                    lonOffset /= 78710
+                    Log.i(TAG, "latOffset when absolute of longitude is less than 67")
+                }
+                else {
+                    lonOffset /= 43496
+                    Log.i(TAG, "latOffset when absolute of longitude is more than 67")
+                }
                 val trueLat = lat + latOffset
                 val trueLon = lon + lonOffset
 
@@ -747,7 +883,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         val address = storeHouseNumbersObject.lastAddressEntry("left")
 
         if (address != null) {
-            val addressTextbox = findViewById<EditText>(R.id.address_textbox)
+            val addressTextbox = findViewById<EditText>(R.id.classic_address_textbox)
             val addressTextboxText = addressTextbox.text.toString()
 
             if (addressTextboxText != "") {
@@ -805,7 +941,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         val address = storeHouseNumbersObject.lastAddressEntry("right")
 
         if (address != null) {
-            val addressTextbox = findViewById<EditText>(R.id.address_textbox)
+            val addressTextbox = findViewById<EditText>(R.id.classic_address_textbox)
             val addressTextboxText = addressTextbox.text.toString()
 
             if (addressTextboxText != "") {
@@ -861,7 +997,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         val address = storeHouseNumbersObject.lastAddressEntry("right")
 
         if (address != null) {
-            val addressTextbox = findViewById<EditText>(R.id.address_textbox)
+            val addressTextbox = findViewById<EditText>(R.id.classic_address_textbox)
             val addressTextboxText = addressTextbox.text.toString()
 
             if (addressTextboxText != "") {

@@ -566,20 +566,19 @@
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="#FFFFFF"
-                android:onClick="incrementRightAddress"
                 android:padding="30dp"
                 android:scaleType="fitCenter"
                 android:tint="@color/button_colors"
                 app:srcCompat="@drawable/plus" />
 
             <TextView
-                android:id="@+id/classic_modify_increment"
+                android:id="@+id/classic_modify_offset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
-                android:text="Modify Increment"
+                android:text="@string/modify_offset"
                 android:textSize="14dp" />
         </RelativeLayout>
 
@@ -707,6 +706,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:menu="@menu/nav_header_menu"
+        app:headerLayout="@layout/nav_header"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         android:id="@+id/classic_nav_menu" />

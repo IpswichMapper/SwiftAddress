@@ -106,5 +106,10 @@
     <string name="addr_interpolation">addr:interpolation (Required)</string>
     <string name="addr_inclusion">addr:inclusion (Optional)</string>
     <string name="please_wait">Please wait...</string>
+    <string name="modify_offset">Modify Offset</string>
+    <string name="offset_not_integer">Offset given wasn\'t an integer</string>
+    <string name="save_offset">Change Offset</string>
+    <string name="change_offset">Change Offset</string>
+    <string name="offset_message">This is the distance that the housenumber is offset from your current location. Your compass is used to determine what direction the housenumber should be offsetted in.</string>
 
 </resources>

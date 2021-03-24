@@ -111,5 +111,7 @@
     <string name="save_offset">Change Offset</string>
     <string name="change_offset">Change Offset</string>
     <string name="offset_message">This is the distance that the housenumber is offset from your current location. Your compass is used to determine what direction the housenumber should be offsetted in.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

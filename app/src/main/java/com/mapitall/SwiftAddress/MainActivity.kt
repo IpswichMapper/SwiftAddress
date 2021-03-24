@@ -56,8 +56,6 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import kotlin.math.abs
 import kotlin.properties.Delegates
 
@@ -360,7 +358,7 @@ class MainActivity : AppCompatActivity(),
 
         // Onclicklistener to open activity to change background imagery.
         findViewById<ImageButton>(R.id.change_background_imagery_button).setOnClickListener {
-            val intent = Intent(this, ChooseBackgroundImagery::class.java)
+            val intent = Intent(this, BackgroundImagery::class.java)
             startActivityForResult(intent, 1)
         }
 

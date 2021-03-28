@@ -311,7 +311,7 @@
                     android:onClick="closeMiniKeypad"
                     android:scaleType="fitCenter"
                     android:tint="@color/button_colors"
-                    app:srcCompat="@drawable/clear" />
+                    app:srcCompat="@drawable/cross" />
 
                 <ImageView
                     android:id="@+id/horizontal_bar"

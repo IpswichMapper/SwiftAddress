@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -36,6 +37,10 @@ class ChangeBackgroundImageryFragment : Fragment(
         customImageryDialog.setTitle(getString(R.string.custom_imagery))
         val imageryEditText = EditText(context)
 
+        sp = PreferenceManager.getDefaultSharedPreferences(context)
+        var customImageryList = sp.getStringSet("custom_imagery_list", setOf())!!
+                .toMutableList()
+
         val noCopyrightedMaterial = TextView(context)
         noCopyrightedMaterial.text = getString(R.string.no_copyrighted_material)
         noCopyrightedMaterial.setTypeface(null, Typeface.BOLD)
@@ -47,37 +52,85 @@ class ChangeBackgroundImageryFragment : Fragment(
 
         customImageryDialog.setPositiveButton(getString(R.string.change_imagery)) { _, _ ->
 
+            customImageryList =
+                    sp.getStringSet("custom_imagery_list", setOf())!!.toMutableList()
             spEdit = sp.edit()
-            spEdit.putString("imagery", "custom")
-            spEdit.putString("custom-imagery", imageryEditText.text.toString())
+            val imageryText = imageryEditText.text.toString()
+            if (imageryText != "") {
+                spEdit.putString("imagery", "custom")
+                spEdit.putString("custom-imagery", imageryText)
+                customImageryList.add(imageryText)
+                spEdit.putStringSet("custom_imagery_list", customImageryList.toSet())
+            } else {
+                spEdit.putString("imagery", "Osm Carto")
+            }
             spEdit.apply()
         }
         customImageryDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
 
-        val container = LinearLayout(context)
-        container.orientation = LinearLayout.VERTICAL
-        val textParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        val vertialCustomImageryLinearLayout = LinearLayout(context)
+        vertialCustomImageryLinearLayout.orientation = LinearLayout.VERTICAL
+
+        val containerView = FrameLayout(requireContext())
+        val textParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         textParams.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
         textParams.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
         textParams.topMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
-        noCopyrightedMaterial.layoutParams = textParams
+        vertialCustomImageryLinearLayout.layoutParams = textParams
 
-        val editTextParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        editTextParams.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
-        editTextParams.rightMargin =
-            resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
-        // editTextParams.topMargin = 0
-        imageryEditText.layoutParams = editTextParams
         imageryEditText.hint = getString(R.string.custom_slippy_url)
-        sp = PreferenceManager.getDefaultSharedPreferences(context)
-        if (sp.getString("imagery", "Osm Carto") == "custom") {
-            imageryEditText.setText(sp.getString("custom-imagery", "")!!)
+
+        vertialCustomImageryLinearLayout.addView(noCopyrightedMaterial)
+        vertialCustomImageryLinearLayout.addView(imageryEditText)
+
+
+        var i = 0
+        for(customImagery in customImageryList) {
+            val customImageryLinearLayout = LinearLayout(context)
+            customImageryLinearLayout.orientation = LinearLayout.HORIZONTAL
+
+            val button = Button(context)
+            button.text = customImagery
+            button.isSingleLine = true
+            button.gravity = Gravity.CENTER_VERTICAL
+            button.layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 3f)
+
+
+            customImageryLinearLayout.addView(button)
+
+            val crossButton = ImageButton(context)
+            crossButton.setImageResource(R.drawable.cross)
+            crossButton.layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    0.5f
+            )
+            crossButton.tag = i
+            Log.i(TAG, "i: $i")
+            Log.i(TAG, "crossButton.tag, ${crossButton.tag as Int}")
+            button.setOnClickListener {
+                imageryEditText.text.clear()
+                imageryEditText.append(button.text)
+            }
+
+            crossButton.setOnClickListener {
+                vertialCustomImageryLinearLayout.removeView(customImageryLinearLayout)
+                customImageryList.removeAt(crossButton.tag as Int)
+                spEdit.putStringSet("custom_imagery_list", customImageryList.toSet())
+                spEdit.apply()
+            }
+
+            customImageryLinearLayout.addView(crossButton)
+
+            vertialCustomImageryLinearLayout.addView(customImageryLinearLayout)
+            i++
         }
-        container.addView(noCopyrightedMaterial)
-        container.addView(imageryEditText)
 
+        containerView.addView(vertialCustomImageryLinearLayout)
 
-        customImageryDialog.setView(container)
+        customImageryDialog.setView(containerView)
         dialog = customImageryDialog.create()
 
         imageryEditText.requestFocus()

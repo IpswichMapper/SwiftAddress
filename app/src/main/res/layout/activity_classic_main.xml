@@ -490,7 +490,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/classic_relative_layout_7"
-            app:srcCompat="@drawable/clear">
+            app:srcCompat="@drawable/cross">
 
 
             <ImageButton

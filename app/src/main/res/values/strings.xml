@@ -130,5 +130,6 @@
     <string name="addresses_saved">Addresses saved:</string>
     <string name="notes_saved">Notes saved:</string>
     <string name="images_saved">Images saved:</string>
+    <string name="note">Note:</string>
 
 </resources>

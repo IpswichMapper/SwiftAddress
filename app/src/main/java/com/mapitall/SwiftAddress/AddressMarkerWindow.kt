@@ -10,16 +10,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
-class MarkerWindow(pressLayoutId : Int,
-                   private val mapClass: Map,
-                   private val context: Context,
-                   private val ID : Int,
-                   private val mainActivity: MainActivity,
-                   private var houseNumber : String = "",
-                   private var street : String = "") :
-        InfoWindow(pressLayoutId, mapClass.mapView) {
+class AddressMarkerWindow(pressLayoutId : Int,
+                          private val mapClass: Map,
+                          private val context: Context,
+                          private val ID : Int,
+                          private val mainActivity: MainActivity,
+                          private var houseNumber : String = "",
+                          private var street : String = "") :
+    InfoWindow(pressLayoutId, mapClass.mapView) {
 
     private val TAG = "MarkerWindow"
     private val storeHouseNumbersObject = StoreHouseNumbers(context)
@@ -50,8 +51,10 @@ class MarkerWindow(pressLayoutId : Int,
         if (!mainActivity.creatingInterpolationWay) {
 
             moveButton.setOnClickListener {
-                // Toast.makeText(context, R.string.unimplemented, Toast.LENGTH_SHORT).show()
-                mainActivity.moveMarker(ID, mapClass.getMarker(ID))
+
+                val marker = mapClass.getMarker(ID)
+                marker.position = mapClass.mapView.mapCenter as GeoPoint
+                mainActivity.moveMarker(ID, marker)
                 close()
             }
             interpolateButton.setOnClickListener {

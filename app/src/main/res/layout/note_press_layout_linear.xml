@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/rounded_layout">
+
+        <TextView
+            android:id="@+id/note_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_marginStart="5dp"
+            android:text="@string/note"
+            android:textColor="@color/black" />
+
+        <EditText
+            android:id="@+id/note_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/black"
+            android:lines="4"
+            android:gravity="top" />
+
+
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/move_note_linear"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="@string/move"
+            android:textColor="@color/black" />
+
+
+        <Button
+            android:id="@+id/delete_note_linear"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="@string/delete"
+            android:textColor="@color/black" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

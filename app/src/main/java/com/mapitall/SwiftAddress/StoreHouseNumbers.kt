@@ -9,6 +9,7 @@ import android.database.CursorIndexOutOfBoundsException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
+import android.icu.text.IDNA
 import android.net.Uri
 import android.os.Environment
 import android.os.Parcelable
@@ -19,6 +20,7 @@ import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -491,7 +493,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 markerHashMap.getValue(id).setAnchor(
                         Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
 
-                val infoWindow = MarkerWindow(
+                val infoWindow = AddressMarkerWindow(
                         R.layout.address_press_layout_linear,
                         mapClass,
                         context,
@@ -523,7 +525,13 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                         R.drawable.note)
                 markerHashMap.getValue(id).setAnchor(
                         Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerHashMap.getValue(id).title = noteContents
+                val infoWindow = NoteMarkerWindow(
+                    mapClass,
+                    context,
+                    id,
+                    mainActivity,
+                    noteContents)
+                markerHashMap.getValue(id).infoWindow = infoWindow
                 Log.i(TAG, "Note Marker added")
 
             } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Image") {
@@ -737,6 +745,15 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         db.update(TABLE_NAME, contentValues, "ID = ?", arrayOf(ID.toString()))
     }
 
+
+    fun changeNote(ID: Int, note: String) {
+        val db: SQLiteDatabase = this.writableDatabase
+
+        val contentValues = ContentValues()
+        contentValues.put(COL_NOTE, note)
+        db.update(TABLE_NAME, contentValues, "ID = ?", arrayOf(ID.toString()))
+    }
+
     // This adds an "interpolation way" to the database
     fun addInterpolationWay(startMarkerID: Int,
                             geoPoints: MutableList<GeoPoint>,
@@ -785,6 +802,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun addAddressOnLeft() {
 
     }
+
 }
 
 

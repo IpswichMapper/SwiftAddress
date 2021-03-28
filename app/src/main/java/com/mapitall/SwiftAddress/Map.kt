@@ -92,7 +92,7 @@ class Map(var mapView: MapView,
         markerHashMap.getValue(houseNumberID).setAnchor(
                 Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
 
-        val infoWindow = MarkerWindow(
+        val infoWindow = AddressMarkerWindow(
                 R.layout.address_press_layout_linear,
                 this,
                 context,
@@ -125,9 +125,15 @@ class Map(var mapView: MapView,
 
         markerHashMap.getValue(noteID).position = GeoPoint(lat, lon)
         markerHashMap.getValue(noteID).setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-        markerHashMap.getValue(noteID).title = noteContents
         markerHashMap.getValue(noteID).icon = ContextCompat.getDrawable(
                 context, R.drawable.note)
+        val infoWindow = NoteMarkerWindow(
+            this,
+            context,
+            noteID,
+            mainActivity,
+            noteContents)
+        markerHashMap.getValue(noteID).infoWindow = infoWindow
         mapView.overlays.add(markerHashMap.getValue(noteID))
     }
 

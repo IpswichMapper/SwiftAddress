@@ -97,7 +97,7 @@
     <string name="no_copyrighted_material">WARNING! Do not use copyrighted imagery! Only use imagery that is available to OSM!</string>
     <string name="invalid_imagery">Invalid Custom Imagery</string>
     <string name="SwiftAddress">SwiftAddress</string>
-    <string name="version_string">Version 0.2.0</string>
+    <string name="version_string">Version 0.3.0</string>
     <string name="add_point">Add Point</string>
     <string name="interpolate">Inter-
         polate</string>

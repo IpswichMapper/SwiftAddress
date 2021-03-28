@@ -126,5 +126,9 @@
     <string name="bing_satellite_imagery">Bing Satellite</string>
     <string name="custom_imagery_text">Custom</string>
     <string name="save_changes">Save Changes</string>
+    <string name="data_saved">Data Saved</string>
+    <string name="addresses_saved">Addresses saved:</string>
+    <string name="notes_saved">Notes saved:</string>
+    <string name="images_saved">Images saved:</string>
 
 </resources>

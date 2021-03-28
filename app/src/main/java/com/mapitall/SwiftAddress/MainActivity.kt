@@ -236,9 +236,8 @@ class MainActivity : AppCompatActivity(),
 
         rightArrow.setOnLongClickListener {
             val addressToChange = storeHouseNumbersObject.lastAddressEntry("right")
-            Log.e(TAG, "increment; $increment")
             increment = sp.getInt("increment", 2)
-            Log.e(TAG, "increment $increment")
+            Log.i(TAG, "increment $increment")
             if (addressToChange != null) {
                 Log.i(TAG, "longPressDetected & address is not null")
 
@@ -647,7 +646,7 @@ class MainActivity : AppCompatActivity(),
 
             Log.i(TAG, "attempting to store zip file.")
 
-            storeHouseNumbersObject.writeToOsmFile()
+            val (i, j) = storeHouseNumbersObject.writeToOsmFile()
 
             Log.i(TAG, "Addresses and Notes written to XML file in internal storage.")
             val savingFilesDialog = AlertDialog.Builder(this)
@@ -657,14 +656,12 @@ class MainActivity : AppCompatActivity(),
             val dialog = savingFilesDialog.create()
 
             Thread {
-
-
                 try {
                     runOnUiThread {
                         dialog.show()
                     }
                     // create zip file, delete app internal storage, store zip file to chosen location.
-                    storeHouseNumbersObject.zipFilesAndDelete(data?.data!!)
+                    val k = storeHouseNumbersObject.zipFilesAndDelete(data?.data!!)
                     Log.i(TAG, "Data has been zipped and stored")
                     // clear database
                     storeHouseNumbersObject.clearDatabase()
@@ -675,6 +672,24 @@ class MainActivity : AppCompatActivity(),
                         map.removeAllMarkers()
                         dialog.dismiss()
                         Log.i(TAG, "Database cleared, markers removed & dialog dismissed.")
+
+                        if (i != -1 || j != -1 || k != 0) {
+                            val dataSavedDialog = AlertDialog.Builder(this)
+                            dataSavedDialog.setTitle(getString(R.string.data_saved))
+                            dataSavedDialog.setMessage(
+                                getString(R.string.addresses_saved) + " "
+                                        + (abs(i) - 1).toString() + "\n"
+                                        + getString(R.string.notes_saved) + " "
+                                        + (abs(j) - 1).toString() + "\n"
+                                        + getString(R.string.images_saved) + " " + k
+                            )
+                            dataSavedDialog.setPositiveButton(getString(R.string.close)) { _, _ -> }
+
+                            dataSavedDialog.create().show()
+                        } else {
+                            Toast.makeText(this, getString(R.string.osm_files_empty),
+                                Toast.LENGTH_SHORT).show()
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1190,7 +1205,6 @@ class MainActivity : AppCompatActivity(),
     override fun onLongPress(e: MotionEvent?) {
         Log.i(TAG, "onLongPress")
         longPressDetected = true
-        Log.i("in le test", "longpressdetected $longPressDetected")
     }
 
     override fun onFling(

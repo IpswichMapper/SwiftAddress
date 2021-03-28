@@ -65,9 +65,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     private val WAY_COL_END_MARKER_ID = "END_MARKER_ID"
 
     // Write housenumbers to .osm file and notes to .osc file.
-    fun writeToOsmFile() {
+    fun writeToOsmFile() : Pair<Int, Int> {
 
-        val (addressTextToWrite, noteTextToWrite) = databaseToXml()
+        val (textFilePairs, countPairs) = databaseToXml()
+        val (addressTextToWrite, noteTextToWrite) = textFilePairs
+        val (i, j) = countPairs
 
         var isExternalStorageReadOnly: Boolean = false
         val extStorageState = Environment.getExternalStorageState()
@@ -123,22 +125,17 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
                     Log.i(TAG, "noteFile written to Internal Storage")
                 }
-                if (addressTextToWrite == "" && noteTextToWrite == "") {
-                    Toast.makeText(context,
-                            context.getString(R.string.osm_files_empty),
-                            Toast.LENGTH_SHORT)
-                            .show()
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
         }
+        return Pair(i, j)
     }
 
     // This converts a "AddressNodes" object to OSM-XML format (.osm)
     // Converts a note to OsmChange format (.osc)
-    private fun databaseToXml(): Pair<String, String> {
+    private fun databaseToXml(): Pair<Pair<String, String>, Pair<Int, Int>> {
 
         // NOTE: THE GENERATOR USED TO BE CALLED "KEYPAD MAPPER 4"
         // Make sure to search for that when looking for related changesets.
@@ -269,23 +266,24 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         noteFileToWrite.append(noteFileEnd)
         if (addressFileMiddle.toString() != "" && noteFileMiddle.toString() == "") {
             Log.i(TAG, "Writing Addresses to File")
-            return Pair(addressFileToWrite.toString(), "")
+            return Pair(Pair(addressFileToWrite.toString(), ""), Pair(i, j))
         } else if (addressFileMiddle.toString() != "" && noteFileMiddle.toString() != "") {
             Log.i(TAG, "Writing Addresses and Notes to File")
-            return Pair(addressFileToWrite.toString(), noteFileToWrite.toString())
+            return Pair(Pair(addressFileToWrite.toString(), noteFileToWrite.toString()), Pair(i, j))
         } else if (addressFileMiddle.toString() == "" && noteFileMiddle.toString() != "") {
             Log.i(TAG, "Writing Notes to File")
-            return Pair("", noteFileToWrite.toString())
+            return Pair(Pair("", noteFileToWrite.toString()), Pair(i, j))
         } else {
             Log.i(TAG, "Writing Nothing to File")
-            return Pair("", "")
+            return Pair(Pair("", ""), Pair(i, j))
         }
     }
 
 
-    fun zipFilesAndDelete(zipUri : Uri) {
+    fun zipFilesAndDelete(zipUri : Uri) : Int {
         val buffer = 2048
 
+        var k = 0
         val surveyFolder = File(context.getExternalFilesDir("data")!!.absolutePath)
         val surveyFiles: Array<File>? = surveyFolder.listFiles()
 
@@ -293,6 +291,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             val zipOutputStream = ZipOutputStream(
                     context.contentResolver.openOutputStream(zipUri)
             )
+
 
             for (file in surveyFiles) {
 
@@ -307,6 +306,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 }
                 zipOutputStream.closeEntry()
                 fileInputStream.close()
+                if (file.extension == "jpg") {
+                    k++
+                }
+
             }
             zipOutputStream.close()
             Log.i(TAG, "zipFilesAndDelete: files zipped")
@@ -316,6 +319,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             Log.i(TAG, "zipFilesAndDelete: files deleted")
 
         }
+        return k
     }
 
     // Creates database to store the Addresses and Notes
@@ -425,9 +429,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
         c.moveToNext()
-        Log.i(TAG, "Item Type: ${c.getString(1)}")
+        val itemType = c.getString(c.getColumnIndex(COL_TYPE))
+        Log.i(TAG, "Item Type: $itemType")
         c.close()
-        return c.getString(1)
+        return itemType
     }
 
     // removes the last object from database.

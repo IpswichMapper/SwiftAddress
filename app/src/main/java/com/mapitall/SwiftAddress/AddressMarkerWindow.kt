@@ -172,6 +172,7 @@ class AddressMarkerWindow(pressLayoutId : Int,
         houseNumber = houseNumberEditText.text.toString()
         street = streetNameEditText.text.toString()
         storeHouseNumbersObject.changeAddress(ID, houseNumber, street)
+        mapClass.changeAddressMarker(ID, houseNumber)
         Log.i(TAG, "InfoWindow Closed.")
 
         // TODO : Get this to work

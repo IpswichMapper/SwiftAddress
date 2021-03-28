@@ -9,18 +9,20 @@ import android.database.CursorIndexOutOfBoundsException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
-import android.icu.text.IDNA
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.CancellationSignal
 import android.os.Environment
 import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -437,6 +439,28 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         return itemType
     }
 
+    fun getItemType(markerID: Int): String {
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val row = db.rawQuery(
+                    "SELECT * FROM $TABLE_NAME WHERE ID = $markerID", null)
+        row.moveToFirst()
+        val itemType = row.getString(row.getColumnIndex(COL_TYPE))
+        row.close()
+        return itemType
+    }
+
+    fun getHouseNumber(markerID: Int): String {
+        val db: SQLiteDatabase = this.readableDatabase
+
+        val row = db.rawQuery(
+                    "SELECT * FROM $TABLE_NAME WHERE ID = $markerID", null)
+        row.moveToFirst()
+        val houseNumber = row.getString(row.getColumnIndex(COL_HOUSENUMBER))
+        row.close()
+        return houseNumber
+    }
+
     // removes the last object from database.
     fun undo(isAnImage: Boolean) {
         val db: SQLiteDatabase = this.writableDatabase
@@ -480,7 +504,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val id = c.getInt(c.getColumnIndex(COL_ID))
                 /*
                 markerList.add(Marker(map))
-                markerList.last().position = GeoPoint(latitude, longitude)
+                markerList.last().position = GeoPoint(latitud, longitude)
                 markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.address)
                 markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 markerList.last().title = housenumber
@@ -488,8 +512,36 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
                 markerHashMap[id] = Marker(mapClass.mapView)
                 markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
-                markerHashMap.getValue(id).icon = ContextCompat.getDrawable(context,
-                        R.drawable.address)
+
+                val drawable = ContextCompat.getDrawable(context, R.drawable.address)!!
+                if (housenumber.length <= 5) {
+                    val bm = drawable.toBitmap()
+
+
+                    val paint = Paint()
+                    paint.style = Paint.Style.FILL
+                    paint.color = Color.WHITE
+                    if (housenumber.length <= 3) {
+                        paint.textSize = 40f
+                    } else if (housenumber.length == 4) {
+                        paint.textSize = 30f
+                    } else {
+                        paint.textSize = 25f
+                    }
+                    paint.textAlign = Paint.Align.CENTER
+
+                    val canvas = Canvas(bm)
+
+                    // https://stackoverflow.com/a/11121873
+                    // explanation of this line
+                    canvas.drawText(housenumber, bm.width / 2f,
+                            bm.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+
+                    val icon = BitmapDrawable(context.resources, bm)
+                    markerHashMap.getValue(id).icon = icon
+                } else {
+                    markerHashMap.getValue(id).icon = drawable
+                }
                 markerHashMap.getValue(id).setAnchor(
                         Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
 
@@ -802,6 +854,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun addAddressOnLeft() {
 
     }
+
 
 }
 

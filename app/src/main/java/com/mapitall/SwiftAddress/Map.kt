@@ -1,10 +1,14 @@
 package com.mapitall.SwiftAddress
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.preference.PreferenceManager
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.MapListener
@@ -29,8 +33,10 @@ class Map(var mapView: MapView,
     lateinit var makeInterpolationWayFollowCenterMapListener: MapListener
     var moveMarkerCondition = false
     lateinit var markerToMove : Marker
+    private var textMarkersPresent = false
 
     init {
+
         // setting up map
 
         getInstance().load(
@@ -87,8 +93,37 @@ class Map(var mapView: MapView,
         markerHashMap[houseNumberID] = Marker(mapView)
         markerHashMap.getValue(houseNumberID).position = GeoPoint(
                 address.latitude, address.longitude)
-        markerHashMap.getValue(houseNumberID).icon = ContextCompat.getDrawable(
-                context, R.drawable.address)
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.address)!!
+        val housenumber = storeHouseNumbersObject.getHouseNumber(houseNumberID)
+        if (housenumber.length <= 5) {
+            val bm = drawable.toBitmap()
+
+
+            val paint = Paint()
+            paint.style = Paint.Style.FILL
+            paint.color = Color.WHITE
+            if (housenumber.length <= 3) {
+                paint.textSize = 40f
+            } else if (housenumber.length == 4) {
+                paint.textSize = 30f
+            } else {
+                paint.textSize = 25f
+            }
+            paint.textAlign = Paint.Align.CENTER
+
+            val canvas = Canvas(bm)
+
+            // https://stackoverflow.com/a/11121873
+            // explanation of this line
+            canvas.drawText(housenumber, bm.width / 2f,
+                    bm.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+
+            val icon = BitmapDrawable(context.resources, bm)
+            markerHashMap.getValue(houseNumberID).icon = icon
+        } else {
+            markerHashMap.getValue(houseNumberID).icon = drawable
+        }
         markerHashMap.getValue(houseNumberID).setAnchor(
                 Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
 
@@ -304,6 +339,41 @@ class Map(var mapView: MapView,
         return polyLineID
     }
 
+    fun changeAddressMarker(id: Int, houseNumber: String) {
+        val marker = getMarker(id)
+        mapView.overlays.remove(marker)
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.address)!!
+        if (houseNumber.length <= 5) {
+            val bitmap = drawable.toBitmap()
+
+            val paint = Paint()
+            paint.style = Paint.Style.FILL
+            paint.color = Color.WHITE
+            if (houseNumber.length <= 3) {
+                paint.textSize = 40f
+            } else if (houseNumber.length == 4) {
+                paint.textSize = 30f
+            } else {
+                paint.textSize = 25f
+            }
+            paint.textAlign = Paint.Align.CENTER
+
+            val canvas = Canvas(bitmap)
+
+            // https://stackoverflow.com/a/11121873
+            // explanation of this line
+            canvas.drawText(houseNumber, bitmap.width / 2f,
+                    bitmap.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+
+            val icon = BitmapDrawable(context.resources, bitmap)
+
+            marker.icon = icon
+        } else {
+            marker.icon = drawable
+        }
+        mapView.overlays.add(marker)
+    }
 
 
 }

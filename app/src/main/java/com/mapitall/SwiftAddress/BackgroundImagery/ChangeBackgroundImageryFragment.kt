@@ -1,4 +1,4 @@
-package com.mapitall.SwiftAddress
+package com.mapitall.SwiftAddress.BackgroundImagery
 
 import android.app.AlertDialog
 import android.content.SharedPreferences
@@ -15,10 +15,11 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.google.android.material.card.MaterialCardView
+import com.mapitall.SwiftAddress.R
 
 
 class ChangeBackgroundImageryFragment : Fragment(
-    R.layout.fragment_change_background_imagery_fragement) {
+        R.layout.fragment_change_background_imagery_fragement) {
 
     val TAG = "ChooseBackgroundImagery"
     private lateinit var imagery: String
@@ -69,7 +70,7 @@ class ChangeBackgroundImageryFragment : Fragment(
         imageryEditText.layoutParams = editTextParams
         imageryEditText.hint = getString(R.string.custom_slippy_url)
         sp = PreferenceManager.getDefaultSharedPreferences(context)
-        if (sp.getString("imagery", "osm-carto") == "custom") {
+        if (sp.getString("imagery", "Osm Carto") == "custom") {
             imageryEditText.setText(sp.getString("custom-imagery", "")!!)
         }
         container.addView(noCopyrightedMaterial)
@@ -91,7 +92,7 @@ class ChangeBackgroundImageryFragment : Fragment(
             try {
                 val cardView = child as MaterialCardView
                 for (child2 in cardView.children) {
-                    val frameLayout = child as FrameLayout
+                    val frameLayout = child2 as FrameLayout
 
                     frameLayout.setOnClickListener {
                         changeImagery(frameLayout)
@@ -104,44 +105,47 @@ class ChangeBackgroundImageryFragment : Fragment(
 
         val saveButton = requireView().findViewById<Button>(R.id.change_imagery_save_button)
         saveButton.setOnClickListener {
-            Toast.makeText(requireContext(), getString(R.string.unimplemented),
-                Toast.LENGTH_SHORT).show()
+            onSavePressed()
         }
 
-        imagery = sp.getString("imagery", "osm-carto").toString()
+        imagery = sp.getString("imagery", "Osm Carto").toString()
         Log.i(TAG, imagery)
         when (imagery) {
-            "osm-carto" -> {
+            "Osm Carto" -> {
                 val cardView =
                     requireView().findViewById<MaterialCardView>(R.id.osm_carto_card_view)
                 cardView.strokeWidth = 5
                 cardView.strokeColor = ContextCompat.getColor(requireContext(), R.color.border_blue)
             }
-            "mapbox-satellite" -> {
+            "Mapbox Satellite" -> {
                 val cardView =
                     requireView().findViewById<MaterialCardView>(R.id.mapbox_satellite_card_view)
                 cardView.strokeWidth = 5
                 cardView.strokeColor = ContextCompat.getColor(requireContext(), R.color.border_blue)
             }
-            "bing-satellite" -> {
+            "Bing Satellite" -> {
                 val cardView =
                     requireView().findViewById<MaterialCardView>(R.id.bing_satellite_card_view)
                 cardView.strokeWidth = 5
                 cardView.strokeColor = ContextCompat.getColor(requireContext(), R.color.border_blue)
             }
-            "esri-satellite" -> {
+            "Esri Satellite" -> {
                 val cardView =
                     requireView().findViewById<MaterialCardView>(R.id.esri_satellite_card_view)
                 cardView.strokeWidth = 5
                 cardView.strokeColor = ContextCompat.getColor(requireContext(), R.color.border_blue)
             }
-            "custom" -> {
+            "Custom" -> {
                 val cardView =
                     requireView().findViewById<MaterialCardView>(R.id.custom_imagery_card_view)
                 cardView.strokeWidth = 5
                 cardView.strokeColor = ContextCompat.getColor(requireContext(), R.color.border_blue)
             }
         }
+    }
+
+    private fun onSavePressed() {
+        parentFragmentManager.popBackStack()
     }
 
 
@@ -171,36 +175,36 @@ class ChangeBackgroundImageryFragment : Fragment(
         when (view.id) {
             R.id.osm_carto_frame_view -> {
                 if (imagery != "null") {
-                    spEdit.putString("imagery", "osm-carto")
+                    spEdit.putString("imagery", "Osm Carto")
                 } else {
-                    spEdit.putString("imagery", "osm-carto")
+                    spEdit.putString("imagery", "Osm Carto")
                     Log.w(TAG, "imagery was null")
                 }
                 spEdit.apply()
             }
             R.id.mapbox_satellite_frame_layout -> {
                 if (imagery != "null") {
-                    spEdit.putString("imagery", "mapbox-satellite")
+                    spEdit.putString("imagery", "Mapbox Satellite")
                 } else {
-                    spEdit.putString("imagery", "osm-carto")
+                    spEdit.putString("imagery", "Osm Carto")
                     Log.w(TAG, "imagery was null")
                 }
                 spEdit.apply()
             }
             R.id.bing_satellite_frame_layout -> {
                 if (imagery != "null") {
-                    spEdit.putString("imagery", "bing-satellite")
+                    spEdit.putString("imagery", "Bing Satellite")
                 } else {
-                    spEdit.putString("imagery", "osm-carto")
+                    spEdit.putString("imagery", "Osm Carto")
                     Log.w(TAG, "imagery was null")
                 }
                 spEdit.apply()
             }
             R.id.esri_satellite_frame_layout -> {
                 if (imagery != "null") {
-                    spEdit.putString("imagery", "esri-satellite")
+                    spEdit.putString("imagery", "Esri Satellite")
                 } else {
-                    spEdit.putString("imagery", "osm-carto")
+                    spEdit.putString("imagery", "Osm Carto")
                     Log.w(TAG, "imagery was null")
                 }
                 spEdit.apply()

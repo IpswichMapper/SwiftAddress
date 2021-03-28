@@ -39,6 +39,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.navigation.NavigationView
 import com.mancj.slideup.SlideUp
 import com.mancj.slideup.SlideUpBuilder
+import com.mapitall.SwiftAddress.BackgroundImagery.BackgroundImagery
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -108,6 +109,7 @@ class MainActivity : AppCompatActivity(),
         // zoom to current location when app starts.
         val mapController = map.mapView.controller
         mapController.setZoom(3.0)
+
         val eventsOverlay = MapEventsOverlay(this)
         map.mapView.overlays.add(0, eventsOverlay)
 
@@ -777,7 +779,7 @@ class MainActivity : AppCompatActivity(),
     // "ChooseBackgroundImagery" activity
     private fun backgroundImagery() {
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
-        imagery = sp.getString("imagery", "osm-carto").toString()
+        imagery = sp.getString("imagery", "Osm Carto").toString()
 
         Log.i(TAG, "Attempting to change background imagery")
         // All the different tile sources
@@ -803,8 +805,7 @@ class MainActivity : AppCompatActivity(),
                         "https://a.tiles.mapbox.com/v4/mapbox.satellite/",
                         "https://b.tiles.mapbox.com/v4/mapbox.satellite/",
                         "https://c.tiles.mapbox.com/v4/mapbox.satellite/",
-                        "https://d.tiles.mapbox.com/v4/mapbox.satellite/"),
-                "based pog"
+                        "https://d.tiles.mapbox.com/v4/mapbox.satellite/")
         )
 
         val bingSatellite = XYTileSource("bing",
@@ -835,27 +836,27 @@ class MainActivity : AppCompatActivity(),
 
         // Switch statement to set tile source based on what string was given.
         when (imagery) {
-            "osm-carto" -> {
+            "Osm Carto" -> {
                 map.mapView.setTileSource(mapnik)
                 findViewById<ImageView>(R.id.crosshair).imageTintList =
                     ColorStateList.valueOf(Color.BLACK)
             }
-            "mapbox-satellite" -> {
+            "Mapbox Satellite" -> {
                 map.mapView.setTileSource(mapboxSatellite)
                 findViewById<ImageView>(R.id.crosshair).imageTintList =
                     ColorStateList.valueOf(Color.RED)
             }
-            "bing-satellite" -> {
+            "Bing Satellite" -> {
                 map.mapView.setTileSource(bingSatellite)
                 findViewById<ImageView>(R.id.crosshair).imageTintList =
                     ColorStateList.valueOf(Color.RED)
             }
-            "esri-satellite" -> {
+            "Esri Satellite" -> {
                 map.mapView.setTileSource(esriSatellite)
                 findViewById<ImageView>(R.id.crosshair).imageTintList =
                     ColorStateList.valueOf(Color.RED)
             }
-            "custom" -> {
+            "Custom" -> {
                 try {
                     map.mapView.setTileSource(tmsToSlippy(
                             sp.getString("custom-imagery", "")!!
@@ -867,7 +868,7 @@ class MainActivity : AppCompatActivity(),
                     Toast.makeText(this, getString(R.string.invalid_imagery),
                             Toast.LENGTH_SHORT).show()
                     map.mapView.setTileSource(mapnik)
-                    sp.edit().putString("imagery", "osm-carto").apply()
+                    sp.edit().putString("imagery", "Osm Carto").apply()
                     findViewById<ImageView>(R.id.crosshair).imageTintList =
                         ColorStateList.valueOf(Color.BLACK)
                 }

@@ -113,5 +113,18 @@
     <string name="offset_message">This is the distance that the housenumber is offset from your current location. Your compass is used to determine what direction the housenumber should be offsetted in.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="download_tiles">Download Tiles</string>
+    <string name="download">Download</string>
+    <string name="map_too_large">The map is too large. Zoom in to download tiles.</string>
+    <string name="map_good_size">Map is small enough. You can download tiles.</string>
+    <string name="current_imagery">Current Imagery:</string>
+    <string name="choose_area">Choose Area</string>
+    <string name="downloading_tiles_not_supported">Warning: Downloading tiles is not supported for this imagery.</string>
+    <string name="osm_carto_imagery">Osm Carto</string>
+    <string name="mapbox_satellite_imagery">Mapbox Satellite</string>
+    <string name="esri_satellite_imagery">Esri Satellite</string>
+    <string name="bing_satellite_imagery">Bing Satellite</string>
+    <string name="custom_imagery_text">Custom</string>
+    <string name="save_changes">Save Changes</string>
 
 </resources>

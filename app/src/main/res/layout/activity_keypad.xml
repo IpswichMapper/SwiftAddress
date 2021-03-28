@@ -142,14 +142,15 @@
             android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
-            android:id="@+id/comma"
+            android:id="@+id/letterd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="15dp"
-            android:text=","
-            android:textSize="25sp" />
+            android:text="d"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/B1R0"
@@ -186,14 +187,14 @@
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
-            android:id="@+id/hypen"
+            android:id="@+id/lettere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="15dp"
-            android:text="–"
+            android:text="e"
             android:textSize="20sp" />
 
         <TextView
@@ -230,14 +231,14 @@
             android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
-            android:id="@+id/semicolon"
+            android:id="@+id/letterf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="15dp"
-            android:text=";"
+            android:text="f"
             android:textSize="20sp" />
 
         <TextView
@@ -274,6 +275,16 @@
             android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
+            android:id="@+id/comma"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"
+            android:text=","
+            android:textSize="25sp" />
+
+        <TextView
             android:id="@+id/B1R1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -304,6 +315,17 @@
             android:textColor="@color/button_colors"
             android:textSize="50sp"
             android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <TextView
+            android:id="@+id/hypen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text="–"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/B2R1"
@@ -337,6 +359,16 @@
             android:textSize="50sp"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
+        <TextView
+            android:id="@+id/semicolon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:text=";"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/B3R1"

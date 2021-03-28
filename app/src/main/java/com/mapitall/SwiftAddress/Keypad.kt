@@ -194,7 +194,7 @@ class Keypad : AppCompatActivity(),
             onFlingDetected = "no"
 
             gestureDetector.onTouchEvent(event)
-            val swipeUpText = findViewById<TextView>(R.id.comma).text.toString()
+            val swipeUpText = findViewById<TextView>(R.id.letterd).text.toString()
             val swipeDownText = findViewById<TextView>(R.id.B1R0).text.toString()
 
             if (onFlingDetected != "no") {
@@ -221,7 +221,7 @@ class Keypad : AppCompatActivity(),
             onFlingDetected = "no"
 
             gestureDetector.onTouchEvent(event)
-            val swipeUpText = "-"
+            val swipeUpText = findViewById<TextView>(R.id.lettere).text.toString()
             val swipeDownText = findViewById<TextView>(R.id.B2R0).text.toString()
 
             if (onFlingDetected != "no") {
@@ -248,7 +248,7 @@ class Keypad : AppCompatActivity(),
 
             gestureDetector.onTouchEvent(event)
 
-            val swipeUpText = findViewById<TextView>(R.id.semicolon).text.toString()
+            val swipeUpText = findViewById<TextView>(R.id.letterf).text.toString()
             val swipeDownText = findViewById<TextView>(R.id.B3R0).text.toString()
 
             if (onFlingDetected != "no") {
@@ -274,7 +274,7 @@ class Keypad : AppCompatActivity(),
             onFlingDetected = "no"
 
             gestureDetector.onTouchEvent(event)
-            val swipeUpText = ""
+            val swipeUpText = findViewById<TextView>(R.id.comma).text.toString()
             val swipeDownText = findViewById<TextView>(R.id.B1R1).text.toString()
 
             if (onFlingDetected != "no") {
@@ -301,7 +301,7 @@ class Keypad : AppCompatActivity(),
             onFlingDetected = "no"
 
             gestureDetector.onTouchEvent(event)
-            val swipeUpText = ""
+            val swipeUpText = "-"
             val swipeDownText = findViewById<TextView>(R.id.B2R1).text.toString()
 
             if (onFlingDetected != "no") {
@@ -329,7 +329,7 @@ class Keypad : AppCompatActivity(),
             onFlingDetected = "no"
 
             gestureDetector.onTouchEvent(event)
-            val swipeUpText = ""
+            val swipeUpText = findViewById<TextView>(R.id.semicolon).text.toString()
             val swipeDownText = findViewById<TextView>(R.id.B3R1).text.toString()
 
             Log.i("le out test", "onFlingDetected: $onFlingDetected")

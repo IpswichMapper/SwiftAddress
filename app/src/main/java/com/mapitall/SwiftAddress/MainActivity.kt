@@ -1175,7 +1175,10 @@ class MainActivity : AppCompatActivity(),
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             intent.type = "application/zip"
-            intent.putExtra(Intent.EXTRA_TITLE, "survey.zip")
+            val locale = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)
+            Log.i(TAG, "locale: $locale")
+            val date = SimpleDateFormat("yyyy-mm-dd-hh-mm-ss", locale).format(Date())
+            intent.putExtra(Intent.EXTRA_TITLE, "survey-$date.zip")
 
             startActivityForResult(intent, 5)
         }
@@ -1609,7 +1612,7 @@ class MainActivity : AppCompatActivity(),
     fun takePhoto(view: View) {
 
         val locale = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)
-        val current = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss", locale).format(Date())
+        val current = SimpleDateFormat("yyyy-mm-dd-hh-mm-ss", locale).format(Date())
         val fileName = "image-$current.jpg"
 
         val imageFile = File(getExternalFilesDir("data"), fileName)

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
+import android.content.res.Resources
 import android.database.Cursor
 import android.database.CursorIndexOutOfBoundsException
 import android.database.sqlite.SQLiteDatabase
@@ -19,6 +20,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.os.ConfigurationCompat
 import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
@@ -26,8 +28,11 @@ import org.osmdroid.views.overlay.Polyline
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.collections.HashMap
 
 // AddressNodes Class which conveniently packages all the information about
 // an address object into one data class that can be shared accross activities.
@@ -89,8 +94,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         Log.w("addressFile", addressTextToWrite)
         Log.w("noteFile", noteTextToWrite)
         if (isExternalStorageAvailable && !isExternalStorageReadOnly) {
-            val addressFileName = "housenumbers.osm"
-            val noteFileName = "notes.osc"
+
+            val locale = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)
+            val date = SimpleDateFormat("dd-mm-yyyy-hh-mm-ss", locale).format(Date())
+            val addressFileName = "housenumbers-$date.osm"
+            val noteFileName = "notes-$date.osc"
 
             Log.i("ExtStorageAvailable", "$isExternalStorageAvailable")
 

@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.preference.PreferenceManager
 import org.apache.commons.lang3.StringUtils
 import java.net.URL
@@ -56,41 +57,24 @@ class Keypad : AppCompatActivity(),
             texbox.hint = lastAddress.housenumber
         }
 
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
 
         val netInfo = (getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager)
                 .activeNetworkInfo
 
-        if (netInfo != null && netInfo.isConnected) {
-            reverseGeocodeStreet(intent.getDoubleExtra("lat", 0.000), intent.getDoubleExtra("lon", 0.000))
+        if (netInfo != null && netInfo.isConnected &&
+                sp.getBoolean("useReverseGeocoding", true)) {
+            reverseGeocodeStreet(intent.getDoubleExtra(
+                    "lat", 0.000), intent.getDoubleExtra("lon", 0.000))
         } else {
-            Log.i(TAG, "No internet connection available. Street name " +
-                    "now equals lastAddress street name.")
             val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
 
             if (lastAddress != null) {
                 street = lastAddress.street
-
-
-                if (street.length < 18) {
-                    streetNameTextView.text = street
-                } else {
-                    streetNameTextView.text = "${street.subSequence(0, 15)}..."
-                }
-
-                // If the current street name is the same as the previous one,
-                // the color of the street name text becomes green.
-                // Otherwise it becomes red.
-                if (street == lastAddress.street) {
-                    streetNameTextView.setTextColor(
-                        ContextCompat.getColor(this, R.color.street_name_previous))
-                } else {
-                    streetNameTextView.setTextColor(
-                        ContextCompat.getColor(this, R.color.street_name_new))
-                }
-            } else {
-                streetNameTextView.setTextColor(
-                    ContextCompat.getColor(this, R.color.button_colors))
+                streetNameTextView.text = street
             }
+            streetNameTextView.setTextColor(
+                    ContextCompat.getColor(this, R.color.button_colors))
         }
 
         val addressTextBox = findViewById<EditText>(R.id.address_textbox)
@@ -593,12 +577,7 @@ class Keypad : AppCompatActivity(),
 
             runOnUiThread {
                 val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
-                if (street.length < 18) {
-                    streetNameTextView.text = street
-                } else {
-                    streetNameTextView.text = "${street.subSequence(0, 15) as String}..."
-                }
-
+                streetNameTextView.text = street
                 // If the current street name is the same as the previous one,
                 // the color of the street name text becomes green.
                 // Otherwise it becomes red.
@@ -700,8 +679,16 @@ class Keypad : AppCompatActivity(),
         val changeStreetDialogue  = AlertDialog.Builder(this)
         changeStreetDialogue.setTitle(getString(R.string.street_name))
 
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
         var streetNameValue : String
-        val streetNameInput = AutoCompleteTextView(this)
+
+        // Custom version of AutoCompleteTextView that always shows the dropdown
+        // https://stackoverflow.com/a/5783983/15017966
+        // See InstantAutoComplete class
+        val streetNameInput = InstantAutoComplete(this)
+        streetNameInput.maxLines = 1
+        streetNameInput.inputType = InputType.TYPE_CLASS_TEXT
+
 
         val lat = intent.getDoubleExtra("lat", 0.000)
         val lon = intent.getDoubleExtra("lon", 0.000)
@@ -719,19 +706,23 @@ class Keypad : AppCompatActivity(),
             val query = URL(queryText)
             val result = query.readText()
             try {
-                var array: Array<String> = StringUtils.substringsBetween(result,
+                val array: Array<String> = StringUtils.substringsBetween(result,
                         "<tag k=\"name\" v=\"", "\"/>")
                 val distinctList = array.distinct()
-                Log.e(TAG, distinctList.toString())
+                Log.i(TAG, "list of completions: $distinctList")
 
                 runOnUiThread {
+
                     Log.i(TAG, "in runOnUiThread")
-                    streetNameInput.setAdapter(ArrayAdapter(
+                    val arrayAdapter = ArrayAdapter(
                             this,
                             android.R.layout.simple_dropdown_item_1line,
-                            distinctList))
+                            distinctList)
+                    streetNameInput.setAdapter(arrayAdapter)
                     Log.i(TAG, "Query finished")
                     Toast.makeText(this, "Query finished", Toast.LENGTH_SHORT).show()
+
+                    streetNameInput.showDropDown()
 
                 }
             } catch (e : NullPointerException) {
@@ -742,14 +733,36 @@ class Keypad : AppCompatActivity(),
         }.start()
 
         val container = FrameLayout(this)
-        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+        val linearLayout = LinearLayout(this)
+        linearLayout.orientation = LinearLayout.VERTICAL
+        val params : LinearLayout.LayoutParams = LinearLayout.LayoutParams(
             MATCH_PARENT, WRAP_CONTENT
         )
         params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
         params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
-        streetNameInput.layoutParams = params
+        linearLayout.layoutParams = params
 
-        container.addView(streetNameInput)
+        val horizontalLinearLayout = LinearLayout(this)
+        horizontalLinearLayout.orientation = LinearLayout.HORIZONTAL
+
+        val checkBoxTextView = TextView(this)
+        val checkBox = CheckBox(this)
+
+        checkBoxTextView.layoutParams = LinearLayout.LayoutParams(0, WRAP_CONTENT, 3f)
+        checkBoxTextView.text = getString(R.string.disable_reverse_geocoding)
+        checkBox.layoutParams = LinearLayout.LayoutParams(0, MATCH_PARENT, 0.5f)
+        checkBox.gravity = CENTER_VERTICAL
+
+        checkBox.isChecked = !sp.getBoolean("useReverseGeocoding", true)
+
+        horizontalLinearLayout.isBaselineAligned = false
+        horizontalLinearLayout.addView(checkBoxTextView)
+        horizontalLinearLayout.addView(checkBox)
+
+        linearLayout.addView(streetNameInput)
+        linearLayout.addView(horizontalLinearLayout)
+
+        container.addView(linearLayout)
 
         changeStreetDialogue.setView(container)
         changeStreetDialogue.setMessage(getString(R.string.remember_change_street_name))
@@ -757,15 +770,15 @@ class Keypad : AppCompatActivity(),
         changeStreetDialogue.setPositiveButton(getString(R.string.change_street_name_button)) {
             _, _ -> streetNameValue = streetNameInput.text.toString()
 
-            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
-
-            if (streetNameValue.length < 18) {
-                streetNameTextView.text = streetNameValue
+            if (checkBox.isChecked) {
+                sp.edit().putBoolean("useReverseGeocoding", false).apply()
             } else {
-                streetNameTextView.text = "${streetNameValue.subSequence(0, 15)}..."
+                sp.edit().putBoolean("useReverseGeocoding", true).apply()
             }
 
             street = streetNameValue
+            val streetNameTextView = findViewById<TextView>(R.id.street_name_value)
+            streetNameTextView.text = street
         }
         changeStreetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
         val dialog = changeStreetDialogue.create()
@@ -774,6 +787,7 @@ class Keypad : AppCompatActivity(),
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 
     }
+
 
     // Adds value of number pressed to textbox.
     @SuppressLint("SetTextI18n")

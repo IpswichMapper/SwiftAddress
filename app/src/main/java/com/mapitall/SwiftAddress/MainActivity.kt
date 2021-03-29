@@ -688,10 +688,26 @@ class MainActivity : AppCompatActivity(),
                             )
                             dataSavedDialog.setPositiveButton(getString(R.string.close)) { _, _ -> }
 
+                            dataSavedDialog.setOnDismissListener {
+                                // Intent is restarted to fix a few bugs that show up when
+                                // data is saved. You cannot rotate the map & add notes using
+                                // a long press when the map is saved.
+                                // Restarting the intent fixes this.
+                                val intent = Intent(this, MainActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
                             dataSavedDialog.create().show()
                         } else {
                             Toast.makeText(this, getString(R.string.osm_files_empty),
                                 Toast.LENGTH_SHORT).show()
+                            // Intent is restarted to fix a few bugs that show up when
+                            // data is saved. You cannot rotate the map & add notes using
+                                // a long press when the map is saved.
+                            // Restarting the intent fixes this.
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
                         }
                     }
                 } catch (e: Exception) {

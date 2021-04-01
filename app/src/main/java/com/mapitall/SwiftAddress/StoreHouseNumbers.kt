@@ -358,7 +358,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS ${TABLE_NAME}")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TEMP_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $WAYS_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $WAYS_TEMP_TABLE_NAME")
         onCreate(db)
     }
 

@@ -66,8 +66,8 @@ class Map(var mapView: MapView,
                 return false
             }
         }
-        mapView.addMapListener(moveMarkerMapListener)
 
+        mapView.addMapListener(moveMarkerMapListener)
 
     }
 
@@ -97,8 +97,8 @@ class Map(var mapView: MapView,
         val drawable = ContextCompat.getDrawable(context, R.drawable.address)!!
         val housenumber = storeHouseNumbersObject.getHouseNumber(houseNumberID)
         if (housenumber.length <= 5) {
-            val bm = drawable.toBitmap()
 
+            val bitmap = drawable.toBitmap()
 
             val paint = Paint()
             paint.style = Paint.Style.FILL
@@ -112,14 +112,14 @@ class Map(var mapView: MapView,
             }
             paint.textAlign = Paint.Align.CENTER
 
-            val canvas = Canvas(bm)
+            val canvas = Canvas(bitmap)
 
             // https://stackoverflow.com/a/11121873
             // explanation of this line
-            canvas.drawText(housenumber, bm.width / 2f,
-                    bm.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+            canvas.drawText(housenumber, bitmap.width / 2f,
+                    bitmap.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
 
-            val icon = BitmapDrawable(context.resources, bm)
+            val icon = BitmapDrawable(context.resources, bitmap)
             markerHashMap.getValue(houseNumberID).icon = icon
         } else {
             markerHashMap.getValue(houseNumberID).icon = drawable
@@ -153,6 +153,9 @@ class Map(var mapView: MapView,
 
         mapView.overlays.add(markerHashMap.getValue(imageID))
     }
+
+
+
 
     // adds a note marker to the map
     fun addNoteMarker(noteID : Int, lat : Double, lon : Double, noteContents : String) {
@@ -243,7 +246,8 @@ class Map(var mapView: MapView,
         mainActivity.createNewInterpolationWay(
                 polyLineHashMap.getValue(polyLineID), geoPoints, startMarkerID)
 
-
+        mapView.mapCenter as GeoPoint
+        mapView.context
 
     }
 

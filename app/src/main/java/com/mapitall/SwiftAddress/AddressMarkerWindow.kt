@@ -11,6 +11,8 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.advancedpolyline.PolychromaticPaintList
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 class AddressMarkerWindow(pressLayoutId : Int,
@@ -44,6 +46,7 @@ class AddressMarkerWindow(pressLayoutId : Int,
         mView.setOnClickListener {
             close()
         }
+
         val moveButton = mView.findViewById<Button>(R.id.Move_linear)
         val interpolateButton = mView.findViewById<Button>(R.id.Interpolate_linear)
         val deleteButton = mView.findViewById<Button>(R.id.Delete_linear)
@@ -179,6 +182,8 @@ class AddressMarkerWindow(pressLayoutId : Int,
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE)
                 as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(mView.applicationWindowToken, 0)
+        val polyline = Polyline(mapClass.mapView)
+        polyline.actualPoints.size
     }
 
 }

@@ -48,9 +48,7 @@ import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.overlay.MapEventsOverlay
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.*
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
@@ -58,6 +56,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.properties.Delegates
 
@@ -108,6 +107,8 @@ class MainActivity : AppCompatActivity(),
         increment = sp.getInt("increment", 2)
         backgroundImagery()
 
+        val items = ArrayList<OverlayItem>()
+        items.add(OverlayItem("Title", "Description", GeoPoint(0.0, 0.0)))
 
         // zoom to current location when app starts.
         val mapController = map.mapView.controller
@@ -666,9 +667,7 @@ class MainActivity : AppCompatActivity(),
                     // create zip file, delete app internal storage, store zip file to chosen location.
                     val k = storeHouseNumbersObject.zipFilesAndDelete(data?.data!!)
                     Log.i(TAG, "Data has been zipped and stored")
-                    // clear database
-                    storeHouseNumbersObject.clearDatabase()
-                    Log.i(TAG, "Database cleared.")
+
 
                     runOnUiThread {
                         // clear markers
@@ -677,6 +676,11 @@ class MainActivity : AppCompatActivity(),
                         Log.i(TAG, "Database cleared, markers removed & dialog dismissed.")
 
                         if (i != -1 || j != -1 || k != 0) {
+                            // clear database
+                            storeHouseNumbersObject.clearDatabase()
+                            Log.i(TAG, "Database cleared.")
+
+                            // Dialogue showing number of objects saved
                             val dataSavedDialog = AlertDialog.Builder(this)
                             dataSavedDialog.setTitle(getString(R.string.data_saved))
                             dataSavedDialog.setMessage(
@@ -703,7 +707,7 @@ class MainActivity : AppCompatActivity(),
                                 Toast.LENGTH_SHORT).show()
                             // Intent is restarted to fix a few bugs that show up when
                             // data is saved. You cannot rotate the map & add notes using
-                                // a long press when the map is saved.
+                            // a long press when the map is saved.
                             // Restarting the intent fixes this.
                             val intent = Intent(this, MainActivity::class.java)
                             startActivity(intent)

@@ -42,7 +42,8 @@ data class AddressNodes(
         var latitude: Double,
         var longitude: Double,
         val side: String,
-        var buildingLevels: String) : Parcelable
+        var buildingLevels: String,
+        var houseName: String = "") : Parcelable
 
 class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context,
         "address_database",
@@ -64,6 +65,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     private val COL_NOTE = "NOTE"
     private val COL_SIDE = "SIDE"
     private val COL_BUILDING_LEVELS = "BUILDING_LEVELS"
+    private val COL_HOUSENAME = "HOUSENAME"
     private val COL_TYPE = "TYPE"
     private val COL_REF = "INTERPOLATION_WAY"
 
@@ -198,6 +200,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
                 val buildingLevels = c.getString(c.getColumnIndex(COL_BUILDING_LEVELS))
+                val housename = c.getString(c.getColumnIndex(COL_HOUSENAME))
                 val ID = c.getInt(c.getColumnIndex(COL_ID))
 
                 addressFileMiddle.append("<node id=\"$i\" lat=\"$latitude\" lon=\"$longitude\">\n") // opening tag
@@ -205,8 +208,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 if (street != "") {
                     addressFileMiddle.append("<tag k=\"addr:street\" v=\"$street\"/>\n") // street
                 }
+                if (housename != "") {
+                    addressFileMiddle.append("<tag k=\"addr:housename\" v=\"$housename\"/>\n") //housename
+                }
                 if (buildingLevels != "") {
-                    val parts = buildingLevels.split(" ") //
+                    val parts = buildingLevels.split(" ")
 
                     var buildingLevelsNum = parts[0]
                     buildingLevelsNum = buildingLevelsNum.drop(1)
@@ -343,6 +349,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
            |LONGITUDE REAL NOT NULL,
            |SIDE TEXT,
            |BUILDING_LEVELS TEXT,
+           |HOUSENAME TEXT,
            |NOTE TEXT,
            |INTERPOLATION_WAY INTEGER);""".trimMargin())
 
@@ -415,6 +422,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         contentValues.put(COL_SIDE, address.side)
         contentValues.put(COL_TYPE, "Address")
         contentValues.put(COL_BUILDING_LEVELS, address.buildingLevels)
+        contentValues.put(COL_HOUSENAME, address.houseName)
 
         val result: Long = db.insert(TABLE_NAME, null, contentValues)
         db.close()
@@ -524,6 +532,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
                 val housenumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
                 val street = c.getString(c.getColumnIndex(COL_STREET))
+                val housename = c.getString(c.getColumnIndex(COL_HOUSENAME))
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
                 val id = c.getInt(c.getColumnIndex(COL_ID))
@@ -570,7 +579,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                         id,
                         mainActivity,
                         housenumber,
-                        street)
+                        street,
+                        housename)
 
                 markerHashMap.getValue(id).infoWindow = infoWindow
                 Log.i(TAG, "Address Marker added")
@@ -692,7 +702,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                         c.getDouble(c.getColumnIndex(COL_LATITUDE)),
                         c.getDouble(c.getColumnIndex(COL_LONGITUDE)),
                         c.getString(c.getColumnIndex(COL_SIDE)),
-                        c.getString(c.getColumnIndex(COL_BUILDING_LEVELS))
+                        c.getString(c.getColumnIndex(COL_BUILDING_LEVELS)),
+                        c.getString(c.getColumnIndex(COL_HOUSENAME))
                 )
                 runCondition = false
             }
@@ -784,14 +795,13 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     // Changes address in the database when it has been modified using an "InfoWindow"
     // that pops up when you click on the marker.
-    fun changeAddress(ID: Int, housenumber: String, street: String) {
-
-
+    fun changeAddress(ID: Int, housenumber: String, street: String, houseName: String) {
         val db: SQLiteDatabase = this.writableDatabase
 
         val contentValues = ContentValues()
         contentValues.put(COL_HOUSENUMBER, housenumber)
         contentValues.put(COL_STREET, street)
+        contentValues.put(COL_HOUSENAME, houseName)
         db.update(TABLE_NAME, contentValues, "ID = ?", arrayOf(ID.toString()))
     }
 

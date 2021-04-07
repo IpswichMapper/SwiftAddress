@@ -3,6 +3,7 @@ package com.mapitall.SwiftAddress
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.opengl.Visibility
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,8 @@ class AddressMarkerWindow(pressLayoutId : Int,
                           private val ID : Int,
                           private val mainActivity: MainActivity,
                           private var houseNumber : String = "",
-                          private var street : String = "") :
+                          private var street : String = "",
+                          private var houseName: String) :
     InfoWindow(pressLayoutId, mapClass.mapView) {
 
     private val TAG = "MarkerWindow"
@@ -28,6 +30,7 @@ class AddressMarkerWindow(pressLayoutId : Int,
 
     val houseNumberEditText = mView.findViewById<EditText>(R.id.housenumber_edit_text)
     val streetNameEditText = mView.findViewById<EditText>(R.id.street_name_edit_text)
+    val houseNameEditText = mView.findViewById<EditText>(R.id.house_name_edit_text)
     // val houseNameEditText = mView.findViewById<EditText>(R.id.housename_edit_text)
 
     @SuppressLint("SetTextI18n")
@@ -46,12 +49,14 @@ class AddressMarkerWindow(pressLayoutId : Int,
             close()
         }
 
+        val housenameLinearLayout = mView.findViewById<LinearLayout>(R.id.house_name_linear_layout)
+        if (houseName != "") houseNameEditText.setText(houseName)
+
         val moveButton = mView.findViewById<Button>(R.id.Move_linear)
         val interpolateButton = mView.findViewById<Button>(R.id.Interpolate_linear)
         val deleteButton = mView.findViewById<Button>(R.id.Delete_linear)
         val finishInterpolation = mView.findViewById<Button>(R.id.finish_interpolation)
 
-        Log.i(TAG, "mainactivity: ${mainActivity.creatingInterpolationWay}")
         if (!mainActivity.creatingInterpolationWay) {
 
             moveButton.visibility = View.VISIBLE
@@ -173,7 +178,8 @@ class AddressMarkerWindow(pressLayoutId : Int,
             mapClass.getMarker(ID) // Simply to active catch block if marker is deleted
             houseNumber = houseNumberEditText.text.toString()
             street = streetNameEditText.text.toString()
-            storeHouseNumbersObject.changeAddress(ID, houseNumber, street)
+            houseName = houseNameEditText.text.toString()
+            storeHouseNumbersObject.changeAddress(ID, houseNumber, street, houseName)
             mapClass.changeAddressMarker(ID, houseNumber)
         } catch (e: NoSuchElementException) {
             Log.i(TAG, "Marker was deleted")

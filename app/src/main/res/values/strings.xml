@@ -15,6 +15,12 @@
     <string name="num9">9</string>
     <string name="num10">0</string>
     <string name="num0">0</string>
+    <string name="B1_R0">B1 R0</string>
+    <string name="B2_R0">B2 R0</string>
+    <string name="B3_R0">B3 R0</string>
+    <string name="B1_R1">B1 R1</string>
+    <string name="B2_R1">B2 R1</string>
+    <string name="B3_R1">B3 R1</string>
     <string name="osm_background_imagery">Use Openstreetmap as background imagery</string>
     <string name="pt_background_imagery_TEMP">Use public transport as background imagery</string>
     <string name="save_note">Save Note</string>
@@ -136,5 +142,10 @@
     <string name="inclusion">Inclusion:</string>
     <string name="first_house_number">First House Number:</string>
     <string name="last_house_number">Last House Number:</string>
+    <string name="house_name">House Name:</string>
+    <string name="add_house_name">Add House Name</string>
+    <string name="change_building_levels">Change Building Levels</string>
+    <string name="modify_street_name">Modify Street Name</string>
+    <string name="please_enter_number">Please enter a number</string>
 
 </resources>

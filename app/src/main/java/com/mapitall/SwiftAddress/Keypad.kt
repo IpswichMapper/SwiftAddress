@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.app.ActionBar
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.text.InputType
 import android.util.Log
 import android.view.*
@@ -17,7 +20,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
-import androidx.core.widget.addTextChangedListener
 import androidx.preference.PreferenceManager
 import org.apache.commons.lang3.StringUtils
 import java.net.URL
@@ -31,6 +33,7 @@ class Keypad : AppCompatActivity(),
     private var onFlingDetected = "no"
     private var touchEvent = false
     private var street = ""
+    private var houseName = ""
     private var buildingLevels = ""
     private var increment  = 2
 
@@ -79,6 +82,23 @@ class Keypad : AppCompatActivity(),
 
         val addressTextBox = findViewById<EditText>(R.id.address_textbox)
         addressTextBox.requestFocus()
+
+        addressTextBox.setOnLongClickListener {
+
+            val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+
+            if (Build.VERSION.SDK_INT >= 26) {
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                80L, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(80L)
+            }
+
+            addHouseName()
+            return@setOnLongClickListener true
+        }
 
         Log.i("street outside", street)
 
@@ -373,8 +393,11 @@ class Keypad : AppCompatActivity(),
 
             gestureDetector.onTouchEvent(event)
 
-            if (onFlingDetected == "up"){
+            if (onFlingDetected == "up") {
                 modifyIncrement()
+            }
+            if (onFlingDetected == "down") {
+                addHouseName()
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
@@ -406,7 +429,7 @@ class Keypad : AppCompatActivity(),
 
             buildingLevels = findViewById<TextView>(R.id.building_levels_value).text.toString()
             val address = AddressNodes(addressTextbox.text.toString(), street, lat, lon,
-                    side, buildingLevels)
+                    side, buildingLevels, houseName)
 
             val intent = Intent(this, MainActivity::class.java)
 
@@ -423,6 +446,40 @@ class Keypad : AppCompatActivity(),
             setResult(RESULT_CANCELED, intent)
             finish()
         }
+    }
+
+    private fun addHouseName() {
+
+        val addHouseNameDialog = AlertDialog.Builder(this)
+        addHouseNameDialog.setTitle(getString(R.string.house_name))
+
+        var houseNameValue : String
+
+        val addHouseNameEditText = EditText(this)
+        addHouseNameEditText.maxLines = 1
+        addHouseNameEditText.inputType = InputType.TYPE_CLASS_TEXT
+        addHouseNameEditText.append(houseName)
+
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+            MATCH_PARENT, WRAP_CONTENT
+        )
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        addHouseNameEditText.layoutParams = params
+        container.addView(addHouseNameEditText)
+
+        addHouseNameDialog.setView(container)
+
+        addHouseNameDialog.setPositiveButton(getString(R.string.add_house_name)) { _, _ ->
+            houseName = addHouseNameEditText.text.toString()
+        }
+        addHouseNameDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        val dialog = addHouseNameDialog.create()
+        dialog.show()
+        addHouseNameEditText.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
     }
 
     // Modify the default increment used when you double tap or long press on the right/left arrow
@@ -599,6 +656,7 @@ class Keypad : AppCompatActivity(),
     }
 
     // Change the building levels of this address
+    @SuppressLint("SetTextI18n")
     private fun modBuildLevels() {
 
         val modifyBuildLevelsDialog = AlertDialog.Builder(this)
@@ -656,7 +714,7 @@ class Keypad : AppCompatActivity(),
                         this, R.color.button_colors))
             } catch (e : Exception) {
                 e.printStackTrace()
-                Toast.makeText(this, "Please enter a number", Toast.LENGTH_SHORT)
+                Toast.makeText(this, getString(R.string.please_enter_number), Toast.LENGTH_SHORT)
                     .show()
             }
 
@@ -812,17 +870,17 @@ class Keypad : AppCompatActivity(),
                 val buildingLevelsValue = findViewById<TextView>(R.id.building_levels_value)
                 buildingLevelsValue.text = swipeDownText
                 when (swipeDownText) {
-                    "B1 R0" -> buildingLevelsValue.setTextColor(
+                    getString(R.string.B1_R0) -> buildingLevelsValue.setTextColor(
                         ContextCompat.getColor(this, R.color.B1_R0))
-                    "B2 R0" -> buildingLevelsValue.setTextColor(
+                     getString(R.string.B2_R0) -> buildingLevelsValue.setTextColor(
                         ContextCompat.getColor(this, R.color.B2_R0))
-                    "B3 R0" -> buildingLevelsValue.setTextColor(
+                    getString(R.string.B3_R0) -> buildingLevelsValue.setTextColor(
                         ContextCompat.getColor(this, R.color.B3_R0))
-                    "B1 R1" -> buildingLevelsValue.setTextColor(
+                    getString(R.string.B1_R1) -> buildingLevelsValue.setTextColor(
                         ContextCompat.getColor(this, R.color.B1_R1))
-                    "B2 R1" -> buildingLevelsValue.setTextColor(
+                    getString(R.string.B2_R1) -> buildingLevelsValue.setTextColor(
                         ContextCompat.getColor(this, R.color.B2_R1))
-                    "B3 R1" -> buildingLevelsValue.setTextColor(
+                    getString(R.string.B3_R1) -> buildingLevelsValue.setTextColor(
                         ContextCompat.getColor(this, R.color.B3_R1))
                 }
             }

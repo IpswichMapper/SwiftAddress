@@ -8,6 +8,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/house_name_linear_layout">
+        <TextView
+            android:id="@+id/house_name_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_marginStart="5dp"
+            android:text="@string/house_name"
+            android:textColor="@color/black" />
+
+        <EditText
+            android:id="@+id/house_name_edit_text"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/black"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/housenumber_linear_layout">
         <TextView
             android:id="@+id/housenumber_text_view"

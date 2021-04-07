@@ -17,6 +17,7 @@ import android.location.LocationManager
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
+import android.text.InputType
 import android.util.Log
 import android.view.*
 import android.view.Gravity.CENTER
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity(),
     private lateinit var locationOverlay : MyLocationNewOverlay
     private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
     private var increment by Delegates.notNull<Int>()
+    private var houseName = ""
     private var noOnTouchActions = true
     private var flingUpDetected = false
     private var flingLeftDetected = false
@@ -1445,14 +1447,51 @@ class MainActivity : AppCompatActivity(),
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.change_increment_mini_keypad -> {
-
                 modifyIncrement()
+                return true
+            }
+            R.id.add_house_name_mini_keypad -> {
+                addHouseName()
                 return true
             }
             else -> {
                 return false
             }
         }
+
+    }
+
+    private fun addHouseName() {
+        val addHouseNameDialog = AlertDialog.Builder(this)
+        addHouseNameDialog.setTitle(getString(R.string.house_name))
+
+        var houseNameValue : String
+
+        val addHouseNameEditText = EditText(this)
+        addHouseNameEditText.maxLines = 1
+        addHouseNameEditText.inputType = InputType.TYPE_CLASS_TEXT
+        addHouseNameEditText.append(houseName)
+
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+            MATCH_PARENT, WRAP_CONTENT
+        )
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        addHouseNameEditText.layoutParams = params
+        container.addView(addHouseNameEditText)
+
+        addHouseNameDialog.setView(container)
+
+        addHouseNameDialog.setPositiveButton(getString(R.string.add_house_name)) {
+            _, _ ->
+            houseName = addHouseNameEditText.text.toString()
+        }
+        addHouseNameDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        val dialog = addHouseNameDialog.create()
+        dialog.show()
+        addHouseNameEditText.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 
     }
 
@@ -1562,6 +1601,9 @@ class MainActivity : AppCompatActivity(),
         addressToChange.latitude = map.mapView.mapCenter.latitude
         addressToChange.longitude = map.mapView.mapCenter.longitude
         addressToChange.housenumber = houseNumber.text.toString()
+        addressToChange.houseName = houseName
+
+        houseName = ""
 
         val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
         if (id != -1) {

@@ -434,8 +434,8 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:text="Modify Street Name"
-            android:textSize="14dp"/>
+            android:text="@string/modify_street_name"
+            android:textSize="13dp"/>
 
         <TextView
             android:id="@+id/change_building_levels"
@@ -444,7 +444,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="10dp"
             android:layout_centerHorizontal="true"
-            android:text="Change Building Levels"
+            android:text="@string/change_building_levels"
             android:textSize="12dp"/>
     </RelativeLayout>
 
@@ -479,7 +479,17 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:textSize="14dp"
-            android:text="Modify Increment" />
+            android:text="@string/change_increment" />
+
+        <TextView
+            android:id="@+id/add_house_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:layout_centerHorizontal="true"
+            android:text="@string/add_house_name"
+            android:textSize="13dp"/>
     </RelativeLayout>
 
     <RelativeLayout

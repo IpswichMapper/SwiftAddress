@@ -127,7 +127,8 @@ class Map(var mapView: MapView,
                 houseNumberID,
                 mainActivity,
                 address.housenumber,
-                address.street)
+                address.street,
+                address.houseName)
         //markerList.last().infoWindow = infoWindow
         markerHashMap.getValue(houseNumberID).infoWindow = infoWindow
         mapView.overlays.add(markerHashMap.getValue(houseNumberID))

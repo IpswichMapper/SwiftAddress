@@ -132,5 +132,9 @@
     <string name="images_saved">Images saved:</string>
     <string name="note">Note:</string>
     <string name="disable_reverse_geocoding">Remember address\n(this disables Reverse Geocoding)</string>
+    <string name="interpolation">Interpolation:</string>
+    <string name="inclusion">Inclusion:</string>
+    <string name="first_house_number">First House Number:</string>
+    <string name="last_house_number">Last House Number:</string>
 
 </resources>

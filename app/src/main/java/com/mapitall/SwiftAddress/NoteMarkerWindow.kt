@@ -38,7 +38,6 @@ class NoteMarkerWindow(private val mapClass: Map,
             close()
         }
         deleteButton.setOnClickListener {
-            storeHouseNumbersObject.removeAt(ID)
             mapClass.removeAt(ID)
             close()
         }
@@ -46,8 +45,16 @@ class NoteMarkerWindow(private val mapClass: Map,
     }
 
     override fun onClose() {
-        note = noteEditText.text.toString()
-        storeHouseNumbersObject.changeNote(ID, note)
+        try {
+            mapClass.getMarker(ID) // Simply to active catch block if marker is deleted
+            note = noteEditText.text.toString()
+            storeHouseNumbersObject.changeNote(ID, note)
+        } catch (e: NoSuchElementException) {
+            Log.i(TAG, "Marker was deleted")
+        } finally {
+            Log.i(TAG, "InfoWindow Closed.")
+        }
+        // TODO: Add ability to hide keyboard
     }
 
 

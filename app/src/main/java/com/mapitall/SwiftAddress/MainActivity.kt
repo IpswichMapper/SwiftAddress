@@ -1707,10 +1707,10 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    fun createNewInterpolationWay(
-                                  polyline_: Polyline,
-                                  geoPoints_: ArrayList<GeoPoint>,
-                                  startMarkerID_: Int) {
+    fun createPolyline(
+            polyline_: Polyline,
+            geoPoints_: ArrayList<GeoPoint>,
+            startMarkerID_: Int) {
         val addPointButton = findViewById<Button>(R.id.add_interpolation_way_point)
         val cancelButton = findViewById<Button>(R.id.cancel_interpolation_way)
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
@@ -1763,6 +1763,11 @@ class MainActivity : AppCompatActivity(),
         drawerLayout.openDrawer(GravityCompat.START)
     }
 
+    fun restart() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
 
 
 }

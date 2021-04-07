@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/rounded_layout">
+
+        <TextView
+            android:id="@+id/polyline_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:lines="2"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/black"
+            tools:ignore="SpUsage" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:text="@string/interpolation"
+            android:layout_marginStart="10dp"/>
+
+        <com.mapitall.SwiftAddress.InstantAutoComplete
+            android:id="@+id/interpolation_edit_text_linear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:backgroundTint="@color/black"
+            android:gravity="top"
+            android:textColor="@color/black" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:text="@string/inclusion"
+            android:layout_marginStart="10dp"/>
+
+        <Spinner
+            android:id="@+id/inclusion_edit_text_linear"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:backgroundTint="@color/black"
+            android:gravity="top"
+            android:textColor="@color/black"
+            />
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/delete_polyline_linear"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="@string/delete"
+            android:textColor="@color/black" />
+
+
+        <Button
+            android:id="@+id/save_polyline_linear"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="@string/save"
+            android:textColor="@color/black" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

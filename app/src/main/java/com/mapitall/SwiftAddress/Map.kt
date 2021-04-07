@@ -25,7 +25,7 @@ class Map(var mapView: MapView,
           private val mainActivity: MainActivity) {
 
     private var markerHashMap = HashMap<Int, Marker>()
-    private var polyLineID : Int
+    private var currentPolyline: Polyline? = null
     private var polyLineHashMap = HashMap<Int, Polyline>()
     private var storeHouseNumbersObject = StoreHouseNumbers(context)
     private val TAG = "Map"
@@ -45,16 +45,9 @@ class Map(var mapView: MapView,
         )
         mapView.setTileSource(TileSourceFactory.MAPNIK)
 
-
         // Displays all the housenumbers that have already been
         // created but haven't been stored to an OSM file yet.
         storeHouseNumbersObject.displayMarkers(this, mainActivity)
-
-        // Get ID of last added polyline
-        val lastID = storeHouseNumbersObject.lastPolyLineID()
-        polyLineID =
-                if (lastID != -1) lastID + 1
-                else 1
 
         moveMarkerMapListener = object:MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean {
@@ -71,12 +64,12 @@ class Map(var mapView: MapView,
 
     }
 
-    fun setMarkerHashMap(HashMap : HashMap<Int, Marker>) {
+    fun setMarkerHashMap(hashMap : HashMap<Int, Marker>) {
         for (marker: Marker in markerHashMap.values) {
             mapView.overlays.remove(marker)
         }
 
-        markerHashMap = HashMap
+        markerHashMap = hashMap
         for (marker: Marker in markerHashMap.values) {
             mapView.overlays.add(marker)
         }
@@ -190,8 +183,24 @@ class Map(var mapView: MapView,
 
     // removes a marker at a specific ID.
     fun removeAt(ID : Int) {
-        mapView.overlays.remove(markerHashMap.getValue(ID))
-        markerHashMap.remove(ID)
+        val result = storeHouseNumbersObject.removeAt(ID)
+        if (result != -1) {
+            mapView.overlays.remove(markerHashMap.getValue(ID))
+            markerHashMap.remove(ID)
+
+            val polyLineIDs = storeHouseNumbersObject.deleteRelatedPolylines(ID)
+
+            for (polyLineID in polyLineIDs) {
+                val polyline = getPolyline(polyLineID)
+                mapView.overlays.remove(polyline)
+            }
+        }
+    }
+
+    fun removePolylineAt(ID: Int) {
+
+        mapView.overlays.remove(polyLineHashMap.getValue(ID))
+        storeHouseNumbersObject.removePolylineAt(ID)
     }
 
     // Returns a marker after being given the marker ID.
@@ -225,52 +234,80 @@ class Map(var mapView: MapView,
 
     // Creates a new "interpolation" way, this effectively allows you to guess the addresses
     // between two existing addresses.
-    fun createNewInterpolationWay(startMarkerID: Int) {
+    fun createPolyline(startMarkerID: Int) {
         val marker = getMarker(startMarkerID)
         val geoPoints = arrayListOf(marker.position as GeoPoint)
-        polyLineHashMap[polyLineID] =
-                Polyline(null, true)
+        currentPolyline = Polyline()
 
-        polyLineHashMap.getValue(polyLineID).setPoints(geoPoints)
-        polyLineHashMap.getValue(polyLineID).outlinePaint.color = ContextCompat.getColor(
+        currentPolyline!!.setPoints(geoPoints)
+        currentPolyline!!.outlinePaint.color = ContextCompat.getColor(
                 context, R.color.interpolation_way_color)
-        polyLineHashMap.getValue(polyLineID).outlinePaint.style = Paint.Style.STROKE
-        polyLineHashMap.getValue(polyLineID).outlinePaint.pathEffect = (
+        currentPolyline!!.outlinePaint.style = Paint.Style.STROKE
+        currentPolyline!!.outlinePaint.pathEffect = (
                 DashPathEffect(floatArrayOf(50f, 10f), 100f))
 
         // polyLineHashMap.getValue(polyLineID).addPoint(marker.position)
 
-        mapView.overlays.add(polyLineHashMap.getValue(polyLineID))
+        mapView.overlays.add(currentPolyline)
         makeLineFollowCenter(true)
 
-        mainActivity.createNewInterpolationWay(
-                polyLineHashMap.getValue(polyLineID), geoPoints, startMarkerID)
+        mainActivity.createPolyline(
+                currentPolyline!!, geoPoints, startMarkerID)
 
         mapView.mapCenter as GeoPoint
         mapView.context
 
     }
 
-    fun addPolyLineToHashMap(polyline: Polyline, polyLineID : Int) {
-        polyLineHashMap[polyLineID] = polyline
+    private fun addPolyLineToHashMap(polyline: Polyline, polylineID : Int) {
+        polyLineHashMap[polylineID] = polyline
 
-        polyLineHashMap.getValue(polyLineID).outlinePaint.color = ContextCompat.getColor(
+        // Creates a thick dashed line that is red.
+        polyLineHashMap.getValue(polylineID).outlinePaint.color = ContextCompat.getColor(
                 context, R.color.interpolation_way_color)
-        polyLineHashMap.getValue(polyLineID).outlinePaint.style = Paint.Style.STROKE
-        polyLineHashMap.getValue(polyLineID).outlinePaint.pathEffect = (
+        polyLineHashMap.getValue(polylineID).outlinePaint.style = Paint.Style.STROKE
+        polyLineHashMap.getValue(polylineID).outlinePaint.pathEffect = (
                 DashPathEffect(floatArrayOf(50f, 10f), 100f))
+        polyLineHashMap.getValue(polylineID).infoWindow =
+                PolylineMarkerWindow(this, context, polylineID, mainActivity)
     }
-    fun finishInterpolationWay(endMarkerID: Int) {
 
+    fun finishPolyline(endMarkerID: Int, interpolation: String, inclusion: String) {
         makeLineFollowCenter(false)
-        polyLineHashMap.getValue(polyLineID).addPoint(getMarker(endMarkerID).position)
-        polyLineID += 1
+        currentPolyline!!.addPoint(getMarker(endMarkerID).position)
+
+        // InfoWindow doesn't show up unless you remove the polyline and add it again
+        mapView.overlays.remove(currentPolyline)
+        val polylineID = storeHouseNumbersObject.addPolyline(
+                mainActivity.startMarkerID!!, currentPolyline!!.actualPoints.toMutableList(),
+                endMarkerID, interpolation, inclusion)
+        if (polylineID != -1) {
+            // currentPolyline!!.infoWindow =
+            //     PolylineMarkerWindow(this, context, polylineID, mainActivity)
+            mapView.overlays.remove(currentPolyline)
+            polyLineHashMap[polylineID] = currentPolyline!!
+            currentPolyline = null
+            mapView.overlays.remove(polyLineHashMap.getValue(polylineID))
+            polyLineHashMap.getValue(polylineID).infoWindow =
+                    PolylineMarkerWindow(this, context, polylineID, mainActivity)
+            polyLineHashMap.getValue(polylineID).outlinePaint.color = Color.BLACK
+            //
+            polyLineHashMap.getValue(polylineID).setOnClickListener { _, _, _ ->
+                Log.i(TAG, "polyline clicked")
+                polyLineHashMap.getValue(polylineID).outlinePaint.color = Color.GREEN
+                return@setOnClickListener true
+            }
+            mapView.overlays.add(polyLineHashMap.getValue(polylineID))
+
+        } else {
+            Log.w(TAG, "Failed to add polyline to database")
+        }
+
     }
 
     // makes the interpolation line follow the map center
     fun makeLineFollowCenter(follow : Boolean, geoPoints: ArrayList<GeoPoint>) {
 
-        val line = polyLineHashMap.getValue(polyLineID)
         if (follow) {
             makeInterpolationWayFollowCenterMapListener = object:MapListener {
                 override fun onZoom(event: ZoomEvent?): Boolean {
@@ -280,7 +317,7 @@ class Map(var mapView: MapView,
                 override fun onScroll(event: ScrollEvent?): Boolean {
                     geoPoints.removeLast()
                     geoPoints.add(mapView.mapCenter as GeoPoint)
-                    line.setPoints(geoPoints)
+                    currentPolyline!!.setPoints(geoPoints)
                     return true
                 }
             }
@@ -290,10 +327,10 @@ class Map(var mapView: MapView,
             mapView.removeMapListener(makeInterpolationWayFollowCenterMapListener)
         }
     }
+
     fun makeLineFollowCenter(follow : Boolean) {
 
-        val line = polyLineHashMap.getValue(polyLineID)
-        val geoPoints = polyLineHashMap.getValue(polyLineID).actualPoints.toMutableList()
+        val geoPoints = currentPolyline!!.actualPoints.toMutableList()
         if (follow) {
             makeInterpolationWayFollowCenterMapListener = object:MapListener {
                 override fun onZoom(event: ZoomEvent?): Boolean {
@@ -303,7 +340,7 @@ class Map(var mapView: MapView,
                 override fun onScroll(event: ScrollEvent?): Boolean {
                     geoPoints.removeLast()
                     geoPoints.add(mapView.mapCenter as GeoPoint)
-                    line.setPoints(geoPoints)
+                    currentPolyline!!.setPoints(geoPoints)
                     return true
                 }
             }
@@ -314,33 +351,24 @@ class Map(var mapView: MapView,
         }
     }
 
-    fun getPolyLineHashMap() : HashMap<Int, Polyline> {
-        return polyLineHashMap
-    }
-    fun setPolylineHashMap(polyLineHashMap_: HashMap<Int, Polyline>) {
+    fun setPolylineHashMap(hashMap: HashMap<Int, Polyline>) {
         for (polyline in polyLineHashMap.values) {
             mapView.overlays.remove(polyline)
         }
-        for (polyline in polyLineHashMap_) {
-            for(point in polyline.value.actualPoints) {
-                Log.i(TAG, "point: $point")
-            }
-            addPolyLineToHashMap(polyline.value, polyline.key)
+        for (hashMapElement in hashMap) {
+            addPolyLineToHashMap(hashMapElement.value, hashMapElement.key)
         }
         for (polyline in polyLineHashMap.values) {
             mapView.overlays.add(polyline)
         }
     }
     // Gets a specific polyline when given ID.
-    private fun getPolyLineHashMapValue(ID: Int) : Polyline {
+    fun getPolyline(ID: Int) : Polyline {
         return  polyLineHashMap.getValue(ID)
     }
     // get a list of points for a specific Polyline
-    fun getPolyLineHashMapValue(ID: Int, getPoints: Boolean) : MutableList<GeoPoint> {
+    fun getPolylinePoints(ID: Int, getPoints: Boolean) : MutableList<GeoPoint> {
         return polyLineHashMap.getValue(ID).actualPoints.toMutableList()
-    }
-    fun getPolyLineID() : Int {
-        return polyLineID
     }
 
     fun changeAddressMarker(id: Int, houseNumber: String) {
@@ -378,6 +406,7 @@ class Map(var mapView: MapView,
         }
         mapView.overlays.add(marker)
     }
+
 
 
 }

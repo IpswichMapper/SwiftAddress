@@ -13,7 +13,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.os.CancellationSignal
 import android.os.Environment
 import android.os.Parcelable
 import android.util.Log
@@ -48,7 +47,7 @@ data class AddressNodes(
 class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context,
         "address_database",
         null,
-        2) {
+        3) {
     private val TAG = "StoreHouseNumbers"
 
     // All the database table columns.
@@ -393,6 +392,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
         db.delete(TABLE_NAME, null, null)
         db.delete(WAYS_TABLE_NAME, null, null)
+        db.close()
         Log.i(TAG, "Database cleared.")
     }
 
@@ -435,6 +435,23 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         contentValues.put(COL_TYPE, "Note")
 
         val result: Long = db.insert(TABLE_NAME, null, contentValues)
+        db.close()
+        return result.toInt()
+    }
+
+    // Add an row containing information about an image stored in internal storage
+    @SuppressLint("Recycle")
+    fun addImage(absolutePath: String, lat: Double, lon: Double): Int {
+        val db: SQLiteDatabase = this.writableDatabase
+        val contentValues = ContentValues()
+
+        contentValues.put(COL_NOTE, absolutePath)
+        contentValues.put(COL_TYPE, "Image")
+        contentValues.put(COL_LATITUDE, lat)
+        contentValues.put(COL_LONGITUDE, lon)
+
+        val result: Long = db.insert(TABLE_NAME, null, contentValues)
+        db.close()
         return result.toInt()
     }
 
@@ -447,6 +464,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val itemType = c.getString(c.getColumnIndex(COL_TYPE))
         Log.i(TAG, "Item Type: $itemType")
         c.close()
+        db.close()
         return itemType
     }
 
@@ -469,6 +487,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         row.moveToFirst()
         val houseNumber = row.getString(row.getColumnIndex(COL_HOUSENUMBER))
         row.close()
+        db.close()
         return houseNumber
     }
 
@@ -477,8 +496,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val db: SQLiteDatabase = this.writableDatabase
 
         if (isAnImage) {
-            val dbRead: SQLiteDatabase = this.readableDatabase
-            val c: Cursor = dbRead.query(TABLE_NAME, null, null, null,
+            val c: Cursor = db.query(TABLE_NAME, null, null, null,
                     null, null, "ID DESC")
             c.moveToNext()
             val absolutePath = c.getString(c.getColumnIndex(COL_NOTE))
@@ -488,8 +506,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         }
 
         db.execSQL("DELETE FROM $TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $TABLE_NAME);")
-
-
+        db.close()
     }
 
 
@@ -499,8 +516,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val db: SQLiteDatabase = this.readableDatabase
         val markerHashMap = HashMap<Int, Marker>()
 
-        Log.i(TAG, "displayMarkers function started")
-
         val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID ASC")
 
@@ -509,17 +524,9 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
                 val housenumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
                 val street = c.getString(c.getColumnIndex(COL_STREET))
-                // TODO : Show street in popup
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
                 val id = c.getInt(c.getColumnIndex(COL_ID))
-                /*
-                markerList.add(Marker(map))
-                markerList.last().position = GeoPoint(latitud, longitude)
-                markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.address)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerList.last().title = housenumber
-                */
 
                 markerHashMap[id] = Marker(mapClass.mapView)
                 markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
@@ -564,7 +571,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                         mainActivity,
                         housenumber,
                         street)
-                // markerList.last().infoWindow = infoWindow
+
                 markerHashMap.getValue(id).infoWindow = infoWindow
                 Log.i(TAG, "Address Marker added")
 
@@ -573,14 +580,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
                 val id = c.getInt(c.getColumnIndex(COL_ID))
-                /*
-                markerList.add(Marker(map))
-                markerList.last().position = GeoPoint(latitude, longitude)
-                markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.note)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerList.last().title = noteContents
-                Log.i(DEBUG_TAG, "Note Marker added")
-                */
 
                 markerHashMap[id] = Marker(mapClass.mapView)
                 markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
@@ -602,14 +601,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
                 val id = c.getInt(c.getColumnIndex(COL_ID))
                 val imageName = c.getString(c.getColumnIndex(COL_NOTE))
-                /*
-                markerList.add(Marker(map))
-                markerList.last().position = GeoPoint(latitude, longitude)
-                markerList.last().icon = ContextCompat.getDrawable(context, R.drawable.camera)
-                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                markerList.last().title = c.getString(c.getColumnIndex(COL_NOTE)) // TODO : Show actual image
-                Log.i(DEBUG_TAG, "Image Marker added")
-                */
 
                 markerHashMap[id] = Marker(mapClass.mapView)
                 markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
@@ -653,7 +644,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             endMarkerRow.close()
 
             polyLineHashMap[iD] = Polyline()
-
             polyLineHashMap.getValue(iD).addPoint(startMarkerGeoPoint)
 
             val c3 = db.query(TABLE_NAME, null, null, null,
@@ -681,7 +671,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun lastAddressEntry(side: String): AddressNodes? {
         val db: SQLiteDatabase = this.readableDatabase
         var lastAddress: AddressNodes? = null
-        var c: Cursor = db.query(TABLE_NAME, null, null, null,
+        val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
 
 
@@ -715,31 +705,14 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     }
 
-    // Add an row containing information about an image stored in internal storage
-    @SuppressLint("Recycle")
-    fun addImage(absolutePath: String, lat: Double, lon: Double): Int {
-        val db: SQLiteDatabase = this.writableDatabase
-        val dbRead: SQLiteDatabase = this.readableDatabase
-        val contentValues = ContentValues()
-
-        contentValues.put(COL_NOTE, absolutePath)
-        contentValues.put(COL_TYPE, "Image")
-        contentValues.put(COL_LATITUDE, lat)
-        contentValues.put(COL_LONGITUDE, lon)
-
-        val result: Long = db.insert(TABLE_NAME, null, contentValues)
-        return result.toInt()
-
-    }
-
     // Remove marker at specific position.
-    // TODO : Fix this function
-    fun removeAt(housenumberID: Int) {
+    // TODO : Check if the function is fixed
+    fun removeAt(ID: Int) : Int {
 
-        val dbRead: SQLiteDatabase = this.readableDatabase
-        val c: Cursor = dbRead.query(TABLE_NAME, null, null, null,
-                null, null, "ID DESC")
-        c.moveToNext()
+        val db = this.writableDatabase
+        val c = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE ID = $ID",
+                null)
+        c.moveToFirst()
         val itemType = c.getString(c.getColumnIndex(COL_TYPE))
         Log.i(TAG, "Item Type: $itemType")
 
@@ -750,9 +723,20 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             c.close()
         }
 
-        val db = this.writableDatabase
-        db.execSQL("DELETE FROM $TABLE_NAME WHERE ID = $housenumberID;")
+        val result = db.delete(TABLE_NAME, "ID = $ID", null)
         db.close()
+        return result
+    }
+
+
+    fun removePolylineAt(id: Int) {
+        val db: SQLiteDatabase = this.writableDatabase
+
+        db.delete(TABLE_NAME, "$COL_REF = ?", arrayOf(id.toString()))
+        db.delete(WAYS_TABLE_NAME, "ID = ?", arrayOf(id.toString()))
+
+        db.close()
+
     }
 
     // Change location of marker after it has been moved.
@@ -775,10 +759,13 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         recoverDataDialog.setPositiveButton(context.getString(R.string.recover)) { _, _ ->
             try {
                 db.delete(TABLE_NAME, null, null)
+                db.delete(WAYS_TABLE_NAME, null, null)
                 db.execSQL("INSERT INTO $TABLE_NAME SELECT * FROM $TEMP_TABLE_NAME")
+                db.execSQL("INSERT INTO $WAYS_TABLE_NAME SELECT * FROM $WAYS_TEMP_TABLE_NAME")
                 val rows = db.delete(TABLE_NAME, "TYPE = 'Image'", null)
                 Log.i(TAG, "$rows rows deleted (image rows)")
-                displayMarkers(mapClass, mainActivity)
+                mainActivity.restart()
+
             } catch (e: SQLiteException) {
                 e.printStackTrace()
 
@@ -815,14 +802,27 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val contentValues = ContentValues()
         contentValues.put(COL_NOTE, note)
         db.update(TABLE_NAME, contentValues, "ID = ?", arrayOf(ID.toString()))
+        db.close()
+    }
+
+
+    fun changePolyline(ID: Int, interpolation: String, inclusion: String) {
+        val db: SQLiteDatabase = this.writableDatabase
+
+        val contentValues = ContentValues()
+        contentValues.put(WAY_COL_INTERPOLATION, interpolation)
+        contentValues.put(WAY_COL_INCLUSION, inclusion)
+        db.update(WAYS_TABLE_NAME, contentValues, "ID = ?", arrayOf(ID.toString()))
+
+        db.close()
     }
 
     // This adds an "interpolation way" to the database
-    fun addInterpolationWay(startMarkerID: Int,
-                            geoPoints: MutableList<GeoPoint>,
-                            endMarkerID: Int,
-                            interpolation: String,
-                            inclusion: String) {
+    fun addPolyline(startMarkerID: Int,
+                    geoPoints: MutableList<GeoPoint>,
+                    endMarkerID: Int,
+                    interpolation: String,
+                    inclusion: String) : Int {
         val db = this.writableDatabase
         val wayContentValues = ContentValues()
         wayContentValues.put(WAY_COL_INCLUSION, inclusion)
@@ -842,30 +842,112 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
             db.insert(TABLE_NAME, null, contentValues).toInt()
         }
+        db.close()
+
+        return wayRow.toInt()
     }
 
     fun lastPolyLineID(): Int {
         val db = this.readableDatabase
         try {
             val c: Cursor = db.rawQuery(
-                    "SELECT * FROM $WAYS_TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $TABLE_NAME);",
+                    "SELECT * FROM $WAYS_TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $WAYS_TABLE_NAME);",
                     null)
+            c.moveToFirst()
             val id = c.getInt(c.getColumnIndex(COL_ID))
             c.close()
+            db.close()
             return id
         } catch (e: SQLiteException) {
             e.printStackTrace()
+            db.close()
             return -1
         } catch (e: CursorIndexOutOfBoundsException) {
             Log.w(TAG, "Cursor Index out of range, list is empty")
+            db.close()
             return -1
         }
-    }
-
-    fun addAddressOnLeft() {
 
     }
 
+    fun getPolylineDetails(ID: Int): Pair<String, String> {
+        val db = this.readableDatabase
+
+        val row = db.rawQuery(
+                    "SELECT * FROM $WAYS_TABLE_NAME WHERE ID = $ID", null)
+        row.moveToFirst()
+        val interpolation = row.getString(row.getColumnIndex(WAY_COL_INTERPOLATION))
+        val inclusion = row.getString(row.getColumnIndex(WAY_COL_INCLUSION))
+        row.close()
+        db.close()
+        return Pair(interpolation, inclusion)
+    }
+
+    fun getPolylineHouseNumbers(ID: Int): Pair<String, String> {
+        val db = this.writableDatabase
+
+        val row = db.rawQuery(
+                "SELECT * FROM $WAYS_TABLE_NAME WHERE ID = $ID", null)
+        row.moveToFirst()
+        val startMarkerID = row.getInt(row.getColumnIndex(WAY_COL_START_MARKER_ID))
+        val endMarkerID = row.getInt(row.getColumnIndex(WAY_COL_END_MARKER_ID))
+
+        val startMarkerCursor = db.rawQuery(
+                "SELECT * FROM $TABLE_NAME WHERE ID = $startMarkerID", null)
+        val endMarkerCursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE ID = $endMarkerID",
+                null)
+        startMarkerCursor.moveToFirst()
+        endMarkerCursor.moveToFirst()
+        val startHouseNumber = startMarkerCursor.getString(startMarkerCursor.getColumnIndex(
+                COL_HOUSENUMBER))
+        val endHouseNumber = endMarkerCursor.getString(endMarkerCursor.getColumnIndex(
+                COL_HOUSENUMBER))
+
+        startMarkerCursor.close()
+        endMarkerCursor.close()
+        row.close()
+        db.close()
+
+        return Pair(startHouseNumber, endHouseNumber)
+    }
+
+    // This lets you delete any polylines connected to a address marker.
+    // It returns the IDs of the polylines deleted so that the Map Class can
+    // delete them from the map.
+    fun deleteRelatedPolylines(markerID: Int) : List<Int> {
+        val db = this.writableDatabase
+        val polylineIDs = mutableListOf<Int>()
+        val startMarkerCursor = db.rawQuery(
+                "SELECT * FROM $WAYS_TABLE_NAME WHERE $WAY_COL_START_MARKER_ID = $markerID",
+                null)
+        // startMarkerCursor.moveToFirst()
+        while (startMarkerCursor.moveToNext()) {
+            val polylineID = startMarkerCursor.getInt(startMarkerCursor.getColumnIndex(COL_ID))
+            polylineIDs.add(polylineID)
+        }
+        db.delete(WAYS_TABLE_NAME, "$WAY_COL_START_MARKER_ID = $markerID", null)
+        db.close()
+        val db2 = this.writableDatabase
+        val endMarkerCursor = db2.rawQuery(
+                "SELECT * FROM $WAYS_TABLE_NAME WHERE $WAY_COL_END_MARKER_ID = $markerID",
+                null)
+        // endMarkerCursor.moveToFirst()
+        while(endMarkerCursor.moveToNext()) {
+            val polylineID = endMarkerCursor.getInt(endMarkerCursor.getColumnIndex(COL_ID))
+            polylineIDs.add(polylineID)
+        }
+        db2.delete(WAYS_TABLE_NAME, "$WAY_COL_END_MARKER_ID = $markerID", null)
+
+        startMarkerCursor.close()
+        endMarkerCursor.close()
+        db.close()
+        return polylineIDs
+        /*
+        db.delete(WAYS_TABLE_NAME, "$WAY_COL_START_MARKER_ID = $markerID",null)
+        db.delete(WAYS_TABLE_NAME, "$WAY_COL_END_MARKER_ID = $markerID", null)
+        db.close()
+         */
+    }
 
 }
 

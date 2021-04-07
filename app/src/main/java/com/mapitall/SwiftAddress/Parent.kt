@@ -29,7 +29,6 @@ class Parent : AppCompatActivity() {
             }
         }
 
-
         finish()
     }
 }

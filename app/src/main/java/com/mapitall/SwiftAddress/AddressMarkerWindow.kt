@@ -12,7 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.advancedpolyline.PolychromaticPaintList
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 class AddressMarkerWindow(pressLayoutId : Int,
@@ -50,33 +49,35 @@ class AddressMarkerWindow(pressLayoutId : Int,
         val moveButton = mView.findViewById<Button>(R.id.Move_linear)
         val interpolateButton = mView.findViewById<Button>(R.id.Interpolate_linear)
         val deleteButton = mView.findViewById<Button>(R.id.Delete_linear)
+        val finishInterpolation = mView.findViewById<Button>(R.id.finish_interpolation)
 
+        Log.i(TAG, "mainactivity: ${mainActivity.creatingInterpolationWay}")
         if (!mainActivity.creatingInterpolationWay) {
 
-            moveButton.setOnClickListener {
+            moveButton.visibility = View.VISIBLE
+            interpolateButton.visibility = View.VISIBLE
+            deleteButton.visibility = View.VISIBLE
+            finishInterpolation.visibility = View.GONE
 
+            moveButton.setOnClickListener {
                 val marker = mapClass.getMarker(ID)
                 marker.position = mapClass.mapView.mapCenter as GeoPoint
                 mainActivity.moveMarker(ID, marker)
                 close()
             }
             interpolateButton.setOnClickListener {
-                // Toast.makeText(context, R.string.unimplemented, Toast.LENGTH_SHORT).show()
-                mapClass.createNewInterpolationWay(ID)
+                mapClass.createPolyline(ID)
                 close()
             }
             deleteButton.setOnClickListener {
-                // Toast.makeText(context, R.string.unimplemented, Toast.LENGTH_SHORT).show()
-                storeHouseNumbersObject.removeAt(ID)
                 mapClass.removeAt(ID)
                 close()
             }
         } else {
+
             moveButton.visibility = View.GONE
             interpolateButton.visibility = View.GONE
             deleteButton.visibility = View.GONE
-
-            val finishInterpolation = mView.findViewById<Button>(R.id.finish_interpolation)
             finishInterpolation.visibility = View.VISIBLE
 
             finishInterpolation.setOnClickListener {
@@ -89,7 +90,7 @@ class AddressMarkerWindow(pressLayoutId : Int,
                         context, R.color.button_colors))
                 interpolateButton.setTextColor(ContextCompat.getColor(
                         context, R.color.button_colors))
-                val interpolationEditText = AutoCompleteTextView(context)
+                val interpolationEditText = InstantAutoComplete(context)
                 val interpolationOptionsList = listOf("even", "odd", "alphabetic", "all")
                 interpolationEditText.setAdapter(ArrayAdapter(
                         context,
@@ -132,12 +133,10 @@ class AddressMarkerWindow(pressLayoutId : Int,
                 Log.i(TAG, "inclusionDropDown: ${inclusionDropDown.selectedItem}")
 
                 finishInterpolationDialogue.setPositiveButton("save") { _, _ ->
-                    storeHouseNumbersObject.addInterpolationWay(mainActivity.startMarkerID!!,
-                        mapClass.getPolyLineHashMapValue(mapClass.getPolyLineID(), true),
-                        ID,
-                        interpolationEditText.text.toString(),
-                        inclusionDropDown.selectedItem.toString())
-                    mapClass.finishInterpolationWay(ID)
+
+                    mapClass.finishPolyline(ID,
+                            interpolationEditText.text.toString(),
+                            inclusionDropDown.selectedItem.toString())
                     mainActivity.creatingInterpolationWay = false
                     mainActivity.finishCreatingInterpolationWay()
                     closeAllInfoWindowsOn(mapClass.mapView)
@@ -149,6 +148,7 @@ class AddressMarkerWindow(pressLayoutId : Int,
                 dialog.show()
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
 
+                interpolationEditText.requestFocus()
                 interpolationEditText.addTextChangedListener {
                     if (interpolationEditText.text.toString() in interpolationOptionsList) {
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
@@ -161,9 +161,6 @@ class AddressMarkerWindow(pressLayoutId : Int,
                         }
                     }
                 }
-
-                //storeHouseNumbersObject.addInterpolationWay(mapClass.getMarker(geoPoints[0]),
-                  //      geoPoints, mapClass.getMarker(geoPoints.last()))
             }
         }
 
@@ -172,12 +169,17 @@ class AddressMarkerWindow(pressLayoutId : Int,
 
     // When the InfoWindow is closed, the changed housenumber and street is saved.
     override fun onClose() {
-        houseNumber = houseNumberEditText.text.toString()
-        street = streetNameEditText.text.toString()
-        storeHouseNumbersObject.changeAddress(ID, houseNumber, street)
-        mapClass.changeAddressMarker(ID, houseNumber)
-        Log.i(TAG, "InfoWindow Closed.")
-
+        try {
+            mapClass.getMarker(ID) // Simply to active catch block if marker is deleted
+            houseNumber = houseNumberEditText.text.toString()
+            street = streetNameEditText.text.toString()
+            storeHouseNumbersObject.changeAddress(ID, houseNumber, street)
+            mapClass.changeAddressMarker(ID, houseNumber)
+        } catch (e: NoSuchElementException) {
+            Log.i(TAG, "Marker was deleted")
+        } finally {
+            Log.i(TAG, "InfoWindow Closed.")
+        }
         // TODO : Get this to work
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE)
                 as InputMethodManager

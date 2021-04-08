@@ -16,7 +16,6 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -24,12 +23,13 @@ import org.osmdroid.views.overlay.Polyline
 import java.net.URL
 
 class Map(var mapView: MapView,
-          private val context: Context,
-          private val mainActivity: MainActivity)  {
+                private val context: Context,
+                private val mainActivity: MainActivity)  {
 
     private var markerHashMap = HashMap<Int, Marker>()
     private var currentPolyline: Polyline? = null
     private var polyLineHashMap = HashMap<Int, Polyline>()
+    private var downloadedMarkersList = mutableListOf<Marker>()
     private var storeHouseNumbersObject = StoreHouseNumbers(context)
     private val TAG = "Map"
     private var moveMarkerMapListener: MapListener
@@ -37,6 +37,7 @@ class Map(var mapView: MapView,
     var moveMarkerCondition = false
     lateinit var markerToMove : Marker
     private var textMarkersPresent = false
+
 
     init {
 

@@ -54,4 +54,14 @@ dependencies {
     implementation "com.github.mancj:SlideUp-Android:2.2.8"
     implementation 'ru.ztrap:RxSlideUp2:2.0.1' //optional, for reactive listeners based on RxJava-2
     implementation 'androidx.exifinterface:exifinterface:1.3.2'
+    implementation 'de.westnordost:osmapi-overpass:1.3'
+}
+
+configurations {
+    all*.exclude group: 'net.sf.kxml', module: 'kxml2'
+
+    cleanedAnnotations
+    compile.exclude group: 'org.jetbrains', module:'annotations'
+    compile.exclude group: 'com.intellij', module:'annotations'
+    compile.exclude group: 'org.intellij', module:'annotations'
 }

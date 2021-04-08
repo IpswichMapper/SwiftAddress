@@ -10,6 +10,10 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.preference.PreferenceManager
+import de.westnordost.osmapi.OsmConnection
+import de.westnordost.osmapi.map.data.*
+import de.westnordost.osmapi.overpass.MapDataWithGeometryHandler
+import de.westnordost.osmapi.overpass.OverpassMapDataDao
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
@@ -21,6 +25,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.net.URL
+import kotlin.math.*
 
 class Map(var mapView: MapView,
                 private val context: Context,
@@ -70,15 +75,14 @@ class Map(var mapView: MapView,
                 Log.i(TAG, "scroll: ${mapView.mapCenter.latitude}," +
                         " ${mapView.mapCenter.longitude}")
 
-                if (mapView.zoomLevelDouble >= 14) {
-                    downloadHousenumberMarkers()
+                if (mapView.zoomLevelDouble >= 17) {
                 }
                 return true
             }
 
             override fun onZoom(event: ZoomEvent?): Boolean {
                 Log.i(TAG, "zoom: ${mapView.zoomLevelDouble}")
-                if (mapView.zoomLevelDouble >= 14) {
+                if (mapView.zoomLevelDouble >= 17) {
                     downloadHousenumberMarkers()
                 }
                 return true
@@ -435,7 +439,8 @@ class Map(var mapView: MapView,
     }
 
 
-    private fun downloadHousenumberMarkers() {
+
+        /*
         val boundingBox = mapView.boundingBox
 
         Thread {
@@ -464,7 +469,9 @@ class Map(var mapView: MapView,
             }
             Log.i(TAG, "result: $result")
         }.start()
-    }
+         */
+
+
 
 
 }

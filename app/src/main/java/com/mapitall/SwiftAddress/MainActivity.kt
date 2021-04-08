@@ -67,10 +67,12 @@ class MainActivity : AppCompatActivity(),
         PopupMenu.OnMenuItemClickListener,
         LocationListener {
 
+    // this comment added in uploadToOsm branch
+	// this comment added in main branch
+
     private var currentImagePath: String? = null
     private var currentAudioPath: String? = null
     private var TAG = "MainActivity"
-
     private lateinit var map : Map
     private var markerList: MutableList<Marker> = mutableListOf()
     private lateinit var imagery : String
@@ -96,7 +98,9 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        // change made in uploadToOsm branch
+        // change made in uploadToOsm branch
+        // change
 
         // set map details
         map = Map(findViewById(R.id.map), this, this)

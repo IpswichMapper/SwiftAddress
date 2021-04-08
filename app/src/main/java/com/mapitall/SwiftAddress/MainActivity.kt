@@ -381,10 +381,10 @@ class MainActivity : AppCompatActivity(),
         map.mapView.overlays.add(locationOverlay)
 
         // Allows you to pinch & zoom as well as rotate the map.
-        val rotationGestureOverlay = RotationGestureOverlay(map.mapView)
-        rotationGestureOverlay.isEnabled
+        // val rotationGestureOverlay = RotationGestureOverlay(map.mapView)
+        // rotationGestureOverlay.isEnabled
         map.mapView.setMultiTouchControls(true)
-        map.mapView.overlays.add(rotationGestureOverlay)
+        // map.mapView.overlays.add(rotationGestureOverlay)
         map.mapView.tileRequestCompleteHandler
         // Turns off automatic zoom buttons
         map.mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)

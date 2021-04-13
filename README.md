@@ -15,7 +15,6 @@ This application is designed to be able to efficiently collect housenumbers for 
 * Display location marker as soon as location is found by device (currently location is only shown on app startup)
 * More imagery layers, nicer layout to switch between imageries (possibly custom imageries too)
 * Upload directly to OSM
-* addr:interpolation
 
 And probably a few more features I haven't listed here
 

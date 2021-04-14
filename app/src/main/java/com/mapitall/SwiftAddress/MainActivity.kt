@@ -42,6 +42,8 @@ import com.google.android.material.navigation.NavigationView
 import com.mancj.slideup.SlideUp
 import com.mancj.slideup.SlideUpBuilder
 import com.mapitall.SwiftAddress.BackgroundImagery.BackgroundImagery
+import de.westnordost.osmapi.OsmConnection
+import oauth.signpost.basic.DefaultOAuthConsumer
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -466,7 +468,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun uploadData() {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
     }
 
     override fun onLocationChanged(location: Location) {

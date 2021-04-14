@@ -15,12 +15,18 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Environment
 import android.os.Parcelable
+import android.provider.Contacts.SettingsColumns.KEY
 import android.util.Log
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.os.ConfigurationCompat
+import de.westnordost.osmapi.OsmConnection
 import kotlinx.parcelize.Parcelize
+import oauth.signpost.OAuthProvider
+import oauth.signpost.basic.DefaultOAuthConsumer
+import oauth.signpost.basic.DefaultOAuthProvider
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
@@ -957,6 +963,23 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         db.delete(WAYS_TABLE_NAME, "$WAY_COL_END_MARKER_ID = $markerID", null)
         db.close()
          */
+    }
+
+    fun login() {
+        // Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+
+        val provider: OAuthProvider = DefaultOAuthProvider(
+            "https://api06.dev.openstreetmap.org/oauth/request_token",
+            "https://api06.dev.openstreetmap.org/oauth/access_token",
+            "https://api06.dev.openstreetmap.org/oauth/authorize"
+        )
+
+        val consumer = OkHttpOAuthConsumer("")
+
+
+        val connection = OsmConnection("https://api06.dev.openstreetmap.org/", null, null)
+
     }
 
 }

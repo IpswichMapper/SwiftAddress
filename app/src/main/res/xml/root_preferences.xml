@@ -4,24 +4,29 @@
     <PreferenceCategory app:title="@string/user_interface">
 
         <ListPreference
-            app:defaultValue="Default"
-            app:entries="@array/change_UI"
-            app:entryValues="@array/change_UI_values"
-            app:key="interface"
-            app:title="@string/choose_UI"
+            android:defaultValue="Default"
+            android:entries="@array/change_UI"
+            android:entryValues="@array/change_UI_values"
+            android:key="interface"
+            android:title="@string/choose_UI"
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
-            app:key="screen_timeout"
-            app:title="@string/prevent_screen_timeout"
-            app:summary="@string/stop_screen_timeout_desc"/>
+            android:key="screen_timeout"
+            android:title="@string/prevent_screen_timeout_title"
+            android:summary="@string/stop_screen_timeout_desc"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/data_preferences">
+    <PreferenceCategory android:title="@string/data_preferences">
+        <SwitchPreferenceCompat
+            android:key="uppercase_letters"
+            android:title="@string/uppercase_letters_title"
+            android:summaryOn="@string/uppercase_letters_used"
+            android:summaryOff="@string/lowercase_letters_used" />
         <Preference
-            android:title="Clear Cache"
-            android:summary="Clear all the map cache. This will clear up some space on your device."
+            android:title="@string/clear_cache_title"
+            android:summary="@string/clear_cache_description"
             android:key="clear_cache">
         </Preference>
     </PreferenceCategory>

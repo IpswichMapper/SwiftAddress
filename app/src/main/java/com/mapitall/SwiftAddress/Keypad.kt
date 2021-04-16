@@ -102,6 +102,8 @@ class Keypad : AppCompatActivity(),
 
         Log.i("street outside", street)
 
+        uppercaseOrLowercaseLetters()
+
         // Onclick listeners and ontouch listeners for the keypad buttons
         // "Ontouch" is activated when you do any action on the buttons, for example touch or swipe
         // After "ontouch", the code checks if you swiped your finger up or down
@@ -358,9 +360,8 @@ class Keypad : AppCompatActivity(),
         numButton0.setOnTouchListener { _, event ->
             touchEvent = false
             onFlingDetected = "no"
-            Log.w("key0", "ontouchactivated")
+            Log.w(TAG, "numButton0: onTouchListener called.")
             gestureDetector.onTouchEvent(event)
-
             if (onFlingDetected == "up") {
                 modStreetName()
                 touchEvent = true
@@ -377,7 +378,7 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton0.setOnClickListener {
-            Log.i("key0", "onclicklistener called.")
+            Log.i(TAG, "numButton0: onClickListener called.")
             if (!touchEvent) {
                 addNum(numButton0)
             }
@@ -448,12 +449,38 @@ class Keypad : AppCompatActivity(),
         }
     }
 
+    private fun uppercaseOrLowercaseLetters() {
+        val a = findViewById<TextView>(R.id.lettera)
+        val b = findViewById<TextView>(R.id.letterb)
+        val c = findViewById<TextView>(R.id.letterc)
+        val d = findViewById<TextView>(R.id.letterd)
+        val e = findViewById<TextView>(R.id.lettere)
+        val f = findViewById<TextView>(R.id.letterf)
+
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        val uppercase = sp.getBoolean("uppercase_letters", false)
+
+        if (uppercase) {
+            a.text = getString(R.string.letter_a_uppercase)
+            b.text = getString(R.string.letter_b_uppercase)
+            c.text = getString(R.string.letter_c_uppercase)
+            d.text = getString(R.string.letter_d_uppercase)
+            e.text = getString(R.string.letter_e_uppercase)
+            f.text = getString(R.string.letter_f_uppercase)
+        } else {
+            a.text = getString(R.string.letter_a_lowercase)
+            b.text = getString(R.string.letter_b_lowercase)
+            c.text = getString(R.string.letter_c_lowercase)
+            d.text = getString(R.string.letter_d_lowercase)
+            e.text = getString(R.string.letter_e_lowercase)
+            f.text = getString(R.string.letter_f_lowercase)
+        }
+    }
+
     private fun addHouseName() {
 
         val addHouseNameDialog = AlertDialog.Builder(this)
         addHouseNameDialog.setTitle(getString(R.string.house_name))
-
-        var houseNameValue : String
 
         val addHouseNameEditText = EditText(this)
         addHouseNameEditText.maxLines = 1

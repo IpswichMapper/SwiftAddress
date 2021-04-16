@@ -84,7 +84,7 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="other">Other</string>
     <string name="stop_screen_timeout_desc">Stop the screen from turning off when SwiftAddress is open.</string>
-    <string name="prevent_screen_timeout">Prevent Screen Timeout</string>
+    <string name="prevent_screen_timeout_title">Prevent Screen Timeout</string>
     <string name="user_interface">User Interface</string>
     <string name="compass_unavailable">Compass not available</string>
     <string name="choose_UI">Choose User Interface</string>
@@ -147,5 +147,22 @@
     <string name="change_building_levels">Change Building Levels</string>
     <string name="modify_street_name">Modify Street Name</string>
     <string name="please_enter_number">Please enter a number</string>
+    <string name="letter_a_lowercase">a</string>
+    <string name="letter_b_lowercase">b</string>
+    <string name="letter_c_lowercase">c</string>
+    <string name="letter_d_lowercase">d</string>
+    <string name="letter_e_lowercase">e</string>
+    <string name="letter_f_lowercase">f</string>
+    <string name="letter_a_uppercase">A</string>
+    <string name="letter_b_uppercase">B</string>
+    <string name="letter_c_uppercase">C</string>
+    <string name="letter_d_uppercase">D</string>
+    <string name="letter_e_uppercase">E</string>
+    <string name="letter_f_uppercase">F</string>
+    <string name="uppercase_letters_used">Uppercase letters will be used in the keypad.</string>
+    <string name="lowercase_letters_used">Lowercase letters will be used in the keypad.</string>
+    <string name="uppercase_letters_title">Use Uppercase Letters</string>
+    <string name="clear_cache_title">Clear Cache</string>
+    <string name="clear_cache_description">Clear all the map cache. This will clear up some space on your device.</string>
 
 </resources>

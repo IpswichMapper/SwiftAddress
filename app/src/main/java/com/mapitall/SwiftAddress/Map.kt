@@ -10,10 +10,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.preference.PreferenceManager
-import de.westnordost.osmapi.OsmConnection
 import de.westnordost.osmapi.map.data.*
-import de.westnordost.osmapi.overpass.MapDataWithGeometryHandler
-import de.westnordost.osmapi.overpass.OverpassMapDataDao
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
@@ -24,7 +21,6 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import java.net.URL
 import kotlin.math.*
 
 class Map(var mapView: MapView,
@@ -83,7 +79,7 @@ class Map(var mapView: MapView,
             override fun onZoom(event: ZoomEvent?): Boolean {
                 Log.i(TAG, "zoom: ${mapView.zoomLevelDouble}")
                 if (mapView.zoomLevelDouble >= 17) {
-                    downloadHousenumberMarkers()
+                    // downloadHousenumberMarkers()
                 }
                 return true
             }
@@ -336,6 +332,7 @@ class Map(var mapView: MapView,
 
     }
 
+
     // makes the interpolation line follow the map center
     fun makeLineFollowCenter(follow : Boolean, geoPoints: ArrayList<GeoPoint>) {
 
@@ -438,38 +435,41 @@ class Map(var mapView: MapView,
         mapView.overlays.add(marker)
     }
 
+    fun getCurrentPolyline(): Polyline {
+        return currentPolyline!!
+    }
 
 
-        /*
-        val boundingBox = mapView.boundingBox
+    /*
+    val boundingBox = mapView.boundingBox
 
-        Thread {
-            val queryText = "https://overpass-api.de/api/interpreter?data=" +
-                    "<query type='node'>" +
-                    "<has-kv k='addr:housenumber' regv='.+'/>" +
-                    "<bbox-query s='${boundingBox.latSouth}' w='${boundingBox.lonWest}' " +
-                    "n='${boundingBox.latNorth}' e='${boundingBox.lonEast}' />" +
-                    "</query> <print />"
-            val query = URL(queryText)
-            val result = query.readText()
+    Thread {
+        val queryText = "https://overpass-api.de/api/interpreter?data=" +
+                "<query type='node'>" +
+                "<has-kv k='addr:housenumber' regv='.+'/>" +
+                "<bbox-query s='${boundingBox.latSouth}' w='${boundingBox.lonWest}' " +
+                "n='${boundingBox.latNorth}' e='${boundingBox.lonEast}' />" +
+                "</query> <print />"
+        val query = URL(queryText)
+        val result = query.readText()
 
-            mainActivity.runOnUiThread {
-                val marker1 = Marker(mapView)
-                marker1.position = GeoPoint(boundingBox.latSouth, boundingBox.lonWest)
-                val marker2 = Marker(mapView)
-                marker2.position = GeoPoint(boundingBox.latNorth, boundingBox.lonEast)
+        mainActivity.runOnUiThread {
+            val marker1 = Marker(mapView)
+            marker1.position = GeoPoint(boundingBox.latSouth, boundingBox.lonWest)
+            val marker2 = Marker(mapView)
+            marker2.position = GeoPoint(boundingBox.latNorth, boundingBox.lonEast)
 
-                marker1.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                marker2.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                marker1.icon = ContextCompat.getDrawable(context, R.drawable.address)
-                marker2.icon = ContextCompat.getDrawable(context, R.drawable.address)
+            marker1.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            marker2.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            marker1.icon = ContextCompat.getDrawable(context, R.drawable.address)
+            marker2.icon = ContextCompat.getDrawable(context, R.drawable.address)
 
-                mapView.overlays.add(marker1)
-                mapView.overlays.add(marker2)
-            }
-            Log.i(TAG, "result: $result")
-        }.start()
-         */
+            mapView.overlays.add(marker1)
+            mapView.overlays.add(marker2)
+        }
+        Log.i(TAG, "result: $result")
+    }.start()
+     */
 
 
 

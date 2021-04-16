@@ -3,7 +3,6 @@ package com.mapitall.SwiftAddress
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.opengl.Visibility
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup

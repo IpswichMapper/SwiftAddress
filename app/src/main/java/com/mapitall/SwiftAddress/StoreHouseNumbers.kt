@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.media.Image
 import android.net.Uri
 import android.os.Environment
 import android.os.Parcelable
@@ -619,6 +620,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 markerHashMap.getValue(id).setAnchor(
                         Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 markerHashMap.getValue(id).title = imageName
+                markerHashMap.getValue(id).infoWindow = ImageMarkerWindow(
+                    mapClass,
+                    context,
+                    id,
+                    mainActivity)
                 Log.i(TAG, "Image Marker added")
 
             } else {
@@ -957,6 +963,16 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         db.delete(WAYS_TABLE_NAME, "$WAY_COL_END_MARKER_ID = $markerID", null)
         db.close()
          */
+    }
+
+    fun getImageFilePath(imageID: Int) : String {
+        val db = this.readableDatabase
+        val c = db.rawQuery("SELECT $COL_NOTE FROM $TABLE_NAME WHERE $COL_ID = $imageID",
+            null)
+        c.moveToFirst()
+        val imageName = c.getString(c.getColumnIndex(COL_NOTE))
+        db.close()
+        return imageName
     }
 
 }

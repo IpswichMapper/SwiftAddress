@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
+import android.icu.text.IDNA
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -21,6 +22,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.infowindow.InfoWindow
 import kotlin.math.*
 
 class Map(var mapView: MapView,
@@ -170,7 +172,11 @@ class Map(var mapView: MapView,
                 ContextCompat.getDrawable(context, R.drawable.camera)
         markerHashMap.getValue(imageID).setAnchor(
                 Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-
+        markerHashMap.getValue(imageID).infoWindow = ImageMarkerWindow(
+            this,
+            context,
+            imageID,
+            mainActivity)
         mapView.overlays.add(markerHashMap.getValue(imageID))
     }
 

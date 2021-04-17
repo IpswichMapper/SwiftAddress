@@ -63,8 +63,7 @@ import kotlin.properties.Delegates
 class MainActivity : AppCompatActivity(),
         MapEventsReceiver,
         GestureDetector.OnGestureListener,
-        PopupMenu.OnMenuItemClickListener,
-        LocationListener {
+        PopupMenu.OnMenuItemClickListener {
 
     private var currentImagePath: String? = null
     private var currentAudioPath: String? = null
@@ -73,7 +72,6 @@ class MainActivity : AppCompatActivity(),
     private lateinit var map : Map
     private var markerList: MutableList<Marker> = mutableListOf()
     private lateinit var imagery : String
-    private lateinit var locationOverlay : MyLocationNewOverlay
     private var storeHouseNumbersObject: StoreHouseNumbers = StoreHouseNumbers(this)
     private var increment by Delegates.notNull<Int>()
     private var houseName = ""
@@ -85,6 +83,7 @@ class MainActivity : AppCompatActivity(),
     private lateinit var slideUp: SlideUp
     var creatingInterpolationWay = false
 
+    private lateinit var locationListener: LocationListener
     var polyline : Polyline? = null
     var geoPoints : ArrayList<GeoPoint>? = null
     var startMarkerID : Long? = null
@@ -109,6 +108,13 @@ class MainActivity : AppCompatActivity(),
 
         val items = ArrayList<OverlayItem>()
         items.add(OverlayItem("Title", "Description", GeoPoint(0.0, 0.0)))
+
+        locationListener = GPSTracker(this,
+                true,
+                map.mapView,
+                10000)
+
+
 
         // zoom to current location when app starts.
         val mapController = map.mapView.controller
@@ -373,10 +379,7 @@ class MainActivity : AppCompatActivity(),
         // works well with action bar.
         supportActionBar?.hide()
 
-        // Shows current location
-        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map.mapView)
-        locationOverlay.enableMyLocation()
-        map.mapView.overlays.add(locationOverlay)
+
 
         // Allows you to pinch & zoom as well as rotate the map.
         val rotationGestureOverlay = RotationGestureOverlay(map.mapView)
@@ -467,12 +470,6 @@ class MainActivity : AppCompatActivity(),
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
     }
 
-    override fun onLocationChanged(location: Location) {
-        map.mapView.overlays.remove(locationOverlay)
-        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), map.mapView)
-        locationOverlay.enableMyLocation()
-        map.mapView.overlays.add(locationOverlay)
-    }
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
         val location = map.mapView.mapCenter
@@ -1180,6 +1177,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        locationListener = GPSTracker(this)
    }
 
     // Save all the data collected to an .osm file, clear markers

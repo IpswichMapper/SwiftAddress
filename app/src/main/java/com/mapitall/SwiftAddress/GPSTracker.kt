@@ -1,8 +1,10 @@
 package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Context.LOCATION_SERVICE
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -10,8 +12,17 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat.checkSelfPermission
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.lang.invoke.MethodHandles
+import java.util.jar.Manifest
+import java.util.logging.Handler
+import java.util.logging.LogRecord
 
 
 enum class Side {
@@ -22,8 +33,14 @@ enum class Side {
 
 // currently unused GPSTracker class
 // TODO : FINISH
-class GPSTracker(private val context : Context, displayLocationOverlay : Boolean = false)
+// TODO : How to create multiple constructors instead of using null mapView?
+class GPSTracker(private val context : Context,
+                 private val displayLocationOverlay : Boolean = false,
+                 private val mapView: MapView? = null,
+                 private val minTimeForUpdates: Long = 1000)
     : LocationListener, SensorEventListener {
+
+    private var locationOverlay: MyLocationNewOverlay?
     var isGPSEnabled = false
     var isNetworkEnabled = false
     var canGetLocation = false
@@ -36,7 +53,6 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
     private var longitude : Double? = null
 
     private val minDistanceForUpdates : Float = 1F // 1 meter
-    private val minTimeForUpdates : Long = 1000 // 1000 milliseconds
 
     private lateinit var locationManager: LocationManager
 
@@ -45,13 +61,43 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
     private lateinit var magneticSensor: Sensor
 
     init {
-        findLocation()
-        findCompass()
+        if (mapView != null) {
+            locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
+        } else {
+            locationOverlay = null
+            // Only ClassicMainActivity has no mapView, and only it needs compass
+            // So function runs when no mapView is given
+            findCompass()
+        }
+        Log.i(TAG, "GPSTracker init")
+        val locationPossible = checkSelfPermission(
+                context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
+        if (locationPossible) {
+            Log.i(TAG, "locationPossible")
+            var locationFound = findLocation()
+            Log.i(TAG, "first locationFound attempt; locationFound = $locationFound")
+            Thread {
+                // Make it true so the while loop runs at least once
+                isGPSEnabled = true
+                while (!locationFound && isGPSEnabled) {
+                    Log.i(TAG, "attempting to find location again")
+                    Thread.sleep(4000)
+                    val looper = Looper.getMainLooper()
+                    (context as Activity).runOnUiThread {
+                        locationFound = findLocation()
+                    }
+                    Log.i(TAG, "locationFound: $locationFound")
+                }
+            }.start()
+        }
+
+
     }
 
     // Gets the initial location when an object of the class is created.
     @SuppressLint("MissingPermission")
-    fun findLocation() {
+    fun findLocation() : Boolean {
+        Log.i(TAG, "Attempting to find location")
         try {
             locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
             isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -60,8 +106,8 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
                     context, context.getString(R.string.location_not_found),
                     Toast.LENGTH_SHORT
                 ).show()
+                return false
             } else {
-
                 canGetLocation = true
                 locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
@@ -70,10 +116,15 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
                     this
                 )
 
-
+                Log.i(TAG, "Location Found")
+                if (mapView != null) {
+                    showLocationOverlay()
+                }
+                return true
             }
         } catch (e : Exception) {
             e.printStackTrace()
+            return false
             // Toast.makeText(context, context.getString(R.string.location_not_found)
             //    , Toast.LENGTH_SHORT).show()
         }
@@ -115,6 +166,14 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
         }
     }
 
+    override fun onProviderDisabled(provider: String) {
+
+    }
+
+    override fun onProviderEnabled(provider: String) {
+        locationOverlay?.disableMyLocation()
+    }
+
     // Will return azimuth when called.
     fun getAzimuth() : Float? {
         return azimuth
@@ -124,8 +183,19 @@ class GPSTracker(private val context : Context, displayLocationOverlay : Boolean
         return location
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    private fun showLocationOverlay() {
+        Log.i(TAG, "Showing Location Overlay")
+        // Shows current location
+        if (mapView != null) {
+            locationOverlay?.enableMyLocation()
+            mapView.overlays.add(locationOverlay)
+        } else {
+            Log.e(TAG, "showLocationOverlay called yet mapView wasn't given.")
+        }
     }
 
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+    }
 
 }

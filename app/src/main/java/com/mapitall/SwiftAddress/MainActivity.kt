@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity(),
         backgroundImagery()
 
 
-        val locationListener = GPSTracker(this,
+        locationListener = GPSTracker(this,
                 true,
                 map.mapView,
                 10000)
@@ -1137,6 +1137,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        locationListener = GPSTracker(this)
    }
 
     // Save all the data collected to an .osm file, clear markers

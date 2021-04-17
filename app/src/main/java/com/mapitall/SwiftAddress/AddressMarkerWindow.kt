@@ -11,17 +11,17 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 class AddressMarkerWindow(pressLayoutId : Int,
                           private val mapClass: Map,
                           private val context: Context,
-                          private val ID : Int,
+                          private val ID : Long,
                           private val mainActivity: MainActivity,
                           private var houseNumber : String = "",
                           private var street : String = "",
-                          private var houseName: String) :
+                          private var houseName: String,
+                          private val downloaded: Boolean = false) :
     InfoWindow(pressLayoutId, mapClass.mapView) {
 
     private val TAG = "MarkerWindow"
@@ -36,19 +36,15 @@ class AddressMarkerWindow(pressLayoutId : Int,
     override fun onOpen(item: Any?) {
         closeAllInfoWindowsOn(mapView)
 
-
-
         if (houseNumber != "") houseNumberEditText.setText(houseNumber)
         if (street != "") streetNameEditText.setText(street)
 
-        
         Log.i(TAG, "InfoWindow Opened.")
 
         mView.setOnClickListener {
             close()
         }
 
-        val housenameLinearLayout = mView.findViewById<LinearLayout>(R.id.house_name_linear_layout)
         if (houseName != "") houseNameEditText.setText(houseName)
 
         val moveButton = mView.findViewById<Button>(R.id.Move_linear)
@@ -66,7 +62,7 @@ class AddressMarkerWindow(pressLayoutId : Int,
             moveButton.setOnClickListener {
                 val marker = mapClass.getMarker(ID)
                 marker.position = mapClass.mapView.mapCenter as GeoPoint
-                mainActivity.moveMarker(ID, marker)
+                mainActivity.moveMarker(ID, marker, downloaded)
                 close()
             }
             interpolateButton.setOnClickListener {
@@ -74,8 +70,29 @@ class AddressMarkerWindow(pressLayoutId : Int,
                 close()
             }
             deleteButton.setOnClickListener {
-                mapClass.removeAt(ID)
-                close()
+                if (!downloaded) {
+                    mapClass.removeAt(ID)
+                    close()
+                } else {
+                    val areYouSureDialog = AlertDialog.Builder(context)
+
+                    areYouSureDialog.setTitle(
+                            context.getString(R.string.delete_downloaded_address_title))
+                    areYouSureDialog.setMessage(
+                            context.getString(R.string.delete_downloaded_address_message))
+
+                    areYouSureDialog.setPositiveButton(context.getString(R.string.delete)) {
+                        _, _ ->
+                        mapClass.removeAt(ID)
+                        storeHouseNumbersObject.changeDownloadedMarkerStatus(ID, "deleted")
+                        close()
+                    }
+                    areYouSureDialog.setNeutralButton(context.getString(R.string.cancel)) {
+                        _, _ ->
+                    }
+
+                    areYouSureDialog.create().show()
+                }
             }
         } else {
 
@@ -173,24 +190,49 @@ class AddressMarkerWindow(pressLayoutId : Int,
 
     // When the InfoWindow is closed, the changed housenumber and street is saved.
     override fun onClose() {
-        try {
-            mapClass.getMarker(ID) // Simply to active catch block if marker is deleted
-            houseNumber = houseNumberEditText.text.toString()
-            street = streetNameEditText.text.toString()
-            houseName = houseNameEditText.text.toString()
-            storeHouseNumbersObject.changeAddress(ID, houseNumber, street, houseName)
-            mapClass.changeAddressMarker(ID, houseNumber)
-        } catch (e: NoSuchElementException) {
-            Log.i(TAG, "Marker was deleted")
-        } finally {
-            Log.i(TAG, "InfoWindow Closed.")
+        if (!downloaded) {
+            try {
+                mapClass.getMarker(ID) // Simply to active catch block if marker is deleted
+                houseNumber = houseNumberEditText.text.toString()
+                street = streetNameEditText.text.toString()
+                houseName = houseNameEditText.text.toString()
+                storeHouseNumbersObject.changeAddress(ID, houseNumber, street, houseName)
+                mapClass.changeAddressMarker(ID, houseNumber)
+            } catch (e: NoSuchElementException) {
+                Log.i(TAG, "Marker was deleted")
+            } finally {
+                Log.i(TAG, "InfoWindow Closed.")
+            }
+        } else {
+            try {
+                if ((houseNumber != houseNumberEditText.text.toString()
+                        || street != streetNameEditText.text.toString()
+                        || houseName != houseNameEditText.text.toString())) {
+                            if (!houseNumberEditText.text.toString().contains('"')
+                                && !houseNameEditText.toString().contains('"')
+                                && !streetNameEditText.text.toString().contains('"')) {
+                        mapClass.getMarker(ID)
+                        houseNumber = houseNumberEditText.text.toString()
+                        street = streetNameEditText.text.toString()
+                        houseName = houseNameEditText.text.toString()
+                        storeHouseNumbersObject.changeDownloadedAddress(
+                                ID, houseNumber, street, houseName, mapClass)
+                        Log.i(TAG, "Downloaded HouseNumber marker changed")
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.no_quotation_marks),
+                                Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: NoSuchElementException) {
+                Log.i(TAG, "Downloaded Marker was deleted")
+                storeHouseNumbersObject.deleteDownloadedAddress(ID)
+            }
+
         }
         // TODO : Get this to work
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE)
                 as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(mView.applicationWindowToken, 0)
-        val polyline = Polyline(mapClass.mapView)
-        polyline.actualPoints.size
     }
 
 }

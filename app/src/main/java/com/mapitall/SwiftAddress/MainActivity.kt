@@ -9,7 +9,6 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
@@ -88,14 +87,13 @@ class MainActivity : AppCompatActivity(),
 
     var polyline : Polyline? = null
     var geoPoints : ArrayList<GeoPoint>? = null
-    var startMarkerID : Int? = null
+    var startMarkerID : Long? = null
 
     @SuppressLint("ClickableViewAccessibility")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
 
         // set map details
@@ -187,7 +185,7 @@ class MainActivity : AppCompatActivity(),
                 addressToChange.buildingLevels = ""
 
                 val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
-                if (id != -1) {
+                if (id != -1L) {
                     map.addHousenumberMarker(addressToChange, id)
                 } else {
                     Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
@@ -255,7 +253,7 @@ class MainActivity : AppCompatActivity(),
                 addressToChange.buildingLevels = ""
 
                 val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
-                if (id != -1) {
+                if (id != -1L) {
                     map.addHousenumberMarker(addressToChange, id)
                 } else {
                     Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
@@ -365,8 +363,8 @@ class MainActivity : AppCompatActivity(),
 
         // Onclicklistener to open activity to change background imagery.
         findViewById<ImageButton>(R.id.change_background_imagery_button).setOnClickListener {
-            val intent = Intent(this, BackgroundImagery::class.java)
-            startActivityForResult(intent, 1)
+            val backgroundImageryIntent = Intent(this, BackgroundImagery::class.java)
+            startActivityForResult(backgroundImageryIntent, 1)
         }
 
         val moveMarkerButton = findViewById<Button>(R.id.bubble_title)
@@ -405,12 +403,16 @@ class MainActivity : AppCompatActivity(),
                     drawerLayout.closeDrawer(GravityCompat.START)
                     saveData(findViewById(itemID))
                 }
+                R.id.download_addresses_menu_option -> {
+                    val intent = Intent(this, BackgroundImagery::class.java)
+                    intent.putExtra("specific_fragment", "download-addresses")
+                    startActivityForResult(intent, 8)
+                }
                 R.id.upload_data_menu_option -> uploadData()
                 R.id.settings_menu_option -> {
                     drawerLayout.closeDrawer(GravityCompat.START)
                     val intent = Intent(this, Settings::class.java)
                     startActivityForResult(intent, 7)
-
                 }
             }
 
@@ -487,9 +489,11 @@ class MainActivity : AppCompatActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        // Following if statement is for "choosing background imagery" activity
+        // Following if statement is for "BackgroundImagery" activity
         if (requestCode == 1 && resultCode == RESULT_OK) {
             backgroundImagery()
+            // Redraw markers in case house numbers were downloaded.
+            restart()
         }
 
         // Following if statement is for "keypad" activity if left arrow was pressed.
@@ -500,7 +504,7 @@ class MainActivity : AppCompatActivity(),
             Log.i(TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
                 val id = storeHouseNumbersObject.addHouseNumber(addressParcel)
-                if (id != -1) {
+                if (id != -1L) {
                     map.addHousenumberMarker(addressParcel, id)
                 } else {
                     Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
@@ -517,7 +521,7 @@ class MainActivity : AppCompatActivity(),
             Log.i(TAG, "Address Latitude: ${addressParcel!!.latitude}")
             if (addressParcel.housenumber != "") {
                 val id = storeHouseNumbersObject.addHouseNumber(addressParcel)
-                if (id != -1) {
+                if (id != -1L) {
                     map.addHousenumberMarker(addressParcel, id)
                 } else {
                     Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
@@ -633,7 +637,7 @@ class MainActivity : AppCompatActivity(),
 */
                 val imageID = storeHouseNumbersObject.addImage(currentImagePath!!, latitude, longitude)
 
-                if (imageID != -1) {
+                if (imageID != -1L) {
                     map.addImageMarker(imageID, latitude, longitude)
                     Log.i(TAG, "Image Marker added to map")
                 } else {
@@ -763,15 +767,6 @@ class MainActivity : AppCompatActivity(),
 
                 exif.saveAttributes()
 
-                Log.i("exif latitude",
-                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE).toString())
-                Log.i("exif longitude",
-                        exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE).toString())
-                Log.i("Exif latituderef",
-                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF).toString())
-                Log.i("exif longituderef",
-                        exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
-
                 markerList.add(Marker(map.mapView))
 
                 markerList.last().position = GeoPoint(latitude, longitude)
@@ -811,12 +806,16 @@ class MainActivity : AppCompatActivity(),
                 finish()
             }
         }
+        // After Addresses have been downloaded from drawer button to "Download Addresses"
+        else if (requestCode == 8 && resultCode == RESULT_OK) {
+            restart()
+        }
 
     }
 
 
     // Function that switches imageries based on what was chosen in
-    // "ChooseBackgroundImagery" activity
+    // "ChangeBackgroundImagery" fragment
     private fun backgroundImagery() {
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
         imagery = sp.getString("imagery", "Osm Carto").toString()
@@ -947,7 +946,7 @@ class MainActivity : AppCompatActivity(),
         var switchIndex = -1
         var switchValue : String? = null
         var startString : String? = null
-        var startStringList = mutableListOf<String>()
+        val startStringList = mutableListOf<String>()
         try {
             switchIndex = switchRegex.find(tmsUrl)!!.range.last
             switchValue = switchRegex.find(tmsUrl)!!.value
@@ -1158,7 +1157,7 @@ class MainActivity : AppCompatActivity(),
             Log.i(TAG, "noteContents: $noteContents")
             if (noteContents != "") {
                 val noteID = storeHouseNumbersObject.addNote(noteContents, lat, lon)
-                if (noteID != 1) {
+                if (noteID != 1L) {
                     map.addNoteMarker(noteID, lat, lon, noteContents)
                 } else {
                     Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
@@ -1606,7 +1605,7 @@ class MainActivity : AppCompatActivity(),
         houseName = ""
 
         val id = storeHouseNumbersObject.addHouseNumber(addressToChange)
-        if (id != -1) {
+        if (id != -1L) {
             map.addHousenumberMarker(addressToChange, id)
         } else {
             Toast.makeText(this, R.string.failed_save, Toast.LENGTH_SHORT).show()
@@ -1706,7 +1705,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun moveMarker(ID : Int, marker : Marker) {
+    fun moveMarker(ID : Long, marker : Marker, downloaded: Boolean) {
         val moveButton = findViewById<Button>(R.id.move_marker)
         val cancelButton = findViewById<Button>(R.id.cancel_move_marker)
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)
@@ -1728,6 +1727,11 @@ class MainActivity : AppCompatActivity(),
             leftArrow.visibility = View.VISIBLE
             rightArrow.visibility = View.VISIBLE
 
+            if (downloaded) {
+                map.changeDownloadedMarkerLocation(
+                        ID, storeHouseNumbersObject.getHouseNumber(ID, true))
+                storeHouseNumbersObject.changeDownloadedMarkerStatus(ID, "updated")
+            }
             marker.position = map.mapView.mapCenter as GeoPoint
             map.mapView.invalidate()
 
@@ -1752,7 +1756,7 @@ class MainActivity : AppCompatActivity(),
     fun createPolyline(
             polyline_: Polyline,
             geoPoints_: ArrayList<GeoPoint>,
-            startMarkerID_: Int) {
+            startMarkerID_: Long) {
         val addPointButton = findViewById<Button>(R.id.add_interpolation_way_point)
         val cancelButton = findViewById<Button>(R.id.cancel_interpolation_way)
         val leftArrow = findViewById<ImageButton>(R.id.add_address_on_left)

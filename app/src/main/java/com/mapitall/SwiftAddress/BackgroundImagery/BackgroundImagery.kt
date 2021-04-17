@@ -1,16 +1,15 @@
 package com.mapitall.SwiftAddress.BackgroundImagery
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.mapitall.SwiftAddress.MainActivity
+import com.mapitall.SwiftAddress.Map
 import com.mapitall.SwiftAddress.R
 
-class BackgroundImagery : AppCompatActivity() {
+class BackgroundImagery: AppCompatActivity() {
 
+    private val args = Bundle()
+    private val TAG = "BackgroundImageryActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,27 +17,12 @@ class BackgroundImagery : AppCompatActivity() {
 
         val backgroundImageryFragment = BackgroundImageryFragment()
 
+        backgroundImageryFragment.arguments = args
+
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragmentContainer, backgroundImageryFragment)
             commit()
         }
 
     }
-
-    // Sends the chosen imagery back to the MainActivity.
-    // Called by the two imagery buttons.
-    // TODO : Make this interface clearer.
-    /*
-    fun sendImageryChosen(view: View) {
-        val imageryButton = findViewById<Button>(view.id)
-        val imageryButtonText = imageryButton.tag.toString()
-        Log.i("imagery button Text", imageryButtonText)
-        val intent = Intent(this, MainActivity::class.java)
-
-        intent.putExtra("imagery_chosen", imageryButtonText)
-        setResult(RESULT_OK, intent)
-        finish()
-    }
-    */
-
 }

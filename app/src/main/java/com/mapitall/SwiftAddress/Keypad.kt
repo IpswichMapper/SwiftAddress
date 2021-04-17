@@ -429,8 +429,8 @@ class Keypad : AppCompatActivity(),
             Log.i(TAG, "address number: ${addressTextbox.text}")
 
             buildingLevels = findViewById<TextView>(R.id.building_levels_value).text.toString()
-            val address = AddressNodes(addressTextbox.text.toString(), street, lat, lon,
-                    side, buildingLevels, houseName)
+            val address = AddressNodes(addressTextbox.text.toString(), lat, lon,
+                    side, street, buildingLevels, houseName)
 
             val intent = Intent(this, MainActivity::class.java)
 

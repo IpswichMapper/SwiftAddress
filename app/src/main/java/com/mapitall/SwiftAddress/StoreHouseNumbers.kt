@@ -12,7 +12,6 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import android.media.Image
 import android.net.Uri
 import android.os.Environment
 import android.os.Parcelable
@@ -21,8 +20,11 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.os.ConfigurationCompat
+import de.westnordost.osmapi.map.data.Node
+import de.westnordost.osmapi.map.data.Way
 import kotlinx.parcelize.Parcelize
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.io.File
@@ -39,26 +41,29 @@ import kotlin.collections.HashMap
 @Parcelize
 data class AddressNodes(
         var housenumber: String,
-        val street: String = "",
         var latitude: Double,
         var longitude: Double,
         val side: String,
-        var buildingLevels: String,
+        val street: String = "",
+        var buildingLevels: String = "",
         var houseName: String = "") : Parcelable
 
 class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context,
         "address_database",
         null,
-        3) {
+        4) {
     private val TAG = "StoreHouseNumbers"
 
     // All the database table columns.
-    private val TABLE_NAME = "address_database"
-    private val TEMP_TABLE_NAME = "saved_address_database"
-    private val WAYS_TABLE_NAME = "interpolation_ways_table"
-    private val WAYS_TEMP_TABLE_NAME = "saved_interpolation_ways_table"
+    private val TABLE_NAME = "markers"
+    private val TEMP_TABLE_NAME = "saved_markers"
+    private val ATTRIBUTES_TABLE_NAME = "tags"
+    private val ATTRIBUTES_TEMP_TABLE_NAME = "saved_tags"
+    private val WAYS_TABLE_NAME = "polyline_table"
+    private val WAYS_TEMP_TABLE_NAME = "saved_polyline_table"
 
     private val COL_ID = "ID"
+
     private val COL_HOUSENUMBER = "HOUSENUMBER"
     private val COL_STREET = "STREET"
     private val COL_LATITUDE = "LATITUDE"
@@ -69,11 +74,59 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     private val COL_HOUSENAME = "HOUSENAME"
     private val COL_TYPE = "TYPE"
     private val COL_REF = "INTERPOLATION_WAY"
+    private val COL_UPDATED = "UPDATED"
 
     private val WAY_COL_INTERPOLATION = "INTERPOLATION"
     private val WAY_COL_INCLUSION = "INCLUSION"
     private val WAY_COL_START_MARKER_ID = "START_MARKER_ID"
     private val WAY_COL_END_MARKER_ID = "END_MARKER_ID"
+
+    private val ATTR_COL_KEY = "KEY"
+    private val ATTR_COL_VALUE = "VALUE"
+    private val ATTR_COL_MARKER_ID = "MARKER_ID"
+
+
+    // Creates database to store the Addresses and Notes
+    override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL("""CREATE TABLE $TABLE_NAME(ID INTEGER PRIMARY KEY AUTOINCREMENT,
+           |TYPE TEXT,
+           |HOUSENUMBER TEXT,
+           |STREET TEXT,
+           |LATITUDE REAL NOT NULL,
+           |LONGITUDE REAL NOT NULL,
+           |SIDE TEXT,
+           |BUILDING_LEVELS TEXT,
+           |HOUSENAME TEXT,
+           |NOTE TEXT,
+           |INTERPOLATION_WAY INTEGER,
+           |UPDATED TEXT);""".trimMargin())
+
+        db.execSQL("""CREATE TABLE $WAYS_TABLE_NAME(ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            |INTERPOLATION TEXT,
+            |INCLUSION TEXT,
+            |START_MARKER_ID INTEGER,
+            |END_MARKER_ID INTEGER);""".trimMargin())
+
+        db.execSQL("""CREATE TABLE $ATTRIBUTES_TABLE_NAME(
+            |ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            |KEY TEXT,
+            |VALUE TEXT,
+            |MARKER_ID INTEGER);""".trimMargin())
+
+        db.execSQL("CREATE TABLE $TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
+        db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $WAYS_TABLE_NAME")
+        db.execSQL("CREATE TABLE $ATTRIBUTES_TEMP_TABLE_NAME AS SELECT * FROM $ATTRIBUTES_TABLE_NAME")
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TEMP_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $WAYS_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $WAYS_TEMP_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $ATTRIBUTES_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $ATTRIBUTES_TEMP_TABLE_NAME")
+        onCreate(db)
+    }
 
     // Write housenumbers to .osm file and notes to .osc file.
     fun writeToOsmFile() : Pair<Int, Int> {
@@ -82,13 +135,13 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val (addressTextToWrite, noteTextToWrite) = textFilePairs
         val (i, j) = countPairs
 
-        var isExternalStorageReadOnly: Boolean = false
+        var isExternalStorageReadOnly = false
         val extStorageState = Environment.getExternalStorageState()
         if (Environment.MEDIA_MOUNTED_READ_ONLY == extStorageState) {
             isExternalStorageReadOnly = true
         }
         Log.i("ExtStorageReadOnly", "$isExternalStorageReadOnly")
-        var isExternalStorageAvailable: Boolean = false
+        var isExternalStorageAvailable = false
         if (Environment.MEDIA_MOUNTED == extStorageState) {
             isExternalStorageAvailable = true
         }
@@ -202,15 +255,17 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
                 val buildingLevels = c.getString(c.getColumnIndex(COL_BUILDING_LEVELS))
                 val housename = c.getString(c.getColumnIndex(COL_HOUSENAME))
-                val ID = c.getInt(c.getColumnIndex(COL_ID))
+                val id = c.getInt(c.getColumnIndex(COL_ID))
 
                 addressFileMiddle.append("<node id=\"$i\" lat=\"$latitude\" lon=\"$longitude\">\n") // opening tag
-                addressFileMiddle.append("<tag k=\"addr:housenumber\" v=\"$housenumber\"/>\n") // housenumber
+                if (housenumber != "") {
+                    addressFileMiddle.append("<tag k=\"addr:housenumber\" v=\"$housenumber\"/>\n")
+                }
                 if (street != "") {
-                    addressFileMiddle.append("<tag k=\"addr:street\" v=\"$street\"/>\n") // street
+                    addressFileMiddle.append("<tag k=\"addr:street\" v=\"$street\"/>\n")
                 }
                 if (housename != "") {
-                    addressFileMiddle.append("<tag k=\"addr:housename\" v=\"$housename\"/>\n") //housename
+                    addressFileMiddle.append("<tag k=\"addr:housename\" v=\"$housename\"/>\n")
                 }
                 if (buildingLevels != "") {
                     val parts = buildingLevels.split(" ")
@@ -227,7 +282,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 }
                 addressFileMiddle.append("<tag k=\"source:addr\" v=\"SwiftAddress\"/>\n")
                 addressFileMiddle.append("</node>\n")
-                addressIDHashMap[ID] = i
+                addressIDHashMap[id] = i
                 i--
             } else if (type == "Note") {
                 val contents = c.getString(c.getColumnIndex(COL_NOTE))
@@ -246,6 +301,27 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 addressFileMiddle.append(
                         "<node id=\"$i\" lat=\"$latitude\" lon=\"$longitude\"/> \n")
                 i--
+            } else if (type == "downloaded_address") {
+                val id = c.getLong(c.getColumnIndex(COL_ID))
+                val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
+                val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+                val status = c.getString(c.getColumnIndex(COL_UPDATED))
+                if (status != "unchanged") {
+                    if (status == "updated") {
+                        addressFileMiddle.append("<node id=\"$id\" lat=\"$latitude\" lon=\"$longitude\" action=\"modify\">\n")
+                    } else if (status == "deleted") {
+                        addressFileMiddle.append("<node id=\"$id\" lat=\"$latitude\" lon=\"$longitude\" action=\"delete\">\n")
+                    } else {
+                        Log.e(TAG, "incorrect value for \"updated\" column.")
+                    }
+                    val tags = db.rawQuery("SELECT * FROM $ATTRIBUTES_TABLE_NAME WHERE $ATTR_COL_MARKER_ID = $id", null)
+                    while (tags.moveToNext()) {
+                        val key = tags.getString(tags.getColumnIndex(ATTR_COL_KEY))
+                        val value = tags.getString(tags.getColumnIndex(ATTR_COL_VALUE))
+                        addressFileMiddle.append("<tag k=\"$key\" v=\"$value\"/>\n")
+                    }
+                    tags.close()
+                }
             } else {
 
                 Log.i(TAG, "data type wasn't note, node or address. " +
@@ -340,44 +416,13 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         return k
     }
 
-    // Creates database to store the Addresses and Notes
-    override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("""CREATE TABLE $TABLE_NAME(ID INTEGER PRIMARY KEY AUTOINCREMENT,
-           |TYPE TEXT,
-           |HOUSENUMBER TEXT,
-           |STREET TEXT,
-           |LATITUDE REAL NOT NULL,
-           |LONGITUDE REAL NOT NULL,
-           |SIDE TEXT,
-           |BUILDING_LEVELS TEXT,
-           |HOUSENAME TEXT,
-           |NOTE TEXT,
-           |INTERPOLATION_WAY INTEGER);""".trimMargin())
-
-        db.execSQL("""CREATE TABLE $WAYS_TABLE_NAME(ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            |INTERPOLATION TEXT,
-            |INCLUSION TEXT,
-            |START_MARKER_ID INTEGER,
-            |END_MARKER_ID INTEGER);""".trimMargin())
-
-        db.execSQL("CREATE TABLE $TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
-        db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $WAYS_TABLE_NAME")
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
-        db.execSQL("DROP TABLE IF EXISTS $TEMP_TABLE_NAME")
-        db.execSQL("DROP TABLE IF EXISTS $WAYS_TABLE_NAME")
-        db.execSQL("DROP TABLE IF EXISTS $WAYS_TEMP_TABLE_NAME")
-        onCreate(db)
-    }
-
     // Remove all rows from the main table, and move them to a "temporary table" (so that they
     // can be recovered later if need be)
     fun clearDatabase() {
         val db: SQLiteDatabase = this.writableDatabase
         var doNotExecuteNext = false
         var doNotExecuteNextWays = false
+        var doNotExecutreNextAttrs = false
         try {
             db.delete(TEMP_TABLE_NAME, null, null)
         } catch (e: SQLiteException) {
@@ -392,14 +437,25 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
             doNotExecuteNextWays = true
         }
+        try {
+            db.delete(ATTRIBUTES_TEMP_TABLE_NAME, null, null)
+        } catch (e: SQLiteException) {
+            e.printStackTrace()
+            db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
+            doNotExecutreNextAttrs = true
+        }
         if (!doNotExecuteNext) {
             db.execSQL("INSERT INTO $TEMP_TABLE_NAME SELECT * FROM $TABLE_NAME")
         }
         if (!doNotExecuteNextWays) {
             db.execSQL("INSERT INTO $WAYS_TEMP_TABLE_NAME SELECT * FROM $WAYS_TABLE_NAME")
         }
+        if (!doNotExecutreNextAttrs) {
+            db.execSQL("INSERT INTO $ATTRIBUTES_TEMP_TABLE_NAME SELECT * FROM $ATTRIBUTES_TABLE_NAME")
+        }
         db.delete(TABLE_NAME, null, null)
         db.delete(WAYS_TABLE_NAME, null, null)
+        db.delete(ATTRIBUTES_TABLE_NAME, null, null)
         db.close()
         Log.i(TAG, "Database cleared.")
     }
@@ -411,7 +467,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     */
 
     // Adds housenumber to database once it is created.
-    fun addHouseNumber(address: AddressNodes): Int {
+    fun addHouseNumber(address: AddressNodes): Long {
 
         val db: SQLiteDatabase = this.writableDatabase
         val contentValues = ContentValues()
@@ -428,12 +484,86 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val result: Long = db.insert(TABLE_NAME, null, contentValues)
         db.close()
         Log.i(TAG, "result: $result")
-        return result.toInt()
+        return result
 
     }
 
+    fun addDownloadedHousenumber(node: Node) {
+
+        val db = this.writableDatabase
+        val iDs = db.rawQuery("SELECT $COL_ID FROM $TABLE_NAME", null)
+        var add = true
+        while (iDs.moveToNext()) {
+            if (iDs.getLong(iDs.getColumnIndex(COL_ID)) == node.id) {
+                add = false
+            }
+        }
+
+        if (add) {
+            for (tag in node.tags) {
+                val tagContentValues = ContentValues()
+                tagContentValues.put(ATTR_COL_KEY, tag.key.toString())
+                tagContentValues.put(ATTR_COL_VALUE, tag.value.toString())
+                Log.w(TAG, "node id ${node.id}")
+                tagContentValues.put(ATTR_COL_MARKER_ID, node.id)
+                db.insert(ATTRIBUTES_TABLE_NAME, null, tagContentValues)
+            }
+
+            val contentValues = ContentValues()
+
+            contentValues.put(COL_ID, node.id)
+            contentValues.put(COL_LATITUDE, node.position.latitude)
+            contentValues.put(COL_LONGITUDE, node.position.longitude)
+            contentValues.put(COL_UPDATED, "unchanged")
+            contentValues.put(COL_TYPE, "downloaded_address")
+            Log.w(TAG, "inserting ${node.id}")
+
+            db.insert(TABLE_NAME, null, contentValues)
+        }
+    }
+
+    fun addDownloadedHousenumber(way: Way, lat: Double, lon: Double) {
+        val db = this.writableDatabase
+        val iDs = db.rawQuery("SELECT $COL_ID FROM $TABLE_NAME", null)
+        var add = true
+        while (iDs.moveToNext()) {
+            if (iDs.getLong(iDs.getColumnIndex(COL_ID)) == way.id) {
+                add = false
+            }
+        }
+        if (way.tags.get("addr:housenumber") == null &&
+                way.tags.get("addr:housename") == null) {
+            add = false
+        }
+
+        if (add) {
+            val contentValues = ContentValues()
+            contentValues.put(COL_ID, way.id)
+            contentValues.put(COL_LATITUDE, lat)
+            contentValues.put(COL_LONGITUDE, lon)
+            contentValues.put(COL_UPDATED, "unchanged")
+            contentValues.put(COL_TYPE, "downloaded_address_way")
+            if (way.tags["addr:housenumber"] != null) {
+                contentValues.put(COL_HOUSENUMBER, way.tags.getValue("addr:housenumber"))
+            } else {
+                contentValues.put(COL_HOUSENUMBER, "")
+            }
+            if (way.tags["addr:housename"] != null) {
+                contentValues.put(COL_HOUSENAME, way.tags.getValue("addr:housename"))
+            } else {
+                contentValues.put(COL_HOUSENAME, "")
+            }
+            if (way.tags["addr:street"] != null) {
+                contentValues.put(COL_STREET, way.tags.getValue("addr:street"))
+            } else {
+                contentValues.put(COL_STREET, "")
+            }
+            db.insert(TABLE_NAME, null, contentValues)
+        }
+    }
+
     // Adds notes to database once it is created.
-    fun addNote(noteContents: String, lat: Double, lon: Double): Int {
+    fun addNote(noteContents: String, lat: Double, lon: Double): Long {
 
         val db: SQLiteDatabase = this.writableDatabase
         val contentValues = ContentValues()
@@ -445,12 +575,12 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         val result: Long = db.insert(TABLE_NAME, null, contentValues)
         db.close()
-        return result.toInt()
+        return result
     }
 
     // Add an row containing information about an image stored in internal storage
     @SuppressLint("Recycle")
-    fun addImage(absolutePath: String, lat: Double, lon: Double): Int {
+    fun addImage(absolutePath: String, lat: Double, lon: Double): Long {
         val db: SQLiteDatabase = this.writableDatabase
         val contentValues = ContentValues()
 
@@ -461,7 +591,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         val result: Long = db.insert(TABLE_NAME, null, contentValues)
         db.close()
-        return result.toInt()
+        return result
     }
 
     // Return the item type of the last item that was added.
@@ -488,7 +618,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         return itemType
     }
 
-    fun getHouseNumber(markerID: Int): String {
+    // Gets the house number from a marker
+    fun getHouseNumber(markerID: Long): String {
         val db: SQLiteDatabase = this.readableDatabase
 
         val row = db.rawQuery(
@@ -497,6 +628,27 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val houseNumber = row.getString(row.getColumnIndex(COL_HOUSENUMBER))
         row.close()
         db.close()
+        return houseNumber
+    }
+
+    fun getHouseNumber(markerID: Long, downloaded: Boolean) : String {
+        var houseNumber = ""
+        if (!downloaded) houseNumber = getHouseNumber(markerID)
+        else {
+            val db = this.readableDatabase
+            val tags = db.rawQuery(
+                    "SELECT * FROM $ATTRIBUTES_TABLE_NAME WHERE $ATTR_COL_MARKER_ID = $markerID",
+                    null)
+            while (tags.moveToNext()) {
+                val key = tags.getString(tags.getColumnIndex(ATTR_COL_KEY))
+
+                if(key == "addr:housenumber") {
+                    houseNumber = tags.getString(tags.getColumnIndex(ATTR_COL_VALUE))
+                }
+            }
+            tags.close()
+        }
+
         return houseNumber
     }
 
@@ -523,7 +675,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     fun displayMarkers(mapClass: Map, mainActivity: MainActivity) {
         val db: SQLiteDatabase = this.readableDatabase
-        val markerHashMap = HashMap<Int, Marker>()
+        val markerHashMap = HashMap<Long, Marker>()
 
         val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID ASC")
@@ -536,7 +688,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val housename = c.getString(c.getColumnIndex(COL_HOUSENAME))
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
-                val id = c.getInt(c.getColumnIndex(COL_ID))
+                val id = c.getLong(c.getColumnIndex(COL_ID))
 
                 markerHashMap[id] = Marker(mapClass.mapView)
                 markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
@@ -586,11 +738,122 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 markerHashMap.getValue(id).infoWindow = infoWindow
                 Log.i(TAG, "Address Marker added")
 
+            } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "downloaded_address") {
+
+                val updated = c.getString(c.getColumnIndex(COL_UPDATED))
+
+                if (updated != "deleted") {
+                    val id = c.getLong(c.getColumnIndex(COL_ID))
+                    var houseNumber = ""
+                    var houseName = ""
+                    var street = ""
+
+                    val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
+                    val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+
+                    val tags = db.rawQuery(
+                            "SELECT * FROM $ATTRIBUTES_TABLE_NAME WHERE $ATTR_COL_MARKER_ID = $id", null)
+
+                    while (tags.moveToNext()) {
+                        if (tags.getString(tags.getColumnIndex(ATTR_COL_KEY)) == "addr:housenumber") {
+                            houseNumber = tags.getString(tags.getColumnIndex(ATTR_COL_VALUE))
+                        } else if (tags.getString(tags.getColumnIndex(ATTR_COL_KEY)) == "addr:street") {
+                            street = tags.getString(tags.getColumnIndex(ATTR_COL_VALUE))
+                        } else if (tags.getString(tags.getColumnIndex(ATTR_COL_KEY)) == "addr:housename") {
+                            houseName = tags.getString(tags.getColumnIndex(ATTR_COL_VALUE))
+                        }
+                    }
+                    tags.close()
+
+                    markerHashMap[id] = Marker(mapClass.mapView)
+                    markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
+
+                    val drawable =
+                            if (updated == "unchanged")
+                                ContextCompat.getDrawable(context, R.drawable.address_downloaded)!!
+                            else ContextCompat.getDrawable(context, R.drawable.address)!!
+                    if (houseNumber.length <= 5) {
+                        val bm = drawable.toBitmap()
+
+
+                        val paint = Paint()
+                        paint.style = Paint.Style.FILL
+                        paint.color = Color.WHITE
+                        if (houseNumber.length <= 3) {
+                            paint.textSize = 40f
+                        } else if (houseNumber.length == 4) {
+                            paint.textSize = 30f
+                        } else {
+                            paint.textSize = 25f
+                        }
+                        paint.textAlign = Paint.Align.CENTER
+
+                        val canvas = Canvas(bm)
+
+                        // https://stackoverflow.com/a/11121873
+                        // explanation of this line
+                        canvas.drawText(houseNumber, bm.width / 2f,
+                                bm.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+
+                        val icon = BitmapDrawable(context.resources, bm)
+                        markerHashMap.getValue(id).icon = icon
+                    } else {
+                        markerHashMap.getValue(id).icon = drawable
+                    }
+                    markerHashMap.getValue(id).setAnchor(
+                            Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+
+                    val infoWindow = AddressMarkerWindow(
+                            R.layout.address_press_layout_linear,
+                            mapClass,
+                            context,
+                            id,
+                            mainActivity,
+                            houseNumber,
+                            street,
+                            houseName,
+                            true)
+
+                    markerHashMap.getValue(id).infoWindow = infoWindow
+                    Log.i(TAG, "Downloaded Address Marker added")
+                }
+
+            } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "downloaded_address_way"){
+
+                val id = c.getLong(c.getColumnIndex(COL_ID))
+                val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
+                val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+                val houseNumber = c.getString(c.getColumnIndex(COL_HOUSENUMBER))
+                val houseName = c.getString(c.getColumnIndex(COL_HOUSENAME))
+                val street = c.getString(c.getColumnIndex(COL_STREET))
+
+                markerHashMap[id] = Marker(mapClass.mapView)
+                markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
+                markerHashMap.getValue(id).icon = ContextCompat.getDrawable(context,
+                        R.drawable.address_downloaded)
+                markerHashMap.getValue(id).setAnchor(
+                        Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                if (houseNumber != "") {
+                    if (street != "") {
+                        markerHashMap.getValue(id).title = houseNumber + "\n" + street
+                    } else {
+                        markerHashMap.getValue(id).title = houseNumber
+                    }
+                }
+                else if (houseName != "") {
+                    if (street != "") {
+                        markerHashMap.getValue(id).title = houseName + "\n" + street
+                    } else {
+                        markerHashMap.getValue(id).title = houseName
+                    }
+                }
+
+
             } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Note") {
                 val noteContents = c.getString(c.getColumnIndex(COL_NOTE))
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
-                val id = c.getInt(c.getColumnIndex(COL_ID))
+                val id = c.getLong(c.getColumnIndex(COL_ID))
 
                 markerHashMap[id] = Marker(mapClass.mapView)
                 markerHashMap.getValue(id).position = GeoPoint(latitude, longitude)
@@ -610,7 +873,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             } else if (c.getString(c.getColumnIndex(COL_TYPE)) == "Image") {
                 val latitude = c.getDouble(c.getColumnIndex(COL_LATITUDE))
                 val longitude = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
-                val id = c.getInt(c.getColumnIndex(COL_ID))
+                val id = c.getLong(c.getColumnIndex(COL_ID))
                 val imageName = c.getString(c.getColumnIndex(COL_NOTE))
 
                 markerHashMap[id] = Marker(mapClass.mapView)
@@ -680,7 +943,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         mapClass.mapView.invalidate()
         mapClass.setMarkerHashMap(markerHashMap)
         mapClass.setPolylineHashMap(polyLineHashMap)
-        db.close()
     }
 
     // Gets last address that was entered
@@ -704,10 +966,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 Log.i(TAG, "in if statemant.")
                 lastAddress = AddressNodes(
                         c.getString(c.getColumnIndex(COL_HOUSENUMBER)),
-                        c.getString(c.getColumnIndex(COL_STREET)),
                         c.getDouble(c.getColumnIndex(COL_LATITUDE)),
                         c.getDouble(c.getColumnIndex(COL_LONGITUDE)),
                         c.getString(c.getColumnIndex(COL_SIDE)),
+                        c.getString(c.getColumnIndex(COL_STREET)),
                         c.getString(c.getColumnIndex(COL_BUILDING_LEVELS)),
                         c.getString(c.getColumnIndex(COL_HOUSENAME))
                 )
@@ -724,10 +986,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     // Remove marker at specific position.
     // TODO : Check if the function is fixed
-    fun removeAt(ID: Int) : Int {
+    fun removeAt(markerID: Long) : Int {
 
         val db = this.writableDatabase
-        val c = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE ID = $ID",
+        val c = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE ID = $markerID",
                 null)
         c.moveToFirst()
         val itemType = c.getString(c.getColumnIndex(COL_TYPE))
@@ -740,7 +1002,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             c.close()
         }
 
-        val result = db.delete(TABLE_NAME, "ID = $ID", null)
+        val result = db.delete(TABLE_NAME, "ID = $markerID", null)
         db.close()
         return result
     }
@@ -757,10 +1019,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // Change location of marker after it has been moved.
-    fun changeLocation(ID: Int, lat: Double, lon: Double) {
+    fun changeLocation(markerID: Long, lat: Double, lon: Double) {
         val db = this.writableDatabase
-        db.execSQL("UPDATE $TABLE_NAME SET LATITUDE = $lat WHERE ID = $ID")
-        db.execSQL("UPDATE $TABLE_NAME SET LONGITUDE = $lon WHERE ID = $ID")
+        db.execSQL("UPDATE $TABLE_NAME SET LATITUDE = $lat WHERE ID = $markerID")
+        db.execSQL("UPDATE $TABLE_NAME SET LONGITUDE = $lon WHERE ID = $markerID")
         db.close()
     }
 
@@ -777,8 +1039,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             try {
                 db.delete(TABLE_NAME, null, null)
                 db.delete(WAYS_TABLE_NAME, null, null)
+                db.delete(ATTRIBUTES_TABLE_NAME, null, null)
                 db.execSQL("INSERT INTO $TABLE_NAME SELECT * FROM $TEMP_TABLE_NAME")
                 db.execSQL("INSERT INTO $WAYS_TABLE_NAME SELECT * FROM $WAYS_TEMP_TABLE_NAME")
+                db.execSQL("INSERT INTO $ATTRIBUTES_TABLE_NAME SELECT * FROM $ATTRIBUTES_TEMP_TABLE_NAME")
+
                 val rows = db.delete(TABLE_NAME, "TYPE = 'Image'", null)
                 Log.i(TAG, "$rows rows deleted (image rows)")
                 mainActivity.restart()
@@ -801,7 +1066,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     // Changes address in the database when it has been modified using an "InfoWindow"
     // that pops up when you click on the marker.
-    fun changeAddress(ID: Int, housenumber: String, street: String, houseName: String) {
+    fun changeAddress(ID: Long, housenumber: String, street: String, houseName: String) {
         val db: SQLiteDatabase = this.writableDatabase
 
         val contentValues = ContentValues()
@@ -811,8 +1076,71 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         db.update(TABLE_NAME, contentValues, "ID = ?", arrayOf(ID.toString()))
     }
 
+    fun changeDownloadedAddress(
+            ID: Long, houseNumber: String, street: String, houseName: String, mapClass: Map) {
+        val db = this.writableDatabase
+        val houseNumberContentValues = ContentValues().apply {
+            put(ATTR_COL_VALUE, houseNumber)
+        }
+        val result = db.update(ATTRIBUTES_TABLE_NAME, houseNumberContentValues,
+                "$ATTR_COL_MARKER_ID = $ID AND $ATTR_COL_KEY = ?",
+                arrayOf("addr:housenumber"))
 
-    fun changeNote(ID: Int, note: String) {
+        val houseNameContentValues = ContentValues().apply {
+            put(ATTR_COL_VALUE, houseName)
+        }
+        db.update(ATTRIBUTES_TABLE_NAME, houseNameContentValues,
+                "$ATTR_COL_MARKER_ID = $ID AND $ATTR_COL_KEY = ?",
+                arrayOf("addr:housename"))
+
+        val streetContentValues = ContentValues().apply {
+            put(ATTR_COL_VALUE, houseNumber)
+        }
+        db.update(ATTRIBUTES_TABLE_NAME, streetContentValues,
+                "$ATTR_COL_MARKER_ID = $ID AND $ATTR_COL_KEY = ?",
+                arrayOf("addr:street"))
+
+        val mainContentValues = ContentValues().apply {
+            put(COL_UPDATED, "updated")
+        }
+        db.update(TABLE_NAME, mainContentValues, "$COL_ID = $ID", null)
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.address)!!
+        if (houseNumber.length <= 5) {
+            val bm = drawable.toBitmap()
+
+
+            val paint = Paint()
+            paint.style = Paint.Style.FILL
+            paint.color = Color.WHITE
+            if (houseNumber.length <= 3) {
+                paint.textSize = 40f
+            } else if (houseNumber.length == 4) {
+                paint.textSize = 30f
+            } else {
+                paint.textSize = 25f
+            }
+            paint.textAlign = Paint.Align.CENTER
+
+            val canvas = Canvas(bm)
+
+            // https://stackoverflow.com/a/11121873
+            // explanation of this line
+            canvas.drawText(houseNumber, bm.width / 2f,
+                    bm.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+
+            val icon = BitmapDrawable(context.resources, bm)
+            mapClass.getMarker(ID).icon = icon
+        } else {
+            mapClass.getMarker(ID).icon = drawable
+        }
+    }
+
+    fun deleteDownloadedAddress(ID: Long) {
+
+    }
+
+    fun changeNote(ID: Long, note: String) {
         val db: SQLiteDatabase = this.writableDatabase
 
         val contentValues = ContentValues()
@@ -834,9 +1162,9 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     }
 
     // This adds an "interpolation way" to the database
-    fun addPolyline(startMarkerID: Int,
+    fun addPolyline(startMarkerID: Long,
                     geoPoints: MutableList<GeoPoint>,
-                    endMarkerID: Int,
+                    endMarkerID: Long,
                     interpolation: String,
                     inclusion: String) : Int {
         val db = this.writableDatabase
@@ -930,7 +1258,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     // This lets you delete any polylines connected to a address marker.
     // It returns the IDs of the polylines deleted so that the Map Class can
     // delete them from the map.
-    fun deleteRelatedPolylines(markerID: Int) : List<Int> {
+    fun deleteRelatedPolylines(markerID: Long) : List<Int> {
         val db = this.writableDatabase
         val polylineIDs = mutableListOf<Int>()
         val startMarkerCursor = db.rawQuery(
@@ -965,14 +1293,39 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
          */
     }
 
-    fun getImageFilePath(imageID: Int) : String {
+    fun getImageFilePath(imageID: Long) : String {
         val db = this.readableDatabase
         val c = db.rawQuery("SELECT $COL_NOTE FROM $TABLE_NAME WHERE $COL_ID = $imageID",
             null)
         c.moveToFirst()
         val imageName = c.getString(c.getColumnIndex(COL_NOTE))
+        c.close()
         db.close()
         return imageName
+    }
+
+    fun displayDownloadedMarkers(mapView: MapView) {
+        val db = this.writableDatabase
+        val c = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE TYPE = 'downloaded_address'",
+                null)
+        while (c.moveToNext()) {
+            val lat = c.getDouble(c.getColumnIndex(COL_LATITUDE))
+            val lon = c.getDouble(c.getColumnIndex(COL_LONGITUDE))
+
+            val marker = Marker(mapView)
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            marker.icon = ContextCompat.getDrawable(context, R.drawable.address_downloaded)
+            marker.position = GeoPoint(lat, lon)
+            mapView.overlays.add(marker)
+        }
+        c.close()
+    }
+
+    fun changeDownloadedMarkerStatus(ID: Long, status: String) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(COL_UPDATED, status)
+        db.update(TABLE_NAME, contentValues, "$COL_ID = $ID", null)
     }
 
 }

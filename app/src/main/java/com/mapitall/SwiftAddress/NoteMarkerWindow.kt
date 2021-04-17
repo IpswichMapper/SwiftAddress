@@ -9,7 +9,7 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 class NoteMarkerWindow(private val mapClass: Map,
                        private val context: Context,
-                       private val ID: Int,
+                       private val ID: Long,
                        private val mainActivity: MainActivity,
                        private var note: String) :
     InfoWindow(R.layout.note_press_layout_linear, mapClass.mapView) {
@@ -34,7 +34,7 @@ class NoteMarkerWindow(private val mapClass: Map,
         moveButton.setOnClickListener {
             val marker = mapClass.getMarker(ID)
             marker.position = mapClass.mapView.mapCenter as GeoPoint
-            mainActivity.moveMarker(ID, marker)
+            mainActivity.moveMarker(ID, marker, false)
             close()
         }
         deleteButton.setOnClickListener {

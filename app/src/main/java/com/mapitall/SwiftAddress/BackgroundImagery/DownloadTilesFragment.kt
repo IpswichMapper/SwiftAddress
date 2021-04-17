@@ -43,7 +43,8 @@ class DownloadTilesFragment : Fragment(R.layout.fragment_download_tiles), MapLis
 
     lateinit var mapView : MapView
     lateinit var mapTooLargeTextView: TextView
-    lateinit var downloadButton: Button
+    lateinit var downloadTilesButton: Button
+    lateinit var downloadHousenumbersButton: Button
     lateinit var closeButton: Button
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,8 +96,7 @@ class DownloadTilesFragment : Fragment(R.layout.fragment_download_tiles), MapLis
 
         // Set tile source
         val sp = PreferenceManager.getDefaultSharedPreferences(context)
-        val imagery = sp.getString("imagery", "Mapbox Satellite")
-        when (imagery) {
+        when (sp.getString("imagery", "Mapbox Satellite")) {
             "Mapbox Satellite" -> mapView.setTileSource(mapboxSatellite)
             "Esri Satellite" -> mapView.setTileSource(esriSatellite)
         }
@@ -105,15 +105,14 @@ class DownloadTilesFragment : Fragment(R.layout.fragment_download_tiles), MapLis
         mapView.controller.setZoom(3.0)
 
         mapTooLargeTextView = view.findViewById(R.id.is_map_too_large)
-        downloadButton = view.findViewById(R.id.download_button)
-        downloadButton.setOnClickListener {
+        downloadTilesButton = view.findViewById(R.id.download_button)
+        downloadTilesButton.setOnClickListener {
             downloadTiles()
         }
         closeButton = view.findViewById(R.id.close_download_fragment_button)
         closeButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
         mapView.setMultiTouchControls(true)
         mapView.addMapListener(this)
 
@@ -121,7 +120,7 @@ class DownloadTilesFragment : Fragment(R.layout.fragment_download_tiles), MapLis
 
     private fun downloadTiles() {
 
-        val cacheManager = CacheManager(mapView, )
+        val cacheManager = CacheManager(mapView)
 
         val boundingBox: BoundingBox = mapView.boundingBox
         Log.i(TAG, "boundingBox North: ${boundingBox.actualNorth}")

@@ -7,11 +7,13 @@ import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.icu.text.IDNA
+import android.os.Parcelable
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.preference.PreferenceManager
 import de.westnordost.osmapi.map.data.*
+import kotlinx.parcelize.Parcelize
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
@@ -23,13 +25,14 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.InfoWindow
+import java.io.Serializable
 import kotlin.math.*
 
 class Map(var mapView: MapView,
                 private val context: Context,
-                private val mainActivity: MainActivity)  {
+                private val mainActivity: MainActivity) : Serializable {
 
-    private var markerHashMap = HashMap<Int, Marker>()
+    private var markerHashMap = HashMap<Long, Marker>()
     private var currentPolyline: Polyline? = null
     private var polyLineHashMap = HashMap<Int, Polyline>()
     private var downloadedMarkersList = mutableListOf<Marker>()
@@ -70,8 +73,6 @@ class Map(var mapView: MapView,
         val downloadHousenumberMapListener = DelayedMapListener(object:MapListener {
 
             override fun onScroll(event: ScrollEvent?): Boolean {
-                Log.i(TAG, "scroll: ${mapView.mapCenter.latitude}," +
-                        " ${mapView.mapCenter.longitude}")
 
                 if (mapView.zoomLevelDouble >= 17) {
                 }
@@ -92,7 +93,7 @@ class Map(var mapView: MapView,
 
     }
 
-    fun setMarkerHashMap(hashMap : HashMap<Int, Marker>) {
+    fun setMarkerHashMap(hashMap : HashMap<Long, Marker>) {
         for (marker: Marker in markerHashMap.values) {
             mapView.overlays.remove(marker)
         }
@@ -110,7 +111,7 @@ class Map(var mapView: MapView,
      */
 
     // adds a housenumber marker to the map
-    fun addHousenumberMarker(address: AddressNodes, houseNumberID : Int) {
+    fun addHousenumberMarker(address: AddressNodes, houseNumberID : Long) {
         markerHashMap[houseNumberID] = Marker(mapView)
         markerHashMap.getValue(houseNumberID).position = GeoPoint(
                 address.latitude, address.longitude)
@@ -164,7 +165,7 @@ class Map(var mapView: MapView,
     }
 
     // adds an image marker to the map
-    fun addImageMarker(imageID : Int, lat : Double, lon : Double) {
+    fun addImageMarker(imageID : Long, lat : Double, lon : Double) {
         markerHashMap[imageID] = Marker(mapView)
 
         markerHashMap.getValue(imageID).position = GeoPoint(lat, lon)
@@ -184,7 +185,7 @@ class Map(var mapView: MapView,
 
 
     // adds a note marker to the map
-    fun addNoteMarker(noteID : Int, lat : Double, lon : Double, noteContents : String) {
+    fun addNoteMarker(noteID : Long, lat : Double, lon : Double, noteContents : String) {
         markerHashMap[noteID] = Marker(mapView)
 
         markerHashMap.getValue(noteID).position = GeoPoint(lat, lon)
@@ -215,7 +216,7 @@ class Map(var mapView: MapView,
     }
 
     // removes a marker at a specific ID.
-    fun removeAt(ID : Int) {
+    fun removeAt(ID : Long) {
         val result = storeHouseNumbersObject.removeAt(ID)
         if (result != -1) {
             mapView.overlays.remove(markerHashMap.getValue(ID))
@@ -237,7 +238,7 @@ class Map(var mapView: MapView,
     }
 
     // Returns a marker after being given the marker ID.
-    fun getMarker(id: Int): Marker {
+    fun getMarker(id: Long): Marker {
         return markerHashMap.getValue(id)
     }
 
@@ -267,7 +268,7 @@ class Map(var mapView: MapView,
 
     // Creates a new "interpolation" way, this effectively allows you to guess the addresses
     // between two existing addresses.
-    fun createPolyline(startMarkerID: Int) {
+    fun createPolyline(startMarkerID: Long) {
         val marker = getMarker(startMarkerID)
         val geoPoints = arrayListOf(marker.position as GeoPoint)
         currentPolyline = Polyline()
@@ -305,7 +306,7 @@ class Map(var mapView: MapView,
                 PolylineMarkerWindow(this, context, polylineID, mainActivity)
     }
 
-    fun finishPolyline(endMarkerID: Int, interpolation: String, inclusion: String) {
+    fun finishPolyline(endMarkerID: Long, interpolation: String, inclusion: String) {
         makeLineFollowCenter(false)
         currentPolyline!!.addPoint(getMarker(endMarkerID).position)
 
@@ -405,7 +406,7 @@ class Map(var mapView: MapView,
         return polyLineHashMap.getValue(ID).actualPoints.toMutableList()
     }
 
-    fun changeAddressMarker(id: Int, houseNumber: String) {
+    fun changeAddressMarker(id: Long, houseNumber: String) {
         val marker = getMarker(id)
         mapView.overlays.remove(marker)
 
@@ -443,6 +444,42 @@ class Map(var mapView: MapView,
 
     fun getCurrentPolyline(): Polyline {
         return currentPolyline!!
+    }
+
+    fun changeDownloadedMarkerLocation(id: Long, houseNumber: String) {
+        val marker = getMarker(id)
+        mapView.overlays.remove(marker)
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.address)!!
+        if (houseNumber.length <= 5) {
+            val bitmap = drawable.toBitmap()
+
+            val paint = Paint()
+            paint.style = Paint.Style.FILL
+            paint.color = Color.WHITE
+            if (houseNumber.length <= 3) {
+                paint.textSize = 40f
+            } else if (houseNumber.length == 4) {
+                paint.textSize = 30f
+            } else {
+                paint.textSize = 25f
+            }
+            paint.textAlign = Paint.Align.CENTER
+
+            val canvas = Canvas(bitmap)
+
+            // https://stackoverflow.com/a/11121873
+            // explanation of this line
+            canvas.drawText(houseNumber, bitmap.width / 2f,
+                    bitmap.height / 2f - (paint.descent() + paint.ascent() / 2), paint)
+
+            val icon = BitmapDrawable(context.resources, bitmap)
+
+            marker.icon = icon
+        } else {
+            marker.icon = drawable
+        }
+        mapView.overlays.add(marker)
     }
 
 

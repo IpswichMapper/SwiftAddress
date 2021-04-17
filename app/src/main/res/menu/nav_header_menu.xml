@@ -9,6 +9,10 @@
         android:icon="@drawable/save"
         android:id="@+id/save_data_menu_option"/>
     <item
+        android:title="@string/download_addresses"
+        android:icon="@drawable/download"
+        android:id="@+id/download_addresses_menu_option" />
+    <item
         android:title="@string/upload_to_osm"
         android:icon="@drawable/upload"
         android:id="@+id/upload_data_menu_option" />

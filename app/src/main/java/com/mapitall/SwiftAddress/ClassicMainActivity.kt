@@ -787,11 +787,11 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                     else if(side == Side.RIGHT) "right"
                     else "forward"
                 val address = AddressNodes(houseNumber,
-                    street,
-                    trueLat,
-                    trueLon,
-                    sideString,
-                    buildingLevels)
+                        trueLat,
+                        trueLon,
+                        sideString,
+                        street,
+                        buildingLevels)
                 storeHouseNumbersObject.addHouseNumber(address)
 
                 Log.i(TAG, "Housenumber Added")

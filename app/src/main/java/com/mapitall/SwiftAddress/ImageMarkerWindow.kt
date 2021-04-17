@@ -10,7 +10,7 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 
 class ImageMarkerWindow(private val mapClass: Map,
                         private val context: Context,
-                        private val ID: Int,
+                        private val ID: Long,
                         private val mainActivity: MainActivity) :
         InfoWindow(R.layout.image_press_layout_linear, mapClass.mapView) {
 
@@ -27,7 +27,7 @@ class ImageMarkerWindow(private val mapClass: Map,
         moveButton.setOnClickListener {
             val marker = mapClass.getMarker(ID)
             marker.position = mapClass.mapView.mapCenter as GeoPoint
-            mainActivity.moveMarker(ID, marker)
+            mainActivity.moveMarker(ID, marker, false)
             close()
         }
         deleteButton.setOnClickListener {
@@ -43,7 +43,7 @@ class ImageMarkerWindow(private val mapClass: Map,
 
     override fun onClose() {
         try {
-            mapClass.getPolyline(ID) // Simply to active catch block if marker is deleted
+            mapClass.getMarker(ID) // Simply to active catch block if marker is deleted
         } catch (e: NoSuchElementException) {
             Log.i(TAG, "Marker was deleted")
         } finally {

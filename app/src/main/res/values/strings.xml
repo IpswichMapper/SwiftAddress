@@ -164,5 +164,11 @@
     <string name="uppercase_letters_title">Use Uppercase Letters</string>
     <string name="clear_cache_title">Clear Cache</string>
     <string name="clear_cache_description">Clear all the map cache. This will clear up some space on your device.</string>
+    <string name="no_quotation_marks">Can\'t contain quotation marks</string>
+    <string name="download_house_numbers">Download House Numbers</string>
+    <string name="delete_downloaded_address_message">Are you sure you want to delete this address? This will remove it from OpenStreetMap if you upload your changes.</string>
+    <string name="delete_downloaded_address_title">Delete Address</string>
+    <string name="download_addresses">Download Addresses</string>
+    <string name="downloading_addresses">Downloading Addresses</string>
 
 </resources>

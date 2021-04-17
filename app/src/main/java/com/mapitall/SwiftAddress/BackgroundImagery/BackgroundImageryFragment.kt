@@ -16,11 +16,6 @@ import androidx.preference.PreferenceManager
 import com.mapitall.SwiftAddress.R
 import org.w3c.dom.Text
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 class BackgroundImageryFragment : Fragment(R.layout.fragment_background_imagery) {
 
 
@@ -75,7 +70,27 @@ class BackgroundImageryFragment : Fragment(R.layout.fragment_background_imagery)
             chooseAreaButton.alpha = 0.5f
         }
 
-        val saveChanges: TextView = view.findViewById(R.id.save_background_imagery_changes)
+        val chooseHouseNumberAreaButton: Button =
+            view.findViewById(R.id.choose_area_housenumbers_button)
+        chooseHouseNumberAreaButton.setOnClickListener {
+            val fragmentManager = parentFragmentManager
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            val downloadHouseNumbersFragment = DownloadHouseNumbersFragment()
+
+            downloadHouseNumbersFragment.arguments = arguments
+
+            fragmentTransaction.addToBackStack("Background Imagery")
+            fragmentTransaction.setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out)
+            fragmentTransaction.replace(R.id.fragmentContainer, downloadHouseNumbersFragment)
+            fragmentTransaction.commit()
+        }
+
+
+        val saveChanges: Button = view.findViewById(R.id.save_background_imagery_changes)
         saveChanges.setOnClickListener {
             requireActivity().setResult(RESULT_OK)
             requireActivity().finish()

@@ -55,7 +55,7 @@ class GPSTracker(private val context : Context,
     private val minDistanceForUpdates : Float = 1F // 1 meter
 
     private lateinit var locationManager: LocationManager
-
+    private var locationFound = false
     private lateinit var sensorManager: SensorManager
     private lateinit var gravitySensor: Sensor
     private lateinit var magneticSensor: Sensor
@@ -74,7 +74,7 @@ class GPSTracker(private val context : Context,
                 context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
         if (locationPossible) {
             Log.i(TAG, "locationPossible")
-            var locationFound = findLocation()
+            locationFound = findLocation()
             Log.i(TAG, "first locationFound attempt; locationFound = $locationFound")
             Thread {
                 // Make it true so the while loop runs at least once
@@ -102,10 +102,13 @@ class GPSTracker(private val context : Context,
             locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
             isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
             if (!isGPSEnabled) {
+                /*
                 Toast.makeText(
                     context, context.getString(R.string.location_not_found),
                     Toast.LENGTH_SHORT
                 ).show()
+                 */
+                Log.w(TAG, "Location not found")
                 return false
             } else {
                 canGetLocation = true
@@ -167,11 +170,26 @@ class GPSTracker(private val context : Context,
     }
 
     override fun onProviderDisabled(provider: String) {
-
+        locationFound = false
+        locationOverlay?.disableMyLocation()
     }
 
     override fun onProviderEnabled(provider: String) {
-        locationOverlay?.disableMyLocation()
+        locationFound = false
+        Log.i(TAG, "Location provider enabled")
+        Thread {
+            // Make it true so the while loop runs at least once
+
+            while (!locationFound && isGPSEnabled) {
+                Log.i(TAG, "attempting to find location again")
+                Thread.sleep(4000)
+                (context as Activity).runOnUiThread {
+                    locationFound = findLocation()
+                }
+                Log.i(TAG, "locationFound: $locationFound")
+            }
+            if (locationFound) locationOverlay?.enableMyLocation()
+        }.start()
     }
 
     // Will return azimuth when called.

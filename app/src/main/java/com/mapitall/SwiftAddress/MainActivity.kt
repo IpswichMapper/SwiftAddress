@@ -399,7 +399,7 @@ class MainActivity : AppCompatActivity(),
                 R.id.recover_data_menu_option -> {
 
                     drawerLayout.closeDrawer(GravityCompat.START)
-                    storeHouseNumbersObject.recoverData(map, this)
+                    storeHouseNumbersObject.recoverData(this)
                 }
                 R.id.save_data_menu_option -> {
 

@@ -30,6 +30,7 @@ import org.osmdroid.views.overlay.Polyline
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.IndexOutOfBoundsException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.ZipEntry
@@ -74,6 +75,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     private val COL_HOUSENAME = "HOUSENAME"
     private val COL_TYPE = "TYPE"
     private val COL_REF = "INTERPOLATION_WAY"
+    private val COL_OSM_ID = "OSM_ID"
     private val COL_UPDATED = "UPDATED"
 
     private val WAY_COL_INTERPOLATION = "INTERPOLATION"
@@ -99,6 +101,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
            |HOUSENAME TEXT,
            |NOTE TEXT,
            |INTERPOLATION_WAY INTEGER,
+           |OSM_ID BIGINT,
            |UPDATED TEXT);""".trimMargin())
 
         db.execSQL("""CREATE TABLE $WAYS_TABLE_NAME(ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -419,38 +422,40 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     // Remove all rows from the main table, and move them to a "temporary table" (so that they
     // can be recovered later if need be)
     fun clearDatabase() {
+
         val db: SQLiteDatabase = this.writableDatabase
-        var doNotExecuteNext = false
-        var doNotExecuteNextWays = false
-        var doNotExecutreNextAttrs = false
+        var executeNextMarkers = true
+        var executeNextWays = true
+        var executeNextAttrs = true
+
         try {
             db.delete(TEMP_TABLE_NAME, null, null)
         } catch (e: SQLiteException) {
             e.printStackTrace()
             db.execSQL("CREATE TABLE $TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
-            doNotExecuteNext = true
+            executeNextMarkers = false
         }
         try {
             db.delete(WAYS_TEMP_TABLE_NAME, null, null)
         } catch (e: SQLiteException) {
             e.printStackTrace()
             db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
-            doNotExecuteNextWays = true
+            executeNextWays = false
         }
         try {
             db.delete(ATTRIBUTES_TEMP_TABLE_NAME, null, null)
         } catch (e: SQLiteException) {
             e.printStackTrace()
             db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
-            doNotExecutreNextAttrs = true
+            executeNextAttrs = false
         }
-        if (!doNotExecuteNext) {
+        if (executeNextMarkers) {
             db.execSQL("INSERT INTO $TEMP_TABLE_NAME SELECT * FROM $TABLE_NAME")
         }
-        if (!doNotExecuteNextWays) {
+        if (executeNextWays) {
             db.execSQL("INSERT INTO $WAYS_TEMP_TABLE_NAME SELECT * FROM $WAYS_TABLE_NAME")
         }
-        if (!doNotExecutreNextAttrs) {
+        if (executeNextAttrs) {
             db.execSQL("INSERT INTO $ATTRIBUTES_TEMP_TABLE_NAME SELECT * FROM $ATTRIBUTES_TABLE_NAME")
         }
         db.delete(TABLE_NAME, null, null)
@@ -491,10 +496,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun addDownloadedHousenumber(node: Node) {
 
         val db = this.writableDatabase
-        val iDs = db.rawQuery("SELECT $COL_ID FROM $TABLE_NAME", null)
+        val iDs = db.rawQuery("SELECT $COL_OSM_ID FROM $TABLE_NAME", null)
         var add = true
         while (iDs.moveToNext()) {
-            if (iDs.getLong(iDs.getColumnIndex(COL_ID)) == node.id) {
+            if (iDs.getLong(iDs.getColumnIndex(COL_OSM_ID)) == node.id) {
                 add = false
             }
         }
@@ -504,14 +509,13 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 val tagContentValues = ContentValues()
                 tagContentValues.put(ATTR_COL_KEY, tag.key.toString())
                 tagContentValues.put(ATTR_COL_VALUE, tag.value.toString())
-                Log.w(TAG, "node id ${node.id}")
                 tagContentValues.put(ATTR_COL_MARKER_ID, node.id)
                 db.insert(ATTRIBUTES_TABLE_NAME, null, tagContentValues)
             }
 
             val contentValues = ContentValues()
 
-            contentValues.put(COL_ID, node.id)
+            contentValues.put(COL_OSM_ID, node.id)
             contentValues.put(COL_LATITUDE, node.position.latitude)
             contentValues.put(COL_LONGITUDE, node.position.longitude)
             contentValues.put(COL_UPDATED, "unchanged")
@@ -524,10 +528,10 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     fun addDownloadedHousenumber(way: Way, lat: Double, lon: Double) {
         val db = this.writableDatabase
-        val iDs = db.rawQuery("SELECT $COL_ID FROM $TABLE_NAME", null)
+        val iDs = db.rawQuery("SELECT $COL_OSM_ID FROM $TABLE_NAME", null)
         var add = true
         while (iDs.moveToNext()) {
-            if (iDs.getLong(iDs.getColumnIndex(COL_ID)) == way.id) {
+            if (iDs.getLong(iDs.getColumnIndex(COL_OSM_ID)) == way.id) {
                 add = false
             }
         }
@@ -538,7 +542,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         if (add) {
             val contentValues = ContentValues()
-            contentValues.put(COL_ID, way.id)
+            contentValues.put(COL_OSM_ID, way.id)
             contentValues.put(COL_LATITUDE, lat)
             contentValues.put(COL_LONGITUDE, lon)
             contentValues.put(COL_UPDATED, "unchanged")
@@ -599,9 +603,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val db: SQLiteDatabase = this.readableDatabase
         val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
-        c.moveToNext()
-        val itemType = c.getString(c.getColumnIndex(COL_TYPE))
-        Log.i(TAG, "Item Type: $itemType")
+        var itemType = ""
+        while (c.moveToNext()
+                && c.getString(c.getColumnIndex(COL_UPDATED)) == "unchanged")
+        itemType = c.getString(c.getColumnIndex(COL_TYPE))
+            Log.i(TAG, "Item Type: $itemType")
         c.close()
         db.close()
         return itemType
@@ -668,6 +674,31 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         db.execSQL("DELETE FROM $TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $TABLE_NAME);")
         db.close()
+    }
+    // This is for ClassicMainActivity where markers aren't deleted from the map,
+    // so you can't use the Map class to check if no markers have been added
+    fun undo(isAnImage: Boolean, noMapView: Boolean) {
+        if (!noMapView) {
+            undo(isAnImage)
+        } else {
+            val db = this.writableDatabase
+
+            val c: Cursor = db.query(TABLE_NAME, null, null, null,
+                        null, null, "ID DESC")
+            c.moveToNext()
+
+
+            if (isAnImage) {
+
+                val absolutePath = c.getString(c.getColumnIndex(COL_NOTE))
+                File(absolutePath).delete()
+                Log.i(TAG, "Item Type: ${c.getString(1)}")
+                c.close()
+        }
+
+        db.execSQL("DELETE FROM $TABLE_NAME WHERE ID = (SELECT MAX(ID) FROM $TABLE_NAME);")
+        db.close()
+        }
     }
 
 
@@ -955,15 +986,8 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
         var runCondition = true
         while (c.moveToNext() && runCondition) {
-            Log.i(TAG, "${c.getString(c.getColumnIndex(COL_TYPE))}, ${
-                c.getString(c.getColumnIndex(COL_TYPE)) == "Address"
-            }")
-            Log.i(TAG, "${c.getString(c.getColumnIndex(COL_SIDE))}, ${
-                c.getString(c.getColumnIndex(COL_SIDE)) == side
-            }, $side")
             if (c.getString(c.getColumnIndex(COL_TYPE)) == "Address" &&
                     c.getString(c.getColumnIndex(COL_SIDE)) == side) {
-                Log.i(TAG, "in if statemant.")
                 lastAddress = AddressNodes(
                         c.getString(c.getColumnIndex(COL_HOUSENUMBER)),
                         c.getDouble(c.getColumnIndex(COL_LATITUDE)),
@@ -976,7 +1000,6 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
                 runCondition = false
             }
         }
-
         Log.i(TAG, "lastAddress: ${lastAddress.toString()}")
 
         c.close()
@@ -1029,7 +1052,9 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     // Gets old data from a "temporary table", and overwrites current table with
     // rows from "temporary table". The "temporary table" consists of data from
     // the last time the user saved.
-    fun recoverData(mapClass: Map, mainActivity: MainActivity) {
+
+    // This works for mainActiivty
+    fun recoverData(mainActivity: MainActivity) {
 
         Log.i(TAG, "Attempting to recover data.")
         val db = this.writableDatabase
@@ -1061,6 +1086,35 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         recoverDataDialog.setMessage(context.getString(R.string.recover_data_message))
 
         recoverDataDialog.create().show()
+
+    }
+    // Recover data function for activies that are not MainActivity
+    fun recoverData() {
+
+        Log.i(TAG, "Attempting to recover data")
+        val db = this.writableDatabase
+
+        val recoverDataDialog = AlertDialog.Builder(context)
+        recoverDataDialog.setPositiveButton(context.getString(R.string.recover)) { _, _ ->
+            try {
+                db.delete(TABLE_NAME, null, null)
+                db.delete(WAYS_TABLE_NAME, null, null)
+                db.delete(ATTRIBUTES_TABLE_NAME, null, null)
+                db.execSQL("INSERT INTO $TABLE_NAME SELECT * FROM $TEMP_TABLE_NAME")
+                db.execSQL("INSERT INTO $WAYS_TABLE_NAME SELECT * FROM $WAYS_TEMP_TABLE_NAME")
+                db.execSQL("INSERT INTO $ATTRIBUTES_TABLE_NAME SELECT * FROM $ATTRIBUTES_TEMP_TABLE_NAME")
+
+                val rows = db.delete(TABLE_NAME, "TYPE = 'Image'", null)
+                Log.i(TAG, "$rows rows deleted (image rows)")
+
+
+            } catch (e: SQLiteException) {
+                e.printStackTrace()
+
+                Toast.makeText(context, context.getString(R.string.no_saved_data),
+                        Toast.LENGTH_SHORT).show()
+            }
+        }
 
     }
 
@@ -1326,6 +1380,43 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val contentValues = ContentValues()
         contentValues.put(COL_UPDATED, status)
         db.update(TABLE_NAME, contentValues, "$COL_ID = $ID", null)
+    }
+
+    fun getLastThreeHouseNumbers() : List<String> {
+        val db = this.readableDatabase
+        val list = mutableListOf<String>()
+        val c = db.rawQuery(
+                "SELECT * FROM $TABLE_NAME WHERE $COL_TYPE = 'Address' ORDER BY $COL_ID DESC",
+                null)
+        try {
+            c.moveToNext()
+            list.add(c.getString(c.getColumnIndex(COL_HOUSENUMBER)))
+            list.add(c.getString(c.getColumnIndex(COL_SIDE)))
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+            list.add("")
+            list.add("")
+        }
+        try {
+            c.moveToNext()
+            list.add(c.getString(c.getColumnIndex(COL_HOUSENUMBER)))
+            list.add(c.getString(c.getColumnIndex(COL_SIDE)))
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+            list.add("")
+            list.add("")
+        }
+        try {
+            c.moveToNext()
+            list.add(c.getString(c.getColumnIndex(COL_HOUSENUMBER)))
+            list.add(c.getString(c.getColumnIndex(COL_SIDE)))
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+            list.add("")
+            list.add("")
+        }
+
+        return list.toList()
     }
 
 }

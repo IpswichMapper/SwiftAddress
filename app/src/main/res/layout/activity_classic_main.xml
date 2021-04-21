@@ -18,20 +18,19 @@
             android:background="@android:color/darker_gray"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
 
                 android:id="@+id/classic_main_menu_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:backgroundTint="@android:color/darker_gray"
+                android:onClick="openDrawer"
                 android:scaleType="fitCenter"
                 android:tint="@color/black"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/menu"
-                android:onClick="openDrawer"/>
+                app:srcCompat="@drawable/menu" />
 
             <ImageButton
                 android:id="@+id/classic_save"
@@ -40,7 +39,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="@android:color/darker_gray"
                 android:onClick="saveData"
-                    android:scaleType="fitCenter"
+                android:scaleType="fitCenter"
                 android:tint="@color/black"
                 app:srcCompat="@drawable/save"
                 tools:srcCompat="@drawable/save" />
@@ -81,6 +80,43 @@
             android:textSize="50dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/classic_top_bar_linear_layout" />
+
+        <TextView
+            android:id="@+id/classic_house_number_text_view1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/button_colors"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/classic_address_textbox"
+            app:layout_constraintTop_toBottomOf="@+id/classic_top_bar_linear_layout" />
+
+        <TextView
+            android:id="@+id/classic_house_number_text_view2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/button_colors"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/classic_address_textbox"
+            app:layout_constraintTop_toBottomOf="@+id/classic_house_number_text_view1" />
+
+
+        <TextView
+            android:id="@+id/classic_house_number_text_view3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/button_colors"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/classic_address_textbox"
+            app:layout_constraintTop_toBottomOf="@+id/classic_house_number_text_view2" />
 
         <RelativeLayout
             android:id="@+id/classic_relative_layout_left"
@@ -536,9 +572,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:text="Modify Street Name"
-                android:textSize="14dp" />
+                android:layout_marginTop="5dp"
+                android:text="@string/modify_street_name"
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/classic_change_building_levels"
@@ -546,9 +582,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="10dp"
-                android:text="Change Building Levels"
-                android:textSize="12dp" />
+                android:layout_marginBottom="5dp"
+                android:text="@string/change_building_levels"
+                android:textSize="11dp" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -579,9 +615,20 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:text="@string/modify_offset"
                 android:textSize="14dp" />
+
+
+            <TextView
+                android:id="@+id/classic_add_housename"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:text="@string/add_house_name"
+                android:textSize="11dp" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -679,6 +726,8 @@
                 android:id="@+id/classic_street_name_value"
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:textColor="@color/button_colors"
                 android:layout_height="wrap_content" />
 
             <TextView
@@ -693,11 +742,13 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.4"
                 android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
                 app:layout_constraintStart_toEndOf="@id/classic_building_levels_tag"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/classic_address_textbox" />
 
         </LinearLayout>
+
 
 
 

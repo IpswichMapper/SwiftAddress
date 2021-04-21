@@ -170,5 +170,10 @@
     <string name="delete_downloaded_address_title">Delete Address</string>
     <string name="download_addresses">Download Addresses</string>
     <string name="downloading_addresses">Downloading Addresses</string>
+    <string name="right_side_abbreviation">R:</string>
+    <string name="left_side_abbreviation">L:</string>
+    <string name="forward_side_abbreviation">F:</string>
+    <string name="online_api_used_message">Online APIs such as Overpass API and Nominatim will be used to find the name of nearby streets.</string>
+    <string name="online_api_not_used_message">Online APIs such as Overpass API and Nominatim will not be used.</string>
 
 </resources>

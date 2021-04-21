@@ -2,7 +2,14 @@ package com.mapitall.SwiftAddress
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Resources
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.provider.MediaStore
+import android.text.InputType
 import android.util.Log
 import android.view.*
 import android.view.Gravity.CENTER
@@ -14,19 +21,26 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.os.ConfigurationCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.exifinterface.media.ExifInterface
 import androidx.preference.PreferenceManager
 import com.google.android.material.navigation.NavigationView
 import org.apache.commons.lang3.StringUtils
+import java.io.File
 import java.lang.NullPointerException
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.cos
 
 class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
 
+    private var currentImagePath = ""
     private val storeHouseNumbersObject = StoreHouseNumbers(this)
 
     private val TAG = "ClassicMainActivity"
@@ -35,9 +49,10 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private var onFlingDetected = "no"
     private var touchEvent = false
     private var street = ""
+    private var houseName = ""
     private var buildingLevels = ""
     private var increment  = 2
-    private lateinit var gpsTracker : GPSTracker
+    private lateinit var locationListener : GPSTracker
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +60,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         setContentView(R.layout.activity_classic_main)
         supportActionBar?.hide()
 
-        gpsTracker = GPSTracker(this)
+        locationListener = GPSTracker(this)
 
         val navMenu = findViewById<NavigationView>(R.id.classic_nav_menu)
 
@@ -53,6 +68,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
         val addressTextBox = findViewById<EditText>(R.id.classic_address_textbox)
         addressTextBox.requestFocus()
+
+        displayLastThreeHouseNumbers()
 
         // Onclick listeners and ontouch listeners for the keypad buttons
         // "Ontouch" is activated when you do any action on the buttons, for example touch or swipe
@@ -63,7 +80,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         // to the textbox.
         val numButton1 = findViewById<Button>(R.id.classic_keypad_num1)
         numButton1.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton1: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -79,10 +95,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton1.setOnClickListener {
-            Log.i(TAG, "numButton1: onTouchListener Called")
             if (!touchEvent) {
-                Log.i(TAG, "numButton2: clicked.")
-                Log.i(TAG, "numButton2: addNum(numButton4) called")
+                Log.i(TAG, "numButton1: clicked.")
                 addNum(numButton1)
             } else {
                 touchEvent = false
@@ -91,7 +105,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
         val numButton2 = findViewById<Button>(R.id.classic_keypad_num2)
         numButton2.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton2: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -107,17 +120,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton2.setOnClickListener {
-            Log.i(TAG, "numButton2: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton2: clicked.")
-                Log.i(TAG, "numButton2: addNum(numButton4) called")
                 addNum(numButton2)
             }
         }
 
         val numButton3 = findViewById<Button>(R.id.classic_keypad_num3)
         numButton3.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton3: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -133,17 +143,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton3.setOnClickListener {
-            Log.i(TAG, "numButton3: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton3: clicked.")
-                Log.i(TAG, "numButton3: addNum(numButton4) called")
                 addNum(numButton3)
             }
         }
 
         val numButton4 = findViewById<Button>(R.id.classic_keypad_num4)
         numButton4.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton4: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -159,10 +166,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton4.setOnClickListener {
-            Log.i(TAG, "numButton4: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton4: clicked.")
-                Log.i(TAG, "numButton4: addNum(numButton4) called")
                 addNum(numButton4)
             }
         }
@@ -170,7 +175,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
         val numButton5 = findViewById<Button>(R.id.classic_keypad_num5)
         numButton5.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton5: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -186,17 +190,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton5.setOnClickListener {
-            Log.i(TAG, "numButton5: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton5: clicked.")
-                Log.i(TAG, "numButton5: addNum(numButton5) called")
                 addNum(numButton5)
             }
         }
 
         val numButton6 = findViewById<Button>(R.id.classic_keypad_num6)
         numButton6.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton6: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -213,17 +214,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton6.setOnClickListener {
-            Log.i(TAG, "numButton6: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton6: clicked.")
-                Log.i(TAG, "numButton6: addNum(numButton6) called")
                 addNum(numButton6)
             }
         }
 
         val numButton7 = findViewById<Button>(R.id.classic_keypad_num7)
         numButton7.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton7: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -239,18 +237,14 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton7.setOnClickListener {
-            Log.i(TAG, "numButton7: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton7: clicked.")
-                Log.i(TAG, "numButton7: addNum(numButton7) called")
                 addNum(numButton7)
           }
         }
 
-
         val numButton8 = findViewById<Button>(R.id.classic_keypad_num8)
         numButton8.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton8: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -266,11 +260,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton8.setOnClickListener {
-            Log.i(TAG, "numButton8: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton8: clicked.")
-                Log.i(TAG, "numButton8: addNum(numButton8) called")
-                Log.i("keypad button ${numButton8.text}", "Clicked")
                 addNum(numButton8)
             }
         }
@@ -278,7 +269,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
         val numButton9 = findViewById<Button>(R.id.classic_keypad_num9)
         numButton9.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton9: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -286,7 +276,6 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             val swipeUpText = ""
             val swipeDownText = findViewById<TextView>(R.id.classic_B3R1).text.toString()
 
-            Log.i("le out test", "onFlingDetected: $onFlingDetected")
             if (onFlingDetected != "no") {
                 addNum(numButton9, swipeUpText, swipeDownText)
                 touchEvent = true
@@ -295,10 +284,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton9.setOnClickListener {
-            Log.i(TAG, "numButton9: onClickListener Called")
           if (!touchEvent) {
               Log.i(TAG, "numButton9: clicked.")
-              Log.i(TAG, "numButton9: addNum(numButton9) called")
               addNum(numButton9)
           }
         }
@@ -314,20 +301,17 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             if (onFlingDetected == "up") {
                 modStreetName()
                 touchEvent = true
-                Log.i(TAG, "numButton0: onFlingDetected = up, touchevent = true")
             } else if (onFlingDetected == "down") {
                 modBuildLevels()
                 touchEvent = true
-                Log.i(TAG, "numButton0: onFlingDetected = up, touchevent = true")
             } else {
                 touchEvent = false
-                Log.w(TAG, "numButton0: onFlingDetected != up || down, touchEvent = false")
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton0.setOnClickListener {
-            Log.i("key0", "onclicklistener called.")
+            Log.i("key0", "onClickListener called.")
             if (!touchEvent) {
                 addNum(numButton0)
             }
@@ -341,6 +325,10 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             gestureDetector.onTouchEvent(event)
             if (onFlingDetected == "up") {
                 modifyOffset()
+                touchEvent = true
+            }
+            if (onFlingDetected == "down") {
+                addHouseName()
                 touchEvent = true
             }
 
@@ -364,8 +352,11 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             val itemID = menuItem.itemId
             when(itemID) {
                 R.id.recover_data_menu_option -> {
+                    /*
                     Toast.makeText(this, getString(R.string.unimplemented),
                             Toast.LENGTH_SHORT).show()
+                     */
+                    storeHouseNumbersObject.recoverData()
                 }
                 R.id.save_data_menu_option -> {
                     saveData(navMenu)
@@ -385,6 +376,23 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setNavigationItemSelectedListener true
         }
 
+        addressTextBox.setOnLongClickListener {
+
+            val vibrator: Vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+
+            if (Build.VERSION.SDK_INT >= 26) {
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                80L, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(80L)
+            }
+
+            addHouseName()
+            return@setOnLongClickListener true
+        }
+
         val streetNameTag = findViewById<TextView>(R.id.classic_street_name_tag)
         val streetNameValue = findViewById<TextView>(R.id.classic_street_name_value)
         streetNameTag.setOnClickListener {
@@ -396,7 +404,77 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     }
 
     private fun modBuildLevels() {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+        val modifyBuildLevelsDialog = AlertDialog.Builder(this)
+
+        modifyBuildLevelsDialog.setTitle(getString(R.string.modify_building_levels))
+        modifyBuildLevelsDialog.setMessage(getString(R.string.building_levels_question))
+
+        var buildingLevelsValue : String
+        var roofLevelsValue : String
+        val buildingLevelsInput = EditText(this)
+        val roofLevelsInput = EditText(this)
+
+        buildingLevelsInput.hint = getString(R.string.building_levels_hint)
+        roofLevelsInput.hint = getString(R.string.roof_levels_hint)
+
+        buildingLevelsInput.inputType = InputType.TYPE_CLASS_PHONE
+        roofLevelsInput.inputType = InputType.TYPE_CLASS_PHONE
+
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+            MATCH_PARENT, WRAP_CONTENT
+        )
+
+        val linearLayout = LinearLayout(this)
+        linearLayout.orientation = LinearLayout.VERTICAL
+
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        linearLayout.layoutParams = params
+
+        linearLayout.addView(buildingLevelsInput)
+        linearLayout.addView(roofLevelsInput)
+        container.addView(linearLayout)
+        modifyBuildLevelsDialog.setView(container)
+
+        modifyBuildLevelsDialog.setPositiveButton(getString(R.string.save)) { _, _ ->
+
+            Log.i(TAG, "positive button pressed")
+            try {
+                buildingLevelsValue = buildingLevelsInput.text.toString()
+                buildingLevelsValue.toInt()
+                try {
+                    roofLevelsValue = roofLevelsInput.text.toString()
+                    roofLevelsValue.toInt()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+
+                    roofLevelsValue = "0"
+                }
+                Log.i(TAG, "about to change building levels")
+
+                val buildingLevelsTextView = findViewById<TextView>(R.id.building_levels_value)
+                buildingLevelsTextView.text = ""
+                buildingLevelsTextView.append("B$buildingLevelsValue R$roofLevelsValue")
+                buildingLevelsTextView.setTextColor(ContextCompat.getColor(
+                        this, R.color.button_colors))
+            } catch (e : Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, getString(R.string.please_enter_number),
+                        Toast.LENGTH_SHORT).show()
+            }
+
+        }
+        modifyBuildLevelsDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+
+
+
+        val dialog = modifyBuildLevelsDialog.create()
+        dialog.show()
+        buildingLevelsInput.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
     }
 
     // Modify the distance that a housenumber is offset from your current location.
@@ -411,18 +489,18 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         offset = sp.getInt("offset", 2)
 
         Log.i(TAG, "offset before function: $offset")
-        val modifyoffsetDialogue  = AlertDialog.Builder(this)
-        modifyoffsetDialogue.setTitle(getString(R.string.change_offset))
+        val modifyOffsetDialogue  = AlertDialog.Builder(this)
+        modifyOffsetDialogue.setTitle(getString(R.string.change_offset))
 
         var offsetValue : String
 
-        val modifyoffsetInput = EditText(this)
-        modifyoffsetInput.inputType = EditorInfo.TYPE_CLASS_PHONE
-        modifyoffsetInput.setText(offset.toString())
-        modifyoffsetInput.textSize = textBoxTextSize
+        val modifyOffsetInput = EditText(this)
+        modifyOffsetInput.inputType = EditorInfo.TYPE_CLASS_PHONE
+        modifyOffsetInput.setText(offset.toString())
+        modifyOffsetInput.textSize = textBoxTextSize
 
-        modifyoffsetInput.layoutParams = ViewGroup.LayoutParams(textBoxWidth, MATCH_PARENT)
-        modifyoffsetInput.gravity =CENTER
+        modifyOffsetInput.layoutParams = ViewGroup.LayoutParams(textBoxWidth, MATCH_PARENT)
+        modifyOffsetInput.gravity =CENTER
 
         val minusButton = ImageButton(this)
         minusButton.setImageResource(R.drawable.minus)
@@ -430,12 +508,12 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         minusButton.layoutParams = ViewGroup.LayoutParams(offsetButtonsDimensions,
                 offsetButtonsDimensions)
         minusButton.setOnClickListener {
-            val text = modifyoffsetInput.text.toString()
+            val text = modifyOffsetInput.text.toString()
             if (text != "") {
                 try {
                     var textToInt = text.toInt()
                     textToInt -= 1
-                    modifyoffsetInput.setText(textToInt.toString())
+                    modifyOffsetInput.setText(textToInt.toString())
                 } catch (e: NumberFormatException) {
                     var textToSet = ""
 
@@ -447,7 +525,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                         }
                     }
                     textToSet = (textToSet.toInt() - 1).toString()
-                    modifyoffsetInput.setText(textToSet)
+                    modifyOffsetInput.setText(textToSet)
 
                     Log.i(textToSet, "final text")
                 }
@@ -460,12 +538,12 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         plusButton.layoutParams = ViewGroup.LayoutParams(offsetButtonsDimensions,
                 offsetButtonsDimensions)
         plusButton.setOnClickListener {
-            val text = modifyoffsetInput.text.toString()
+            val text = modifyOffsetInput.text.toString()
             if (text != "") {
                 try {
                     var textToInt = text.toInt()
                     textToInt += 1
-                    modifyoffsetInput.setText(textToInt.toString())
+                    modifyOffsetInput.setText(textToInt.toString())
                 } catch (e: NumberFormatException) {
                     var textToSet = ""
 
@@ -477,7 +555,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                         }
                     }
                     textToSet = (textToSet.toInt() + 1).toString()
-                    modifyoffsetInput.setText(textToSet)
+                    modifyOffsetInput.setText(textToSet)
 
                     Log.i(textToSet, "final text")
                 }
@@ -491,15 +569,15 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         linearLayout.orientation = LinearLayout.HORIZONTAL
         linearLayout.gravity = CENTER
         linearLayout.addView(minusButton)
-        linearLayout.addView(modifyoffsetInput)
+        linearLayout.addView(modifyOffsetInput)
         linearLayout.addView(plusButton)
 
-        modifyoffsetDialogue.setView(linearLayout)
-        modifyoffsetDialogue.setMessage(getString(R.string.offset_message))
+        modifyOffsetDialogue.setView(linearLayout)
+        modifyOffsetDialogue.setMessage(getString(R.string.offset_message))
 
-        modifyoffsetDialogue.setPositiveButton(getString(R.string.save_offset)) {
+        modifyOffsetDialogue.setPositiveButton(getString(R.string.save_offset)) {
             _, _ ->
-            offsetValue = modifyoffsetInput.text.toString()
+            offsetValue = modifyOffsetInput.text.toString()
             try {
                 Log.i(TAG, "offsetValue in Dialog: $offsetValue")
                 offset = offsetValue.toInt()
@@ -515,8 +593,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                         Toast.LENGTH_SHORT).show()
             }
         }
-        modifyoffsetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
-        modifyoffsetDialogue.create().show()
+        modifyOffsetDialogue.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        modifyOffsetDialogue.create().show()
     }
 
     private fun modStreetName() {
@@ -526,43 +604,52 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         var streetNameValue : String
         val streetNameInput = AutoCompleteTextView(this)
 
-        val lat = intent.getDoubleExtra("lat", 0.000)
-        val lon = intent.getDoubleExtra("lon", 0.000)
+        val lat = locationListener.getLocation()?.latitude
+        val lon = locationListener.getLocation()?.longitude
         val radius = 100
 
-        Thread {
-            Log.i(TAG, "In thread")
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        if (sp.getBoolean("online-queries", true)) {
+            if (lat != null && lon != null) {
+                Thread {
+                    Log.i(TAG, "In thread")
 
-            val queryText = "https://overpass-api.de/api/interpreter?data=" +
-                    "<query type='way'><around lat='$lat' lon='$lon' radius='$radius'/>" +
-                    "<has-kv k='highway' regv='trunk|primary|secondary|tertiary|unclassified" +
-                    "|residential|living_street|pedestrian|road' />" +
-                    "<has-kv k='name' regv='.+'></has-kv></query><print/>"
+                    val queryText = "https://overpass-api.de/api/interpreter?data=" +
+                            "<query type='way'><around lat='$lat' lon='$lon' radius='$radius'/>" +
+                            "<has-kv k='highway' regv='" +
+                            "trunk|primary|secondary|tertiary|unclassified" +
+                            "|residential|living_street|pedestrian|road' />" +
+                            "<has-kv k='name' regv='.+'></has-kv></query><print/>"
 
-            val query = URL(queryText)
-            val result = query.readText()
-            try {
-                var array: Array<String> = StringUtils.substringsBetween(result,
-                        "<tag k=\"name\" v=\"", "\"/>")
-                val distinctList = array.distinct()
-                Log.e(TAG, distinctList.toString())
+                    val query = URL(queryText)
+                    val result = query.readText()
+                    try {
+                        val array: Array<String> = StringUtils.substringsBetween(result,
+                                "<tag k=\"name\" v=\"", "\"/>")
+                        val distinctList = array.distinct()
+                        Log.e(TAG, distinctList.toString())
 
-                runOnUiThread {
-                    Log.i(TAG, "in runOnUiThread")
-                    streetNameInput.setAdapter(ArrayAdapter(
-                            this,
-                            android.R.layout.simple_dropdown_item_1line,
-                            distinctList))
-                    Log.i(TAG, "Query finished")
-                    Toast.makeText(this, "Query finished", Toast.LENGTH_SHORT).show()
+                        runOnUiThread {
+                            Log.i(TAG, "in runOnUiThread")
+                            streetNameInput.setAdapter(ArrayAdapter(
+                                    this,
+                                    android.R.layout.simple_dropdown_item_1line,
+                                    distinctList))
+                            Log.i(TAG, "Query finished")
+                            Toast.makeText(this, "Query finished",
+                                    Toast.LENGTH_SHORT).show()
 
-                }
-            } catch (e : NullPointerException) {
-                Log.i(TAG, "Failed to find any street names.")
-                Log.w(TAG, result)
+                        }
+                    } catch (e: NullPointerException) {
+                        Log.i(TAG, "Failed to find any street names.")
+                        Log.w(TAG, result)
+                    }
+
+                }.start()
+            } else {
+                Log.i(TAG, "Can't download nearby streets: location not available")
             }
-
-        }.start()
+        }
 
         val container = FrameLayout(this)
         val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
@@ -582,11 +669,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
             val streetNameTextView = findViewById<TextView>(R.id.classic_street_name_value)
 
-            if (streetNameValue.length < 18) {
-                streetNameTextView.text = streetNameValue
-            } else {
-                streetNameTextView.text = "${streetNameValue.subSequence(0, 15)}..."
-            }
+            streetNameTextView.text = streetNameValue
 
             street = streetNameValue
         }
@@ -649,7 +732,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         Log.i(TAG, "onActivityResult")
 
         // Saves data
-        if (requestCode == 5 && resultCode == RESULT_OK) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
 
             Log.i(TAG, "attempting to store zip file.")
 
@@ -678,6 +761,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                     runOnUiThread {
                         dialog.dismiss()
                         Log.i(TAG, "Dialog dismissed.")
+                        displayLastThreeHouseNumbers()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -690,7 +774,77 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 }
             }.start()
         }
+        // When a photo is taken
+        if (requestCode == 4 && resultCode == RESULT_OK) {
+            try {
+                val exif = ExifInterface(File(currentImagePath))
+                Log.i(TAG, "filePath: $currentImagePath")
 
+                val latitude = map.mapView.mapCenter.latitude
+                Log.i("lat", "$latitude")
+                val latitudeHours = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
+                var trueLat = latitudeHours.toInt().toString() + "/1," // 105/1,
+                val latitudeMinutes = (latitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
+                trueLat = trueLat + latitudeMinutes.toInt().toString() + "/1," // 105/1,59/1,
+                val latitudeSeconds = (latitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
+                trueLat = trueLat + latitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
+
+                val longitude = map.mapView.mapCenter.longitude
+                val longitudeHours = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
+                var trueLon = longitudeHours.toInt().toString() + "/1," // 105/1,
+                val longitudeMinutes = (longitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
+                trueLon = trueLon + longitudeMinutes.toInt().toString() + "/1," // 105/1,59/1,
+                val longitudeSeconds = (longitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
+                trueLon = trueLon + longitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/100
+
+                Log.i(TAG, "lat: $latitude, lon: $longitude")
+                Log.i(TAG, "trueLat: $trueLat, trueLong: $trueLon")
+
+                exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, trueLat)
+                exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, trueLon)
+                exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF,
+                        if (latitude > 0) "N" else "S")
+                exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF,
+                        if (longitude > 0) "E" else "W")
+
+
+                exif.saveAttributes()
+
+                Log.i("exif latitude",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE).toString())
+                Log.i("exif longitude",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE).toString())
+                Log.i("Exif latituderef",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF).toString())
+                Log.i("exif longituderef",
+                        exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF).toString())
+/*
+                markerList.add(Marker(map))
+
+                markerList.last().position = GeoPoint(latitude, longitude)
+                markerList.last().icon = ContextCompat.getDrawable(this, R.drawable.camera)
+                markerList.last().setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                // TODO : Show image when marker is clicked.
+
+                map.overlays.add(markerList.last())
+                Log.i(DEBUG_TAG, "Image Marker Added to Map")
+*/
+                val imageID = storeHouseNumbersObject.addImage(currentImagePath!!, latitude, longitude)
+
+                if (imageID != -1L) {
+                    map.addImageMarker(imageID, latitude, longitude)
+                    Log.i(TAG, "Image Marker added to map")
+                } else {
+                    Toast.makeText(this, getString(R.string.failed_save),
+                            Toast.LENGTH_SHORT).show()
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        // When the settings manager is closed
         if (requestCode == 7 && resultCode == RESULT_OK) {
             val sp = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -698,7 +852,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
 
-            if (sp.getString("interface", "Classic") != "Classic") {
+            if (sp.getString("interface", "Classic") == "Default") {
                 val intent = Intent(this, MainActivity::class.java)
 
                 startActivity(intent)
@@ -727,12 +881,12 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
         try {
 
-            val location = gpsTracker.getLocation()!!
+            val location = locationListener.getLocation()!!
             val lat = location.latitude
             val lon = location.longitude
 
             try {
-                var azimuth = gpsTracker.getAzimuth()!!.toDouble()
+                var azimuth = locationListener.getAzimuth()!!.toDouble()
                 if (azimuth < 0) azimuth += (2 * Math.PI)
                 val bearing = Math.toRadians(azimuth)
                 val angle : Double
@@ -780,7 +934,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
                 val houseNumber = findViewById<EditText>(R.id.classic_address_textbox)
                     .text.toString()
-                val buildingLevels = findViewById<TextView>(R.id.classic_building_levels_value)
+                buildingLevels = findViewById<TextView>(R.id.classic_building_levels_value)
                     .text.toString()
                 val sideString : String =
                     if(side == Side.LEFT) "left"
@@ -791,7 +945,8 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                         trueLon,
                         sideString,
                         street,
-                        buildingLevels)
+                        buildingLevels,
+                        houseName)
                 storeHouseNumbersObject.addHouseNumber(address)
 
                 Log.i(TAG, "Housenumber Added")
@@ -802,6 +957,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
                 findViewById<EditText>(R.id.classic_address_textbox).text.clear()
 
+                displayLastThreeHouseNumbers()
 
             } catch (e : NullPointerException) {
                 e.printStackTrace()
@@ -814,6 +970,39 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             Toast.makeText(this, R.string.location_not_found, Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun addHouseName() {
+        val addHouseNameDialog = AlertDialog.Builder(this)
+        addHouseNameDialog.setTitle(getString(R.string.house_name))
+
+        val addHouseNameEditText = EditText(this)
+        addHouseNameEditText.maxLines = 1
+        addHouseNameEditText.inputType = InputType.TYPE_CLASS_TEXT
+        addHouseNameEditText.append(houseName)
+
+        val container = FrameLayout(this)
+        val params : FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+            MATCH_PARENT, WRAP_CONTENT
+        )
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_edit_text_margin)
+        addHouseNameEditText.layoutParams = params
+        container.addView(addHouseNameEditText)
+
+        addHouseNameDialog.setView(container)
+
+        addHouseNameDialog.setPositiveButton(getString(R.string.add_house_name)) {
+            _, _ ->
+            houseName = addHouseNameEditText.text.toString()
+        }
+        addHouseNameDialog.setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+        val dialog = addHouseNameDialog.create()
+        dialog.show()
+        addHouseNameEditText.requestFocus()
+        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+
+    }
+
 
     // These two functions increment or decrement the from the previous address that was added
     // on the left. It increments / decrements textbox if the textbox contains anything
@@ -1064,6 +1253,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         val drawerLayout = findViewById<DrawerLayout>(R.id.classic_drawer_layout)
         drawerLayout.openDrawer(GravityCompat.START)
     }
+
     fun saveData(view: View) {
 
         val saveDataDialogue  = AlertDialog.Builder(this)
@@ -1087,10 +1277,74 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
     }
     fun takePhoto(view: View) {
-        Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+
+        val locale = ConfigurationCompat.getLocales(Resources.getSystem().configuration).get(0)
+        val current = SimpleDateFormat("yyyy-mm-dd-hh-mm-ss", locale).format(Date())
+        val fileName = "image-$current.jpg"
+
+        val imageFile = File(getExternalFilesDir("data"), fileName)
+        currentImagePath = imageFile.absolutePath
+
+        Log.i(TAG, "filePath: ${getExternalFilesDir("data")!!.absolutePath + fileName}")
+        Log.i(TAG, "filePath: $currentImagePath")
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (cameraIntent.resolveActivity(packageManager) != null) {
+
+            val imageURI : Uri = FileProvider.getUriForFile(this,
+                    "com.mapitall.SwiftAddress.provider",
+                    imageFile
+            )
+            Log.i(TAG, "URI filePath: $imageURI")
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
+            startActivityForResult(cameraIntent, 4)
+        } else {
+            Toast.makeText(this, getString(R.string.no_camera_app),
+                    Toast.LENGTH_SHORT).show()
+        }
     }
     fun undo(view: View) {
         Toast.makeText(this, getString(R.string.unimplemented), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun displayLastThreeHouseNumbers() {
+        val list = storeHouseNumbersObject.getLastThreeHouseNumbers()
+
+        val textView1 = findViewById<TextView>(R.id.classic_house_number_text_view1)
+        val textView2 = findViewById<TextView>(R.id.classic_house_number_text_view2)
+        val textView3 = findViewById<TextView>(R.id.classic_house_number_text_view3)
+
+        textView1.text = ""
+        if (list[0] != "") {
+            if (list[1] == "right") textView1.append(getString(R.string.right_side_abbreviation) + " ")
+            else if (list[1] == "left") textView1.append(
+                    getString(R.string.left_side_abbreviation) + " ")
+            else if (list[1] == "forward") textView1.append(
+                    getString(R.string.forward_side_abbreviation) + " ")
+            else throw TypeCastException("Side wasn't forward, right or left")
+            textView1.append(list[0])
+        }
+
+        if (list[2] != "") {
+            textView2.text = ""
+            if (list[3] == "right") textView2.append(getString(R.string.right_side_abbreviation) + " ")
+            else if (list[3] == "left") textView2.append(
+                    getString(R.string.left_side_abbreviation) + " ")
+            else if (list[3] == "forward") textView2.append(
+                    getString(R.string.forward_side_abbreviation) + " ")
+            else throw TypeCastException("Side wasn't forward, right or left")
+            textView2.append(list[2])
+        }
+
+        if (list[4] != "") {
+            textView3.text = ""
+            if (list[5] == "right") textView3.append(getString(R.string.right_side_abbreviation) + " ")
+            else if (list[5] == "left") textView3.append(
+                    getString(R.string.left_side_abbreviation) + " ")
+            else if (list[5] == "forward") textView3.append(
+                    getString(R.string.forward_side_abbreviation) + " ")
+            else throw TypeCastException("Side wasn't forward, right or left")
+            textView3.append(list[4])
+        }
     }
 
     // GestureDetector Methods
@@ -1130,13 +1384,12 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             if(abs(differenceInY) > swipeValue) {
                 if (differenceInY < 0) {
                     // up swipe
-                    Log.i("onFlingDetected", "up swipe")
                     this.onFlingDetected = "up"
-                    Log.i("le in test", "onFlingDetected : $onFlingDetected")
+                    Log.i(TAG, "onFlingDetected: $onFlingDetected")
                 } else {
                     // down swipe
-                    Log.i("onFlingDetected", "down swipe")
                     this.onFlingDetected = "down"
+                    Log.i(TAG, "onFlingDetected: $onFlingDetected")
                 }
             }
         }
@@ -1145,9 +1398,4 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
 
     }
-
-
-
-
-
 }

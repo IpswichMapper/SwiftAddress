@@ -66,7 +66,8 @@ class Keypad : AppCompatActivity(),
                 .activeNetworkInfo
 
         if (netInfo != null && netInfo.isConnected &&
-                sp.getBoolean("useReverseGeocoding", true)) {
+                sp.getBoolean("useReverseGeocoding", true) &&
+                sp.getBoolean("online-queries", true)) {
             reverseGeocodeStreet(intent.getDoubleExtra(
                     "lat", 0.000), intent.getDoubleExtra("lon", 0.000))
         } else {
@@ -113,7 +114,6 @@ class Keypad : AppCompatActivity(),
         // to the textbox.
         val numButton1 = findViewById<Button>(R.id.keypad_num1)
         numButton1.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton1: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -129,10 +129,8 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton1.setOnClickListener {
-            Log.i(TAG, "numButton1: onTouchListener Called")
             if (!touchEvent) {
-                Log.i(TAG, "numButton2: clicked.")
-                Log.i(TAG, "numButton2: addNum(numButton4) called")
+                Log.i(TAG, "numButton1: clicked.")
                 addNum(numButton1)
             } else {
                 touchEvent = false
@@ -141,7 +139,6 @@ class Keypad : AppCompatActivity(),
 
         val numButton2 = findViewById<Button>(R.id.keypad_num2)
         numButton2.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton2: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -157,10 +154,8 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton2.setOnClickListener {
-            Log.i(TAG, "numButton2: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton2: clicked.")
-                Log.i(TAG, "numButton2: addNum(numButton4) called")
                 addNum(numButton2)
             } else {
                 touchEvent = false
@@ -169,7 +164,6 @@ class Keypad : AppCompatActivity(),
 
         val numButton3 = findViewById<Button>(R.id.keypad_num3)
         numButton3.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton3: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -185,17 +179,14 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton3.setOnClickListener {
-            Log.i(TAG, "numButton3: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton3: clicked.")
-                Log.i(TAG, "numButton3: addNum(numButton4) called")
                 addNum(numButton3)
             }
         }
 
         val numButton4 = findViewById<Button>(R.id.keypad_num4)
         numButton4.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton4: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -211,10 +202,8 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton4.setOnClickListener {
-            Log.i(TAG, "numButton4: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton4: clicked.")
-                Log.i(TAG, "numButton4: addNum(numButton4) called")
                 addNum(numButton4)
             }
         }
@@ -222,7 +211,6 @@ class Keypad : AppCompatActivity(),
 
         val numButton5 = findViewById<Button>(R.id.keypad_num5)
         numButton5.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton5: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -238,17 +226,14 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton5.setOnClickListener {
-            Log.i(TAG, "numButton5: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton5: clicked.")
-                Log.i(TAG, "numButton5: addNum(numButton5) called")
                 addNum(numButton5)
             }
         }
 
         val numButton6 = findViewById<Button>(R.id.keypad_num6)
         numButton6.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton6: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -265,17 +250,14 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton6.setOnClickListener {
-            Log.i(TAG, "numButton6: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton6: clicked.")
-                Log.i(TAG, "numButton6: addNum(numButton6) called")
                 addNum(numButton6)
             }
         }
 
         val numButton7 = findViewById<Button>(R.id.keypad_num7)
         numButton7.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton7: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -291,10 +273,8 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton7.setOnClickListener {
-            Log.i(TAG, "numButton7: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton7: clicked.")
-                Log.i(TAG, "numButton7: addNum(numButton7) called")
                 addNum(numButton7)
           }
         }
@@ -302,7 +282,6 @@ class Keypad : AppCompatActivity(),
 
         val numButton8 = findViewById<Button>(R.id.keypad_num8)
         numButton8.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton8: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -318,11 +297,8 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton8.setOnClickListener {
-            Log.i(TAG, "numButton8: onTouchListener Called")
             if (!touchEvent) {
                 Log.i(TAG, "numButton8: clicked.")
-                Log.i(TAG, "numButton8: addNum(numButton8) called")
-                Log.i("keypad button ${numButton8.text}", "Clicked")
                 addNum(numButton8)
             }
         }
@@ -330,7 +306,6 @@ class Keypad : AppCompatActivity(),
 
         val numButton9 = findViewById<Button>(R.id.keypad_num9)
         numButton9.setOnTouchListener { _, event ->
-            Log.i(TAG, "numButton9: onTouchListener Called")
             touchEvent = false
             onFlingDetected = "no"
 
@@ -338,7 +313,6 @@ class Keypad : AppCompatActivity(),
             val swipeUpText = findViewById<TextView>(R.id.semicolon).text.toString()
             val swipeDownText = findViewById<TextView>(R.id.B3R1).text.toString()
 
-            Log.i("le out test", "onFlingDetected: $onFlingDetected")
             if (onFlingDetected != "no") {
                 addNum(numButton9, swipeUpText, swipeDownText)
                 touchEvent = true
@@ -347,10 +321,8 @@ class Keypad : AppCompatActivity(),
             return@setOnTouchListener super.onTouchEvent(event)
         }
         numButton9.setOnClickListener {
-            Log.i(TAG, "numButton9: onClickListener Called")
           if (!touchEvent) {
               Log.i(TAG, "numButton9: clicked.")
-              Log.i(TAG, "numButton9: addNum(numButton9) called")
               addNum(numButton9)
           }
         }
@@ -360,19 +332,15 @@ class Keypad : AppCompatActivity(),
         numButton0.setOnTouchListener { _, event ->
             touchEvent = false
             onFlingDetected = "no"
-            Log.w(TAG, "numButton0: onTouchListener called.")
             gestureDetector.onTouchEvent(event)
             if (onFlingDetected == "up") {
                 modStreetName()
                 touchEvent = true
-                Log.i(TAG, "numButton0: onFlingDetected = up, touchevent = true")
             } else if (onFlingDetected == "down") {
                 modBuildLevels()
                 touchEvent = true
-                Log.i(TAG, "numButton0: onFlingDetected = up, touchevent = true")
             } else {
                 touchEvent = false
-                Log.w(TAG, "numButton0: onFlingDetected != up || down, touchEvent = false")
             }
 
             return@setOnTouchListener super.onTouchEvent(event)
@@ -426,7 +394,6 @@ class Keypad : AppCompatActivity(),
             val lat = intent.getDoubleExtra("lat", 0.000)
             val lon = intent.getDoubleExtra("lon", 0.000)
             val side = intent.getStringExtra("side").toString()
-            Log.i(TAG, "address number: ${addressTextbox.text}")
 
             buildingLevels = findViewById<TextView>(R.id.building_levels_value).text.toString()
             val address = AddressNodes(addressTextbox.text.toString(), lat, lon,
@@ -435,6 +402,8 @@ class Keypad : AppCompatActivity(),
             val intent = Intent(this, MainActivity::class.java)
 
             intent.putExtra("address", address)
+
+            Log.i(TAG, "address: $address")
 
             setResult(RESULT_OK, intent)
             finish()
@@ -779,43 +748,45 @@ class Keypad : AppCompatActivity(),
         val lon = intent.getDoubleExtra("lon", 0.000)
         val radius = 100
 
-        Thread {
-            Log.i(TAG, "In thread")
+        if (sp.getBoolean("online-queries", true)) {
+            Thread {
+                Log.i(TAG, "In thread")
 
-            val queryText = "https://overpass-api.de/api/interpreter?data=" +
-                    "<query type='way'><around lat='$lat' lon='$lon' radius='$radius'/>" +
-                    "<has-kv k='highway' regv='trunk|primary|secondary|tertiary|unclassified" +
-                    "|residential|living_street|pedestrian|road' />" +
-                    "<has-kv k='name' regv='.+'></has-kv></query><print/>"
+                val queryText = "https://overpass-api.de/api/interpreter?data=" +
+                        "<query type='way'><around lat='$lat' lon='$lon' radius='$radius'/>" +
+                        "<has-kv k='highway' regv='trunk|primary|secondary|tertiary|unclassified" +
+                        "|residential|living_street|pedestrian|road' />" +
+                        "<has-kv k='name' regv='.+'></has-kv></query><print/>"
 
-            val query = URL(queryText)
-            val result = query.readText()
-            try {
-                val array: Array<String> = StringUtils.substringsBetween(result,
-                        "<tag k=\"name\" v=\"", "\"/>")
-                val distinctList = array.distinct()
-                Log.i(TAG, "list of completions: $distinctList")
+                val query = URL(queryText)
+                val result = query.readText()
+                try {
+                    val array: Array<String> = StringUtils.substringsBetween(result,
+                            "<tag k=\"name\" v=\"", "\"/>")
+                    val distinctList = array.distinct()
+                    Log.i(TAG, "list of completions: $distinctList")
 
-                runOnUiThread {
+                    runOnUiThread {
 
-                    Log.i(TAG, "in runOnUiThread")
-                    val arrayAdapter = ArrayAdapter(
-                            this,
-                            android.R.layout.simple_dropdown_item_1line,
-                            distinctList)
-                    streetNameInput.setAdapter(arrayAdapter)
-                    Log.i(TAG, "Query finished")
-                    Toast.makeText(this, "Query finished", Toast.LENGTH_SHORT).show()
+                        Log.i(TAG, "in runOnUiThread")
+                        val arrayAdapter = ArrayAdapter(
+                                this,
+                                android.R.layout.simple_dropdown_item_1line,
+                                distinctList)
+                        streetNameInput.setAdapter(arrayAdapter)
+                        Log.i(TAG, "Query finished")
+                        Toast.makeText(this, "Query finished", Toast.LENGTH_SHORT).show()
 
-                    streetNameInput.showDropDown()
+                        streetNameInput.showDropDown()
 
+                    }
+                } catch (e: NullPointerException) {
+                    Log.i(TAG, "Failed to find any street names.")
+                    Log.w(TAG, result)
                 }
-            } catch (e : NullPointerException) {
-                Log.i(TAG, "Failed to find any street names.")
-                Log.w(TAG, result)
-            }
 
-        }.start()
+            }.start()
+        }
 
         val container = FrameLayout(this)
         val linearLayout = LinearLayout(this)
@@ -1085,7 +1056,6 @@ class Keypad : AppCompatActivity(),
     // Detects if a swipe action on a keypad button was done, and checks if it was a
     // swipe up or swipe down action so that nothing happens when you swipe sideways.
     override fun onFling(downEvent: MotionEvent, moveEvent: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-        Log.i(TAG, "onFlingDetected")
 
         val swipeValue = 100
 
@@ -1098,13 +1068,12 @@ class Keypad : AppCompatActivity(),
             if(abs(differenceInY) > swipeValue) {
                 if (differenceInY < 0) {
                     // up swipe
-                    Log.i("onFlingDetected", "up swipe")
                     this.onFlingDetected = "up"
-                    Log.i("le in test", "onFlingDetected : $onFlingDetected")
+                    Log.i(TAG, "onFlingDetected: $onFlingDetected")
                 } else {
                     // down swipe
-                    Log.i("onFlingDetected", "down swipe")
                     this.onFlingDetected = "down"
+                    Log.i(TAG, "onFlingDetected: $onFlingDetected")
                 }
             }
         }

@@ -23,7 +23,14 @@
             android:key="uppercase_letters"
             android:title="@string/uppercase_letters_title"
             android:summaryOn="@string/uppercase_letters_used"
-            android:summaryOff="@string/lowercase_letters_used" />
+            android:summaryOff="@string/lowercase_letters_used"
+            android:defaultValue="false"/>
+        <SwitchPreferenceCompat
+            android:key="online-queries"
+            android:title="Query online APIs for nearby streets"
+            android:summaryOn="@string/online_api_used_message"
+            android:summaryOff="@string/online_api_not_used_message"
+            android:defaultValue="true" />
         <Preference
             android:title="@string/clear_cache_title"
             android:summary="@string/clear_cache_description"

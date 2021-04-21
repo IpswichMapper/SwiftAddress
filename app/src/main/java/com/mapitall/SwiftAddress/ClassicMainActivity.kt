@@ -778,9 +778,10 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         if (requestCode == 4 && resultCode == RESULT_OK) {
             try {
                 val exif = ExifInterface(File(currentImagePath))
+
                 Log.i(TAG, "filePath: $currentImagePath")
 
-                val latitude = map.mapView.mapCenter.latitude
+                val latitude = locationListener.getSavedLocation()!!.latitude
                 Log.i("lat", "$latitude")
                 val latitudeHours = if (latitude > 0) latitude else (-1) * latitude // -105.9876543 -> 105.9876543
                 var trueLat = latitudeHours.toInt().toString() + "/1," // 105/1,
@@ -789,7 +790,7 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 val latitudeSeconds = (latitudeMinutes % 1) * 60000 // .259258 * 6000 = 1555
                 trueLat = trueLat + latitudeSeconds.toInt().toString() + "/1000" // 105/1,59/1,15555/1000
 
-                val longitude = map.mapView.mapCenter.longitude
+                val longitude = locationListener.getSavedLocation()!!.longitude
                 val longitudeHours = if (longitude > 0) longitude else (-1) * longitude // -105.9876543 -> 105.9876543
                 var trueLon = longitudeHours.toInt().toString() + "/1," // 105/1,
                 val longitudeMinutes = (longitudeHours % 1) * 60 // .987654321 * 60 = 59.259258
@@ -829,13 +830,10 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 map.overlays.add(markerList.last())
                 Log.i(DEBUG_TAG, "Image Marker Added to Map")
 */
-                val imageID = storeHouseNumbersObject.addImage(currentImagePath!!, latitude, longitude)
+                val imageID = storeHouseNumbersObject.addImage(currentImagePath, latitude, longitude)
 
-                if (imageID != -1L) {
-                    map.addImageMarker(imageID, latitude, longitude)
-                    Log.i(TAG, "Image Marker added to map")
-                } else {
-                    Toast.makeText(this, getString(R.string.failed_save),
+                if (imageID == -1L) {
+                    Toast.makeText(this, getString(R.string.failed_add_image),
                             Toast.LENGTH_SHORT).show()
                 }
 
@@ -1289,14 +1287,20 @@ class ClassicMainActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         Log.i(TAG, "filePath: $currentImagePath")
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (cameraIntent.resolveActivity(packageManager) != null) {
+            if (locationListener.getLocation() != null) {
+                val imageURI: Uri = FileProvider.getUriForFile(this,
+                        "com.mapitall.SwiftAddress.provider",
+                        imageFile
+                )
+                Log.i(TAG, "URI filePath: $imageURI")
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
+                locationListener.saveLocation()
 
-            val imageURI : Uri = FileProvider.getUriForFile(this,
-                    "com.mapitall.SwiftAddress.provider",
-                    imageFile
-            )
-            Log.i(TAG, "URI filePath: $imageURI")
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageURI)
-            startActivityForResult(cameraIntent, 4)
+                startActivityForResult(cameraIntent, 4)
+            } else {
+                Toast.makeText(this, getString(R.string.no_location),
+                        Toast.LENGTH_SHORT).show()
+            }
         } else {
             Toast.makeText(this, getString(R.string.no_camera_app),
                     Toast.LENGTH_SHORT).show()

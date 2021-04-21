@@ -49,8 +49,10 @@ class GPSTracker(private val context : Context,
 
 
     private var location : Location? = null
-    private var latitude : Double? = null
-    private var longitude : Double? = null
+    // private var latitude : Double? = null
+    // private var longitude : Double? = null
+
+    private var savedLocation : Location? = null
 
     private val minDistanceForUpdates : Float = 1F // 1 meter
 
@@ -214,6 +216,14 @@ class GPSTracker(private val context : Context,
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
 
+    }
+
+    fun saveLocation() {
+        savedLocation = getLocation()
+    }
+
+    fun getSavedLocation() : Location? {
+        return savedLocation
     }
 
 }

@@ -175,5 +175,7 @@
     <string name="forward_side_abbreviation">F:</string>
     <string name="online_api_used_message">Online APIs such as Overpass API and Nominatim will be used to find the name of nearby streets.</string>
     <string name="online_api_not_used_message">Online APIs such as Overpass API and Nominatim will not be used.</string>
+    <string name="failed_add_image">Failed to add image</string>
+    <string name="no_location">Location not available</string>
 
 </resources>

@@ -58,10 +58,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     // All the database table columns.
     private val TABLE_NAME = "markers"
     private val TEMP_TABLE_NAME = "saved_markers"
-    private val ATTRIBUTES_TABLE_NAME = "tags"
-    private val ATTRIBUTES_TEMP_TABLE_NAME = "saved_tags"
     private val WAYS_TABLE_NAME = "polyline_table"
     private val WAYS_TEMP_TABLE_NAME = "saved_polyline_table"
+    private val DOWNLOADED_TABLE_NAME = "downloaded_addresses"
+    private val ATTRIBUTES_TABLE_NAME = "tags"
+    private val ATTRIBUTES_TEMP_TABLE_NAME = "saved_tags"
 
     private val COL_ID = "ID"
 
@@ -116,6 +117,11 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
             |VALUE TEXT,
             |MARKER_ID INTEGER);""".trimMargin())
 
+        db.execSQL("""CREATE TABLE $DOWNLOADED_TABLE_NAME
+            |ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            |TYPE TEXT
+        );""".trimMargin())
+
         db.execSQL("CREATE TABLE $TEMP_TABLE_NAME AS SELECT * FROM $TABLE_NAME")
         db.execSQL("CREATE TABLE $WAYS_TEMP_TABLE_NAME AS SELECT * FROM $WAYS_TABLE_NAME")
         db.execSQL("CREATE TABLE $ATTRIBUTES_TEMP_TABLE_NAME AS SELECT * FROM $ATTRIBUTES_TABLE_NAME")
@@ -128,6 +134,7 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         db.execSQL("DROP TABLE IF EXISTS $WAYS_TEMP_TABLE_NAME")
         db.execSQL("DROP TABLE IF EXISTS $ATTRIBUTES_TABLE_NAME")
         db.execSQL("DROP TABLE IF EXISTS $ATTRIBUTES_TEMP_TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $DOWNLOADED_TABLE_NAME")
         onCreate(db)
     }
 
@@ -496,13 +503,14 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
     fun addDownloadedHousenumber(node: Node) {
 
         val db = this.writableDatabase
-        val iDs = db.rawQuery("SELECT $COL_OSM_ID FROM $TABLE_NAME", null)
+        val osmIDs = db.rawQuery("SELECT $COL_ID FROM $DOWNLOADED_TABLE_NAME", null)
         var add = true
-        while (iDs.moveToNext()) {
-            if (iDs.getLong(iDs.getColumnIndex(COL_OSM_ID)) == node.id) {
+        while (osmIDs.moveToNext()) {
+            if (osmIDs.getLong(osmIDs.getColumnIndex(COL_OSM_ID)) == node.id) {
                 add = false
             }
         }
+        osmIDs.close()
 
         if (add) {
             for (tag in node.tags) {
@@ -528,15 +536,17 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
 
     fun addDownloadedHousenumber(way: Way, lat: Double, lon: Double) {
         val db = this.writableDatabase
-        val iDs = db.rawQuery("SELECT $COL_OSM_ID FROM $TABLE_NAME", null)
+        val osmIDs = db.rawQuery("SELECT $COL_ID FROM $DOWNLOADED_TABLE_NAME", null)
         var add = true
-        while (iDs.moveToNext()) {
-            if (iDs.getLong(iDs.getColumnIndex(COL_OSM_ID)) == way.id) {
+        while (osmIDs.moveToNext()) {
+            if (osmIDs.getLong(osmIDs.getColumnIndex(COL_OSM_ID)) == way.id) {
                 add = false
             }
         }
-        if (way.tags.get("addr:housenumber") == null &&
-                way.tags.get("addr:housename") == null) {
+        osmIDs.close()
+
+        if (way.tags["addr:housenumber"] == null &&
+                way.tags["addr:housename"] == null) {
             add = false
         }
 
@@ -604,8 +614,12 @@ class StoreHouseNumbers(private val context: Context) : SQLiteOpenHelper(context
         val c: Cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, "ID DESC")
         var itemType = ""
+        @Suppress("ControlFlowWithEmptyBody")
         while (c.moveToNext()
-                && c.getString(c.getColumnIndex(COL_UPDATED)) == "unchanged")
+                && c.getString(c.getColumnIndex(COL_UPDATED)) == "unchanged") {
+
+        }
+
         itemType = c.getString(c.getColumnIndex(COL_TYPE))
             Log.i(TAG, "Item Type: $itemType")
         c.close()

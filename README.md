@@ -11,7 +11,7 @@ If you want to generate an apk file, you should run this command:
 ./gradlew :app:assembleRelease
 ```
 
-You can then sign the generated apk in the terminal using `apksigner`. This is all mentioned in thsi guide:
+You can then sign the generated apk in the terminal using `apksigner`. This is all mentioned in this guide:
 
 https://developer.android.com/studio/build/building-cmdline
 

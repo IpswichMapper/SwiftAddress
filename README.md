@@ -1,4 +1,23 @@
 # SwiftAddress
+** THIS APPLICATION IS NO LONGER BEING DEVELOPED. **
+
+Feel free to fork it and continue its development if you want. Note: The apk file in the Releases page is out of date. If you want the latest version, please download android studio and build this project yourself.
+
+In android studio , the "build" button doesn't work but the "run" button does.
+
+If you want to generate an apk file, you should run this command:
+
+```
+./gradlew :app:assembleRelease
+```
+
+You can then sign the generated apk in the terminal using `apksigner`. This is all mentioned in thsi guide:
+
+https://developer.android.com/studio/build/building-cmdline
+
+If you want to know more about this app **no longer being developed**, follow this link:
+
+https://lists.openstreetmap.org/pipermail/talk/2021-May/086565.html
 
 **WARNING: If you decide to take surveys with this app, please, please test if it works first. Either take a small survey (e.g. a 10 minute one) and open the files in JOSM and check that everything works, or simply add some fake addresses, notes and images and see if you can open this data in JOSM. You could lose data if you don't test that this application works.**
 

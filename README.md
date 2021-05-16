@@ -1,5 +1,5 @@
 # SwiftAddress
-** THIS APPLICATION IS NO LONGER BEING DEVELOPED. **
+**THIS APPLICATION IS NO LONGER BEING DEVELOPED.**
 
 Feel free to fork it and continue its development if you want. Note: The apk file in the Releases page is out of date. If you want the latest version, please download android studio and build this project yourself.
 

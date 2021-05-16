@@ -23,7 +23,7 @@ https://lists.openstreetmap.org/pipermail/talk/2021-May/086565.html
 
 This application is designed to be able to efficiently collect housenumbers for OSM. 
 
-**It is still a work in progress**. 
+~~It is still a work in progress.~~ 
 
 ## Missing features
 
